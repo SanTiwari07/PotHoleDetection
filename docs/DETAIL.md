@@ -393,7 +393,7 @@ outputs/
 
 ### 13.4 Running the System
 1.  Open `python/main.py` in your text editor.
-2.  Update the critical constants `ESP32_CAM_IP = "192.168.x.x"` and `ESP32_SENSOR_IP = "192.168.x.y"` corresponding to your flashed hardware.
+2. Update the critical constants `ESP32_CAM_IP = "10.83.168.54"` and `ESP32_SENSOR_IP = "10.83.168.215"` corresponding to your flashed hardware.
 3.  Ensure `LIVE_MODE = True`.
 4.  Execute the system: `python python/main.py`.
 5.  The OpenCV window will launch providing a real-time HUD (Heads Up Display).

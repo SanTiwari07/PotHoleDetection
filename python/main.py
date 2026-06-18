@@ -42,8 +42,8 @@ LIVE_MODE = True  # Set to True to use ESP32 devices, False for video file
 
 # DUAL ESP32 ARCHITECTURE CONFIGURATION
 # Configure ESP32 IPs in the .env file in the project root
-ESP32_CAM_IP = os.getenv("ESP32_CAM_IP", "10.71.42.54")
-ESP32_SENSOR_IP = os.getenv("ESP32_SENSOR_IP", "10.71.42.215")
+ESP32_CAM_IP = os.getenv("ESP32_CAM_IP", "10.83.168.54")
+ESP32_SENSOR_IP = os.getenv("ESP32_SENSOR_IP", "10.83.168.215")
 
 ESP32_STREAM_URL = f"http://{ESP32_CAM_IP}:81/stream"  # Vision Node (port 81)
 ESP32_SENSOR_URL = f"http://{ESP32_SENSOR_IP}/query"    # Sensor Node (port 80)

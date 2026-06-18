@@ -1,22 +1,39 @@
-# Python
+# Python bytecode & caches
 __pycache__/
 *.py[cod]
 *$py.class
+*.pyo
 
-# Environments
+# Virtual environments
 env/
 venv/
 .venv/
 
-# IDEs
+# Environment / secrets
+.env
+
+# IDE / editor configs
 .vscode/
 .idea/
+*.swp
+*.swo
 
-# Project Outputs
+# OS artefacts
+.DS_Store
+Thumbs.db
+
+# Project runtime outputs (keep sample_logs/ tracked)
+outputs/logs/
+outputs/videos/
 *.mp4
-*.csv
-!output.csv
-output/
 
-# Models (Optional: un-comment if you want to commit models)
+# CSV outputs — keep only the curated sample log
+*.csv
+!outputs/sample_logs/output.csv
+
+# Model weights (large binary; distribute via GitHub Releases)
 # *.pt
+assets/models/*.pt
+
+# Jupyter
+.ipynb_checkpoints/

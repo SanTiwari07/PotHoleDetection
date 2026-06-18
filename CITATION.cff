@@ -1,0 +1,45 @@
+cff-version: 1.2.0
+message: "If you use this software or dataset in your research, please cite it as below."
+type: software
+title: "Real-Time Pothole Detection Based on Vision-Dominant Sensor Fusion and Dual ESP32 Architecture"
+version: "1.0.0"
+date-released: "2026-03-20"
+license: MIT
+repository-code: "https://github.com/SanTiwari07/PotHoleDetection"
+abstract: >
+  An embedded IoT system for real-time pothole detection and severity classification
+  using a dual ESP32 architecture, YOLOv8 computer vision, and multi-sensor fusion
+  combining GPS coordinates, RTC timestamps, and MPU6050 accelerometer jerk data.
+  The system produces geo-tagged severity logs suitable for road-maintenance prioritization.
+keywords:
+  - pothole detection
+  - YOLOv8
+  - object detection
+  - sensor fusion
+  - ESP32
+  - IoT
+  - road monitoring
+  - SORT tracking
+  - embedded systems
+  - computer vision
+authors:
+  - family-names: Tiwari
+    given-names: Sanskar
+    affiliation: >
+      Department of Electronics and Telecommunication Engineering,
+      Pune Institute of Computer Technology (PICT), Pune, Maharashtra, India
+  - family-names: Bansod
+    given-names: Swarali
+    affiliation: >
+      Department of Electronics and Telecommunication Engineering,
+      Pune Institute of Computer Technology (PICT), Pune, Maharashtra, India
+  - family-names: Kognole
+    given-names: Eshwari
+    affiliation: >
+      Department of Electronics and Telecommunication Engineering,
+      Pune Institute of Computer Technology (PICT), Pune, Maharashtra, India
+  - family-names: Shinde
+    given-names: Shruti
+    affiliation: >
+      Department of Electronics and Telecommunication Engineering,
+      Pune Institute of Computer Technology (PICT), Pune, Maharashtra, India
