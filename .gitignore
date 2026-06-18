@@ -15,6 +15,7 @@ venv/
 # Project Outputs
 *.mp4
 *.csv
+!output.csv
 output/
 
 # Models (Optional: un-comment if you want to commit models)
