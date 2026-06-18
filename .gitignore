@@ -37,3 +37,7 @@ assets/models/*.pt
 
 # Jupyter
 .ipynb_checkpoints/
+
+# Word documents (use the PDF in docs/ instead)
+*.docx
+*.doc

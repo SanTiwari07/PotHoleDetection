@@ -6,6 +6,7 @@
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
 [![YOLOv8](https://img.shields.io/badge/model-YOLOv8m-orange.svg)](https://ultralytics.com)
 [![Preprint](https://img.shields.io/badge/Preprints.org-ready-brightgreen.svg)](https://www.preprints.org)
+[![Preprint PDF](https://img.shields.io/badge/Preprint-PDF-red.svg)](docs/IPDS_Pothole_Detection.pdf)
 
 An embedded IoT research system that detects potholes in real-time using a dual ESP32 hardware architecture, a custom-trained YOLOv8m vision model, and multi-sensor data fusion (camera, GPS, RTC, and MPU6050 accelerometer). The system produces geo-tagged severity logs and annotated video suitable for road-maintenance prioritization.
 
@@ -24,12 +25,13 @@ An embedded IoT research system that detects potholes in real-time using a dual 
 9. [Installation Guide](#9-installation-guide)
 10. [Usage Instructions](#10-usage-instructions)
 11. [Sample Field-Test Data](#11-sample-field-test-data)
-12. [Sample Results](#12-sample-results)
-13. [Repository Structure](#13-repository-structure)
-14. [Future Scope](#14-future-scope)
-15. [Citation](#15-citation)
-16. [Authors](#16-authors)
-17. [License](#17-license)
+12. [Preprint Manuscript](#12-preprint-manuscript)
+13. [Sample Results](#13-sample-results)
+14. [Repository Structure](#14-repository-structure)
+15. [Future Scope](#15-future-scope)
+16. [Citation](#16-citation)
+17. [Authors](#17-authors)
+18. [License](#18-license)
 
 ---
 
@@ -325,7 +327,17 @@ date,time,frame_id,pothole_id,confidence,bounding_box_area,aspect_ratio,peak_jer
 
 ---
 
-## 12. Sample Results
+## 12. Preprint Manuscript
+
+The full research paper is available as a PDF in this repository:
+
+📄 **[IPDS_Pothole_Detection.pdf](docs/IPDS_Pothole_Detection.pdf)**
+
+This manuscript describes the complete system design, experimental methodology, validation metrics, and field-test results. It is formatted for submission to Preprints.org and academic conferences.
+
+---
+
+## 13. Sample Results
 
 The field-test session (50 detections, ~12 minutes) recorded on Pune city roads produced the following distribution:
 
@@ -339,7 +351,7 @@ An annotated sample video is available on request. The raw detection output (`ou
 
 ---
 
-## 13. Repository Structure
+## 14. Repository Structure
 
 ```text
 PotHoleDetection/
@@ -374,6 +386,7 @@ PotHoleDetection/
 ├── Diagrams/                         # Interactive HTML block diagrams & flowcharts
 ├── KiCad/                            # PCB schematics and KiCad project files
 ├── docs/
+│   ├── IPDS_Pothole_Detection.pdf    # ← Preprint manuscript (submitted)
 │   ├── ARCHITECTURE.md               # Full system architecture documentation
 │   ├── HARDWARE.md                   # Detailed hardware wiring & pinout guide
 │   └── DETAIL.md                     # In-depth technical specification
@@ -388,7 +401,7 @@ PotHoleDetection/
 
 ---
 
-## 14. Future Scope
+## 15. Future Scope
 
 - **Dashcam / Smartphone Integration** — Passive crowdsourcing via ubiquitous consumer devices.
 - **Cloud Scalability** — Migrate inference to distributed AWS/GCP microservices with Kubernetes orchestration.
@@ -402,7 +415,7 @@ PotHoleDetection/
 
 ---
 
-## 15. Citation
+## 16. Citation
 
 If you use this system, dataset, or code in academic work, please cite:
 
@@ -422,7 +435,7 @@ A machine-readable `CITATION.cff` file is also included in the root of this repo
 
 ---
 
-## 16. Authors
+## 17. Authors
 
 This project was developed by students of the Department of Electronics and Telecommunication Engineering, **Pune Institute of Computer Technology (PICT)**, Pune, Maharashtra, India.
 
@@ -439,7 +452,7 @@ This project was developed by students of the Department of Electronics and Tele
 
 ---
 
-## 17. License
+## 18. License
 
 This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for full details.
 
