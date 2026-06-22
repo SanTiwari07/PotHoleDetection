@@ -5,8 +5,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
 [![YOLOv8](https://img.shields.io/badge/model-YOLOv8m-orange.svg)](https://ultralytics.com)
-[![Preprint](https://img.shields.io/badge/Preprints.org-ready-brightgreen.svg)](https://www.preprints.org)
-[![Preprint PDF](https://img.shields.io/badge/Preprint-PDF-red.svg)](docs/IPDS_Pothole_Detection.pdf)
+[![Zenodo](https://img.shields.io/badge/Zenodo-10.5281%2Fzenodo.20760578-blue.svg)](https://zenodo.org/records/20760578)
 
 An embedded IoT research system that detects potholes in real-time using a dual ESP32 hardware architecture, a custom-trained YOLOv8m vision model, and multi-sensor data fusion (camera, GPS, RTC, and MPU6050 accelerometer). The system produces geo-tagged severity logs and annotated video suitable for road-maintenance prioritization.
 
@@ -25,7 +24,7 @@ An embedded IoT research system that detects potholes in real-time using a dual 
 9. [Installation Guide](#9-installation-guide)
 10. [Usage Instructions](#10-usage-instructions)
 11. [Sample Field-Test Data](#11-sample-field-test-data)
-12. [Preprint Manuscript](#12-preprint-manuscript)
+12. [Zenodo](#12-zenodo)
 13. [Sample Results](#13-sample-results)
 14. [Repository Structure](#14-repository-structure)
 15. [Future Scope](#15-future-scope)
@@ -327,13 +326,13 @@ date,time,frame_id,pothole_id,confidence,bounding_box_area,aspect_ratio,peak_jer
 
 ---
 
-## 12. Preprint Manuscript
+## 12. Zenodo
 
-The full research paper is available as a PDF in this repository:
+The full research paper and associated datasets are archived on Zenodo:
 
-📄 **[IPDS_Pothole_Detection.pdf](docs/IPDS_Pothole_Detection.pdf)**
+📄 **[IPDS — Real-Time Pothole Detection (Zenodo)](https://zenodo.org/records/20760578)**
 
-This manuscript describes the complete system design, experimental methodology, validation metrics, and field-test results. It is formatted for submission to Preprints.org and academic conferences.
+This record includes the complete manuscript describing the system design, experimental methodology, validation metrics, and field-test results, along with citable DOI metadata for academic references.
 
 ---
 

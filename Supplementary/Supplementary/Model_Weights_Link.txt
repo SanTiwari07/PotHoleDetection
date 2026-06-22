@@ -1,0 +1,23 @@
+Model Weights: pothole_yolov8.pt
+================================
+
+GitHub Releases (v1.0):
+https://github.com/SanTiwari07/PotHoleDetection/releases/tag/v1.0
+
+Direct Asset Download:
+https://github.com/SanTiwari07/PotHoleDetection/releases/download/v1.0/pothole_yolov8.pt
+
+Model Details:
+  Architecture  : YOLOv8m (medium)
+  Classes       : 1 (pothole)
+  Input Size    : 640 x 640
+  Training Data : Kaggle Pothole Detection Dataset
+  mAP@0.5       : 81.68%
+  mAP@0.5:0.95  : 55.95%
+  Precision     : 82.33%
+  Recall        : 74.42%
+
+Usage (Python):
+  from ultralytics import YOLO
+  model = YOLO("pothole_yolov8.pt")
+  results = model.predict(source="image_or_video", conf=0.5)

@@ -1,0 +1,16 @@
+Repository: Intelligent Pothole Detection System (IPDS)
+================================================
+
+GitHub Repository:
+https://github.com/SanTiwari07/PotHoleDetection
+
+Description:
+  Source code, firmware, KiCad schematics, sample field-test data,
+  and full documentation for the IPDS system.
+
+Authors:
+  Sanskar Tiwari, Swarali Bansod, Eshwari Kognole, Shruti Shinde
+  Department of Electronics and Telecommunication Engineering
+  Pune Institute of Computer Technology (PICT), Pune, Maharashtra, India
+
+License: MIT
