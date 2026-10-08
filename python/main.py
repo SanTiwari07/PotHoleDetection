@@ -33,7 +33,8 @@ os.environ["OPENCV_FFMPEG_CAPTURE_OPTIONS"] = "rtsp_transport;tcp"
 
 from pothole_detection.detector import PotholeDetector
 from pothole_detection.tracker import PotholeTracker
-from pothole_detection.fusion import accel_magnitude, calculate_severity, peak_jerk
+from pothole_detection.filters import GeometricFilter
+from pothole_detection.fusion import JERK_GATE, accel_magnitude, calculate_severity, jerk_confirms_impact, peak_jerk
 
 # --- CONFIGURATION ---
 ASSETS_DIR = os.path.join(ROOT_DIR, 'assets')
@@ -71,6 +72,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--model", default=MODEL_PATH,
                         help="Path to YOLOv8 weights. The default weights are downloaded on first run.")
     parser.add_argument("--conf", type=float, default=CONF_THRESHOLD, help="Detection confidence threshold.")
+    parser.add_argument("--jerk-threshold", type=float, default=JERK_GATE,
+                        help="Live mode: minimum peak jerk (m/s^3) that confirms an impact. "
+                             "Detections below it are rejected by the fusion gate. Calibrate per vehicle.")
     parser.add_argument("--output-dir", default=OUTPUTS_DIR, help="Where annotated video and CSV log are written.")
     parser.add_argument("--no-display", action="store_true", help="Run headless (no preview window).")
     return parser.parse_args()
@@ -157,6 +161,8 @@ def get_sensor_burst(url: str, pothole_id: int, burst_count: int = 5) -> Tuple[f
         except Exception as e:
             print(f"    Sensor read error: {e}")
 
+    if not accel_magnitudes:
+        print(f"  > Sensor node did not answer; the impact can't be confirmed.")
     jerk = peak_jerk(accel_magnitudes)
     print(f"  > Peak Jerk: {jerk:.2f} m/s³")
     return jerk, last_date, last_time, last_lat, last_lon
@@ -203,7 +209,8 @@ def draw_visuals(frame: np.ndarray,
 
         severity_display = "N/A"
         if track_id in final_severities:
-            severity_display = f"{final_severities[track_id]:.2f}"
+            sev = final_severities[track_id]
+            severity_display = sev if isinstance(sev, str) else f"{sev:.2f}"
 
         cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
         label = f"ID:{track_id} Conf:{conf_str} Sev:{severity_display}"
@@ -365,7 +372,9 @@ def main():
 
     # State variables
     logged_ids = set()
-    track_history = {}
+    queried_ids = set()      # tracks whose event is finished (logged or rejected by the fusion gate)
+    rejected_count = 0
+    geo_filter = GeometricFilter(width, height)
     final_severities = {}
     track_id_colors = {}
     ref_y = int(REFERENCE_LINE_RATIO * height)
@@ -380,7 +389,7 @@ def main():
         while True:
             if live:
                 # Only process frames we haven't seen; re-running YOLO on a repeated
-                # frame would inflate track_history and trip the "too static" filter.
+                # frame would make every track look stationary to the persistence filter.
                 last_seq, frame = stream_reader.read_new(last_seq)
                 if frame is None:
                     time.sleep(0.005)
@@ -403,27 +412,16 @@ def main():
                 x1, y1, x2, y2, track_id_float = track
                 track_id = int(track_id_float)
 
-                # --- DUMPER / SPEED BREAKER REJECTION ---
-                if track_id not in track_history: track_history[track_id] = 0
-                track_history[track_id] += 1
-
-                bbox_w = x2 - x1
-                bbox_h = y2 - y1
-                frame_area = width * height
-                if frame_area == 0: frame_area = 1 # Safety
-                bbox_area = int(bbox_w * bbox_h)
-
-                area_ratio = bbox_area / frame_area
-                aspect_ratio = bbox_w / bbox_h if bbox_h > 0 else 0
-
-                if area_ratio > 0.25: continue # Too big
-                if aspect_ratio > 3.0: continue # Too wide
-                if track_history[track_id] > 10: continue # Too static
+                # --- GEOMETRIC FALSE-POSITIVE FILTERS (area, aspect ratio, persistence) ---
+                result = geo_filter.update(track_id, x1, y1, x2, y2)
+                if not result.passed:
+                    continue
+                bbox_area, aspect_ratio = result.bbox_area, result.aspect_ratio
 
                 # --- LOGGING CHECK ---
                 cy = (y1 + y2) / 2
 
-                if cy >= ref_y and track_id not in logged_ids:
+                if cy >= ref_y and track_id not in queried_ids:
                     # Find best confidence
                     best_conf_log = 0.0
                     max_iou_log = 0
@@ -439,13 +437,23 @@ def main():
                     if best_conf_log < args.conf:
                         continue
 
+                    queried_ids.add(track_id)  # one sensor query per pothole, whatever the outcome
+
                     if live:
                         # --- QUERY SENSOR NODE (EVENT-DRIVEN) ---
                         # Only called after SORT + Validity Filter approval
                         jerk, rtc_date, rtc_time, lat, lon = get_sensor_burst(sensor_url, track_id)
                         jerk_str = f"{jerk:.2f}"
+
+                        # --- SENSOR FUSION GATE: vision AND accelerometer must agree ---
+                        if not jerk_confirms_impact(jerk, args.jerk_threshold):
+                            print(f"  > Rejected track {track_id}: peak jerk {jerk:.2f} < {args.jerk_threshold} m/s³ (no impact)")
+                            final_severities[track_id] = "REJ"
+                            rejected_count += 1
+                            continue
                     else:
-                        # No sensor node offline: severity is vision-only and sensor columns stay empty
+                        # No sensor node offline: the fusion gate can't run, severity is vision-only
+                        # and the sensor columns stay empty
                         jerk, rtc_date, rtc_time, lat, lon = 0.0, time.strftime("%Y-%m-%d"), time.strftime("%H:%M:%S"), "", ""
                         jerk_str = ""
 
@@ -494,7 +502,8 @@ def main():
             cv2.destroyAllWindows()
         except cv2.error:
             pass  # opencv-python-headless has no GUI
-    print(f"Processing complete. {len(logged_ids)} potholes logged.")
+    print(f"Processing complete. {len(logged_ids)} potholes logged"
+          + (f", {rejected_count} rejected by the fusion gate." if live else "."))
     print(f"  > Annotated video: {output_video_path}")
     print(f"  > CSV log:         {log_path}")
 
