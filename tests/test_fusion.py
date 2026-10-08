@@ -1,6 +1,7 @@
 import pytest
 
-from pothole_detection.fusion import accel_magnitude, calculate_severity, peak_jerk
+from pothole_detection.fusion import (accel_magnitude, calculate_severity, jerk_confirms_impact,
+                                      peak_jerk)
 
 
 def test_accel_magnitude():
@@ -25,6 +26,17 @@ def test_severity_vision_only():
     assert calculate_severity(0.9, 0.0) == pytest.approx(0.63)
 
 
+def test_severity_jerk_term_is_linear():
+    # Paper Eq. 7: J_norm = min(J_peak / J_max, 1) = 10 / 20 = 0.5 -> 0.7*0.8 + 0.3*0.5
+    assert calculate_severity(0.8, 10.0) == pytest.approx(0.71)
+
+
 def test_severity_jerk_is_clamped():
-    # jerk_norm saturates at 1.0 for anything >= J_MAX
+    # J_norm saturates at 1.0 for anything >= J_MAX
     assert calculate_severity(1.0, 100.0) == pytest.approx(1.0)
+
+
+def test_fusion_gate():
+    assert jerk_confirms_impact(6.0, threshold=1.5)
+    assert jerk_confirms_impact(1.5, threshold=1.5)
+    assert not jerk_confirms_impact(0.4, threshold=1.5)
