@@ -1,75 +1,66 @@
-# System Architecture Design
+# System Architecture
 
-## System Architecture Overview
-
-The Intelligent Pothole Detection System (IPDS) is designed around an event-driven, distributed computing model. It leverages inexpensive, low-power microcontrollers for data acquisition (the hardware layer) and offloads heavyweight computer vision inference to a more powerful, centralized processing hub (the application layer).
+IPDS is split across three physical tiers: two ESP32 boards that acquire data, a Python processing hub (laptop or edge computer) that runs the AI, and the output files it writes.
 
 ```text
-[Hardwear Layer]          [Communication]         [Processing Layer]
-ESP32-CAM (Vision)   ---- (WiFi / MJPEG) ---->   Python YOLOv8 Logic
-ESP32 Dev (Sensor)   <--- (WiFi / HTTP)  ---->   Python Data Fusion
+┌──────────────────┐   WiFi · MJPEG over HTTP (:81/stream)   ┌──────────────────────────────┐
+│  ESP32-CAM       │ ──────────────────────────────────────► │  Python processing hub       │
+│  vision node     │                                         │  python/main.py              │
+│  OV2640, QVGA    │                                         │                              │
+└──────────────────┘                                         │  YOLOv8m → SORT → filters    │
+                                                             │        │ crosses 75% line    │
+┌──────────────────┐   WiFi · HTTP GET /query?pothole_id=N   │        ▼                     │
+│  ESP32 DevKit    │ ◄────────────────────────────────────── │  sensor burst (5 queries)    │
+│  sensor node     │ ──────────────── JSON ────────────────► │        │                     │
+│  MPU6050, DS3231,│                                         │        ▼                     │
+│  NEO-6M GPS      │                                         │  peak jerk → severity → CSV  │
+└──────────────────┘                                         │  annotated MP4               │
+                                                             └──────────────────────────────┘
 ```
 
-## High Level Architecture
-The architecture comprises four primary layers:
-1. **Hardware Layer:** Physical sensors mapping the real world.
-2. **Firmware Layer:** C++ code allowing microcontrollers to operate the hardware.
-3. **Processing Layer:** Python AI and logic bridging the raw data into insights.
-4. **Application Layer:** The final output generation (logs and video).
+All three devices must be on the same 2.4 GHz WiFi network (a phone hotspot works).
 
-## Hardware Layer
-The system splits hardware responsibilities into two distinct physical nodes to prevent blocking the video frame rate with slow I2C sensor reads:
-- **Vision Node:** An ESP32-CAM module acting purely as a wireless webcam.
-- **Sensor Node:** An ESP32 Dev board acting as an I2C and UART hub, pulling in environmental data from an MPU6050 (Accelerometer), NEO-6M (GPS), and DS3231 (RTC).
+## Why two ESP32 boards?
 
-## Firmware Layer
-- **MJPEG Server (`esp_32_cam_final.ino`):** Uses the `esp_http_server` library to continuously push JPEG frames over an open socket.
-- **Sensor Server (`esp_32_final.ino`):** Uses the `WebServer` library to host a simple REST API. It idles until queried, drastically reducing power consumption compared to continuous broadcasting.
+On the ESP32-CAM, `esp_camera_fb_get()` blocks while a frame is captured and JPEG-encoded. Doing I²C sensor reads on the same board competes with that loop and causes dropped and stuttering frames. The camera board therefore only streams video, and a second ESP32 handles every sensor. It reads them only when the hub asks, so no clock synchronisation between video and sensors is needed.
 
-## Processing Layer
-The central brain of the system, currently a Python instance.
-- **Computer Vision:** Ultralytics YOLOv8 processes frames natively for object detection.
-- **Tracking:** SORT maintains state across frames utilizing Kalman filtering to predict pothole movement even during momentary obscuration.
-- **Logic Matrix:** A heuristic engine that evaluates the tracked objects (filtering by Area/Aspect Ratios and persistence) to determine when the vehicle's axle is actively crossing the hazard.
+## Components
 
-## Application Layer
-Where the gathered and processed data becomes actionable.
-- **CSV Data Logger:** Generates database-ready tables `(Outputs/logs/)` containing the precise ID, Date, GPS, and calculated Severity.
-- **Annotated Video Muxer:** Generates MP4s `(Outputs/videos/)` actively painting bounding boxes and confidence scores over the raw stream for visual verification.
+| Tier | Component | Code | Role |
+|---|---|---|---|
+| Acquisition | ESP32-CAM (AI-Thinker) | [`ESP_32_Code/esp_32_cam_final/`](../ESP_32_Code/esp_32_cam_final/) | MJPEG stream on port 81, `/health` on port 80 |
+| Acquisition | ESP32 DevKit + MPU6050 + DS3231 + NEO-6M | [`ESP_32_Code/esp_32_final/`](../ESP_32_Code/esp_32_final/) | REST endpoint `/query` returning one JSON sensor snapshot; status page `/` |
+| Processing | Detector | [`python/pothole_detection/detector.py`](../python/pothole_detection/detector.py) | YOLOv8m inference via Ultralytics |
+| Processing | Tracker | [`tracker.py`](../python/pothole_detection/tracker.py), [`sort.py`](../python/pothole_detection/sort.py) | SORT (Kalman filter + Hungarian matching) for persistent IDs |
+| Processing | Fusion | [`fusion.py`](../python/pothole_detection/fusion.py) | Peak jerk and severity score |
+| Processing | Orchestrator | [`python/main.py`](../python/main.py) | Stream reading, filters, trigger line, sensor query, logging |
+| Output | CSV log + MP4 | `outputs/logs/`, `outputs/videos/` | One row per logged pothole; annotated video |
 
-## Data Flow Architecture
-1. **Continuous Capture:** ESP32-CAM pushes 320x240 RGB frames over WiFi.
-2. **Continuous Inference:** Processing hub receives a frame, passes it to YOLOv8, and updates the SORT tracker.
-3. **Event Trigger:** If a recognized pothole crosses the designated reference line (near the bottom of the frame where the bumper is), the system halts tracking for a millisecond to fire an HTTP GET request to the Sensor Node (`http://IP/query?pothole_id=x`).
-4. **Acquisition:** Sensor Node fires I2C reads to the MPU6050, grabs the exact GPS coordinates, and returns a JSON payload.
-5. **Fusion & Log:** Python receives the JSON, mathematically fuses the YOLO confidence score with the MPU `m/s²` peak jerk, writes the result to the CSV file, and resumes the video loop.
+## Data flow for one pothole
 
-## Module Breakdown
-### Vision Node
-- Focused entirely on low-latency frame extraction. No processing occurs here to avoid thermal throttling.
-### Sensor Node
-- Acts as a stateless microservice. When queried, it measures the immediate physical impact, preventing the need to synchronize complex clock times between the video and the sensors.
-### Data Processing
-- Built entirely independently of the hardware. The Python script doesn't care if the data comes from a local file or live streams; it processes standard formats.
-### Detection System
-- Designed iteratively. YOLO provides the "What", SORT provides the "Where", Heuristics provide the "Is it fake?", and the MPU provides the "How bad is it?".
+1. The ESP32-CAM streams 320×240 JPEG frames. A background thread on the hub decodes them, and the main loop only processes frames it hasn't seen yet.
+2. YOLOv8m detects potholes with confidence ≥ 0.25.
+3. SORT assigns each pothole a persistent track ID (`max_age=30`, `min_hits=3`, IoU threshold 0.3).
+4. Geometric filters skip tracks whose box covers more than 25% of the frame, whose width/height ratio is above 3.0, or which have been tracked for more than 10 frames.
+5. When a track's centre crosses the reference line at 75% of the frame height (and it hasn't been logged yet), the hub sends 5 `GET /query?pothole_id=N` requests to the sensor node.
+6. The sensor node answers each request with acceleration (m/s²), RTC timestamp, GPS position and health flags.
+7. The hub computes peak jerk from the 5 samples, then a severity score, appends a CSV row and marks the track as logged so it is never logged twice.
 
-## Communication Protocols
-- **WiFi:** The overarching transport protocol connecting the nodes and the hub (TCP/IP).
-- **HTTP / MJPEG:** The application-level protocol for video streaming.
-- **HTTP/REST (GET):** The application-level protocol for sensor querying and JSON delivery.
-- **I2C:** Inter-Integrated Circuit protocol (SDA/SCL) utilized heavily on the Sensor Node to quickly pull data from the MPU and RTC.
-- **UART:** Serial protocol utilized on the Sensor Node to receive NMEA sentences from the GPS module.
+See [DETAIL.md](DETAIL.md) for the formulas, JSON schema and CSV schema.
 
-## Scalability
-The architecture is inherently scalable horizontally.
-- Because the Sensor Node is a standard REST API, multiple cameras (e.g., front, left side, right side) could theoretically stream frames to an edge server, and all individually request severity data from the single central Sensor Node exactly when needed.
-- Upgrading the Vision Node to a stereoscopic camera for depth inference solely requires pointing the Python script to a new IP address.
+## Communication
 
-## Design Decisions
-- **Why dual ESP32s instead of one?**
-  - Attempting to run an I2C accelerometer read (which takes a few milliseconds) interrupts the blocking `esp_camera_fb_get()` function on the ESP32-CAM. This causes extreme frame drops and stuttering in the video. Splitting them solves the concurrency issue perfectly.
-- **Why WiFi instead of Bluetooth?**
-  - Bluetooth bandwidth is notoriously tricky for reliable high-framerate MJPEG video streaming. WiFi opens up massive bandwidth overhead.
-- **Why YOLOv8 over older models?**
-  - YOLOv8 provides extreme optimization, allowing 10-15 FPS inference straight out-of-the-box on a CPU, whereas older iterations demanded desktop-class GPUs.
+| Link | Protocol |
+|---|---|
+| Camera → hub | HTTP `multipart/x-mixed-replace` MJPEG stream, port 81 |
+| Hub → sensor node | HTTP GET, port 80, JSON response, 0.5 s timeout per request |
+| Sensor node ↔ MPU6050, DS3231 | I²C, GPIO21 (SDA) / GPIO22 (SCL) |
+| Sensor node ↔ NEO-6M | UART2, GPIO16 (RX2) / GPIO17 (TX2), 9600 baud |
+
+## Offline mode
+
+Without hardware, `python python/main.py --source video.mp4` runs the same detection, tracking, filtering and trigger logic on a recorded video. No sensor node is queried, so the jerk, latitude and longitude columns are left empty and severity uses the vision term only.
+
+## Extending the system
+
+Because the sensor node is a plain HTTP endpoint, more cameras could each stream to the hub and query the same sensor node. A different camera only needs a different stream URL.

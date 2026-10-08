@@ -1,8 +1,6 @@
-opencv-python
-ultralytics
-numpy
-filterpy
-scipy
-matplotlib
-scikit-image
-python-dotenv
+# Core pipeline (python/main.py)
+ultralytics>=8.0,<9
+opencv-python>=4.8
+numpy>=1.24
+scipy>=1.10
+filterpy>=1.4.5

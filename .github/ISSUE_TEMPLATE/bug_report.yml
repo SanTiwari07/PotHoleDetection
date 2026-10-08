@@ -1,0 +1,34 @@
+name: Bug report
+description: Something isn't working (Python pipeline, firmware, or hardware)
+labels: [bug]
+body:
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Python pipeline (detection / tracking / logging)
+        - ESP32-CAM firmware
+        - ESP32 sensor-node firmware
+        - Wokwi simulation
+        - Hugging Face demo / Colab notebook
+        - Docs
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What did you run, what did you expect, and what happened instead?
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / Serial Monitor output
+      render: shell
+  - type: input
+    id: env
+    attributes:
+      label: Environment
+      placeholder: "OS, Python version, ultralytics version, ESP32 board"

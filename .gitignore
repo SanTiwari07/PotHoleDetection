@@ -11,6 +11,8 @@ venv/
 
 # Environment / secrets
 .env
+!.env.example
+ESP_32_Code/**/credentials.h
 
 # IDE / editor configs
 .vscode/
@@ -30,10 +32,10 @@ outputs/videos/
 # CSV outputs — keep only the curated sample log
 *.csv
 !outputs/sample_logs/output.csv
+!KiCad/**/fabrication/*.csv
 
-# Model weights (large binary; distribute via GitHub Releases)
-# *.pt
-assets/models/*.pt
+# Model weights (large binary; distributed via GitHub Releases, auto-downloaded on first run)
+*.pt
 
 # Jupyter
 .ipynb_checkpoints/
@@ -41,3 +43,18 @@ assets/models/*.pt
 # Word documents (use the PDF in docs/ instead)
 *.docx
 *.doc
+
+# KiCad autosave / cache files
+*-backups/
+fp-info-cache
+*.kicad_prl
+_autosave-*
+*.lck
+
+# Gradio demo cache
+.gradio/
+flagged/
+
+# Training data and runs
+datasets/
+runs/
