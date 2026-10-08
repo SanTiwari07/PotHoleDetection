@@ -12,7 +12,6 @@
   <meta property="og:url" content="https://santiwari07.github.io/PotHoleDetection/" />
   <meta property="og:image" content="https://santiwari07.github.io/PotHoleDetection/KiCad/IPDS_SensorNode/fabrication/pcb_render_top.png" />
   <meta name="twitter:card" content="summary_large_image" />
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230b0e11'/%3E%3Cellipse cx='16' cy='17' rx='10' ry='5.5' fill='none' stroke='%23FCD535' stroke-width='2.6'/%3E%3Cellipse cx='16' cy='17' rx='4' ry='2.2' fill='%23FCD535'/%3E%3C/svg%3E" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
@@ -101,7 +100,6 @@
     .nav { position: sticky; top: 0; z-index: 60; background: var(--canvas); border-bottom: 1px solid var(--hairline); }
     .nav .wrap { display: flex; align-items: center; gap: 32px; height: 64px; }
     .brand { display: flex; align-items: center; gap: 10px; color: var(--primary); font-weight: 700; font-size: 20px; letter-spacing: 0.5px; }
-    .brand svg { width: 28px; height: 28px; }
     .nav-links { display: flex; gap: 24px; font-size: 14px; font-weight: 500; color: var(--body); }
     .nav-links a:hover { color: var(--primary); }
     .nav-right { margin-left: auto; display: flex; align-items: center; gap: 20px; }
@@ -306,7 +304,6 @@
     footer { background: var(--soft-light); color: var(--ink); padding: 64px 0 32px; }
     .foot-grid { display: grid; grid-template-columns: 1.6fr repeat(4, 1fr); gap: 32px; }
     .foot-brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 20px; }
-    .foot-brand svg { width: 28px; height: 28px; }
     .foot-grid p { margin-top: 12px; color: var(--muted); font-size: 13px; max-width: 300px; }
     .foot-grid h4 { font-size: 16px; font-weight: 600; margin-bottom: 14px; }
     .foot-grid ul { list-style: none; display: grid; gap: 10px; }
@@ -365,14 +362,13 @@
       <symbol id="i-play" viewBox="0 0 24 24"><path fill="currentColor" d="M7 4.8v14.4a1 1 0 0 0 1.52.85l11.5-7.2a1 1 0 0 0 0-1.7L8.52 3.95A1 1 0 0 0 7 4.8z"/></symbol>
       <symbol id="i-down" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M12 4v12M6 11l6 6 6-6M5 20h14"/></symbol>
       <symbol id="i-chev" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></symbol>
-      <symbol id="i-logo" viewBox="0 0 32 32"><rect width="32" height="32" rx="6" fill="currentColor" opacity=".12"/><ellipse cx="16" cy="17" rx="10" ry="5.5" fill="none" stroke="currentColor" stroke-width="2.6"/><ellipse cx="16" cy="17" rx="4" ry="2.2" fill="currentColor"/></symbol>
     </defs>
   </svg>
 
   <!-- TOP NAV -->
   <header class="nav">
     <div class="wrap">
-      <a class="brand" href="#top" aria-label="IPDS home"><svg><use href="#i-logo"/></svg>IPDS</a>
+      <a class="brand" href="#top" aria-label="IPDS home">IPDS</a>
       <nav class="nav-links" aria-label="Sections">
         <a href="#how">How it works</a>
         <a href="#results">Results</a>
@@ -412,7 +408,7 @@
     <section class="hero">
       <div class="wrap">
         <div>
-          <span class="badge"><b>Open source</b>Research preprint &middot; PICT, Pune</span>
+          <span class="badge"><b>Open source</b>Research preprint</span>
           <h1>See it. Feel it.<span>Log every pothole.</span></h1>
           <p class="lede">IPDS is a low-cost dual-ESP32 and YOLOv8 system that detects potholes in real time, tracks each one, scores its severity from accelerometer jerk, and logs it with GPS and a timestamp.</p>
           <div class="ctas">
@@ -534,7 +530,7 @@
         <div class="head">
           <div class="eyebrow">Results</div>
           <h2>Measured, not just claimed</h2>
-          <p class="sub">Model metrics on the validation split, and a real 12-minute field drive in Pune on 20 March 2026.</p>
+          <p class="sub">Model metrics on the validation split, and a real 12-minute field drive on 20 March 2026.</p>
         </div>
         <div class="results">
           <div class="card">
@@ -774,8 +770,7 @@ severity  = <span class="k">0.7</span> &times; confidence + <span class="k">0.3<
     <section class="block" id="cite">
       <div class="wrap cite">
         <div class="card">
-          <h3>Built at PICT, Pune</h3>
-          <p class="meta">Dept. of Electronics and Telecommunication Engineering, Pune Institute of Computer Technology</p>
+          <h3>The team</h3>
           <ul class="people">
             <li><span class="avatar">ST</span><div><b>Sanskar Tiwari</b><span>Core architecture and ML pipeline</span></div></li>
             <li><span class="avatar">SB</span><div><b>Swarali Bansod</b><span>Sensor integration and firmware</span></div></li>
@@ -806,8 +801,8 @@ severity  = <span class="k">0.7</span> &times; confidence + <span class="k">0.3<
     <div class="wrap">
       <div class="foot-grid">
         <div>
-          <div class="foot-brand"><svg style="color:#f0b90b"><use href="#i-logo"/></svg>IPDS</div>
-          <p>Intelligent Pothole Detection System. Open-source research from PICT, Pune.</p>
+          <div class="foot-brand">IPDS</div>
+          <p>Intelligent Pothole Detection System. Open-source research project.</p>
         </div>
         <div>
           <h4>Project</h4>

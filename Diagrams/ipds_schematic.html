@@ -6,7 +6,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>IPDS Sensor Node Schematic</title>
   <meta name="theme-color" content="#0b0e11" />
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230b0e11'/%3E%3Cellipse cx='16' cy='17' rx='10' ry='5.5' fill='none' stroke='%23FCD535' stroke-width='2.6'/%3E%3Cellipse cx='16' cy='17' rx='4' ry='2.2' fill='%23FCD535'/%3E%3C/svg%3E" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
@@ -46,7 +45,6 @@
     .nav { position: sticky; top: 0; z-index: 50; background: var(--canvas); border-bottom: 1px solid var(--hairline); }
     .nav .wrap { display: flex; align-items: center; gap: 28px; height: 64px; }
     .brand { display: flex; align-items: center; gap: 10px; color: var(--primary); font-weight: 700; font-size: 20px; letter-spacing: 0.5px; flex-shrink: 0; }
-    .brand svg { width: 28px; height: 28px; }
     .tabs { display: flex; gap: 4px; }
     .tabs a { padding: 8px 12px; border-radius: 6px; font-weight: 500; color: var(--muted-strong); white-space: nowrap; }
     .tabs a:hover { color: var(--on-dark); background: var(--card); }
@@ -120,7 +118,6 @@
 <body>
   <svg width="0" height="0" style="position:absolute" aria-hidden="true">
     <defs>
-      <symbol id="i-logo" viewBox="0 0 32 32"><rect width="32" height="32" rx="6" fill="currentColor" opacity=".12"/><ellipse cx="16" cy="17" rx="10" ry="5.5" fill="none" stroke="currentColor" stroke-width="2.6"/><ellipse cx="16" cy="17" rx="4" ry="2.2" fill="currentColor"/></symbol>
       <symbol id="i-back" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M19 12H5M11 6l-6 6 6 6"/></symbol>
       <symbol id="i-doc" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5zM14 3v5h5M9 13h6M9 17h6"/></symbol>
     </defs>
@@ -128,7 +125,7 @@
 
   <header class="nav">
     <div class="wrap">
-      <a class="brand" href="../index.html"><svg><use href="#i-logo"/></svg>IPDS</a>
+      <a class="brand" href="../index.html">IPDS</a>
       <nav class="tabs" aria-label="Diagrams">
         <a href="ipds_block_diagram.html">Block diagram</a>
         <a href="ipds_flowchart.html">Flowchart</a>

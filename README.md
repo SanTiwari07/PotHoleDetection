@@ -212,7 +212,7 @@ model.predict("road.jpg", conf=0.25)[0].show()
 
 The paper also reports false-positive trials (shadows, manhole covers, speed bumps and others); see [docs/DETAIL.md](docs/DETAIL.md#7-reported-system-results-paper).
 
-### Sample field log (20 March 2026, Pune)
+### Sample field log (20 March 2026)
 
 [`outputs/sample_logs/output.csv`](outputs/sample_logs/output.csv) has 50 logged potholes from a drive between 1:56 and 2:08 pm. This file records severity as text bands by peak jerk, while the current `main.py` writes the numeric 0–1 score instead:
 
@@ -415,8 +415,6 @@ A machine-readable [`CITATION.cff`](CITATION.cff) is included; GitHub's **"Cite 
 
 ## Authors
 
-Department of Electronics and Telecommunication Engineering, **Pune Institute of Computer Technology (PICT)**, Pune, India.
-
 | Name | Role |
 |---|---|
 | **Sanskar Tiwari** | Core architecture & ML pipeline |
@@ -442,7 +440,5 @@ Third-party components keep their own licenses: [`sort.py`](python/pothole_detec
 <br><br>
 
 [![Star History Chart](https://api.star-history.com/svg?repos=SanTiwari07/PotHoleDetection&type=Date)](https://star-history.com/#SanTiwari07/PotHoleDetection&Date)
-
-<sub>Made at PICT, Pune</sub>
 
 </div>
