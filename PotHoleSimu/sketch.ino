@@ -10,11 +10,11 @@ const char* ssid = "Wokwi-GUEST";
 const char* password = "";
 
 // ================= SETTINGS =================
-#define I2C_SDA 14
-#define I2C_SCL 15
+#define I2C_SDA 21
+#define I2C_SCL 22
 
 #define GPS_RX 16   // GPS TX → ESP32 RX
-#define GPS_TX 13   // GPS RX → ESP32 TX
+#define GPS_TX 17   // GPS RX → ESP32 TX
 
 const float POTHOLE_THRESHOLD = 1.8; // Z Acc (g)
 

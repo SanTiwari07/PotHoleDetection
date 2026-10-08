@@ -13,16 +13,16 @@
     [ "esp:RX0", "$serialMonitor:TX", "", [] ],
     [ "imu1:VCC", "esp:3V3", "red", [] ],
     [ "imu1:GND", "esp:GND.1", "black", [] ],
-    [ "imu1:SDA", "esp:14", "green", [] ],
-    [ "imu1:SCL", "esp:15", "green", [] ],
+    [ "imu1:SDA", "esp:21", "green", [] ],
+    [ "imu1:SCL", "esp:22", "green", [] ],
     [ "rtc1:VCC", "esp:3V3", "red", [] ],
     [ "rtc1:GND", "esp:GND.1", "black", [] ],
-    [ "rtc1:SDA", "esp:14", "green", [] ],
-    [ "rtc1:SCL", "esp:15", "green", [] ],
+    [ "rtc1:SDA", "esp:21", "green", [] ],
+    [ "rtc1:SCL", "esp:22", "green", [] ],
     [ "gps1:VCC", "esp:3V3", "red", [] ],
     [ "gps1:GND", "esp:GND.1", "black", [] ],
     [ "gps1:TX", "esp:16", "blue", [] ],
-    [ "esp:13", "gps1:RX", "blue", [] ]
+    [ "esp:17", "gps1:RX", "blue", [] ]
   ],
   "dependencies": {}
 }

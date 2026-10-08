@@ -1,143 +1,102 @@
-# IPDS Sensor Node — KiCad PCB Project
+# IPDS Sensor Node: KiCad PCB
 
-**KiCad Version:** 7.x  
-**Board:** 120 × 90 mm · FR4 · 1.6 mm · 2 layers · HASL · 1 oz copper
+Carrier board for the IPDS sensor node: an **ESP32-DevKitC (38-pin)** plus plug-in **MPU6050**, **DS3231 RTC** and **NEO-6M GPS** breakout modules. Every module sits in a female header, so nothing is soldered to the modules themselves.
+
+<p align="center"><img src="fabrication/pcb_render_top.png" alt="IPDS sensor node PCB, top view" width="720"></p>
+
+**Board:** 117 × 68 mm · 2 layers · 1.6 mm FR4 · GND pour on both sides · 4 × M3 mounting holes
+**Made with:** KiCad 10.0 (open with KiCad 10 or newer)
+
+### Verification status
+
+Checked with `kicad-cli` (KiCad 10.0.6):
+
+| Check | Result |
+|---|---|
+| ERC (schematic) | **0 violations** |
+| DRC (PCB, all severities) | **0 violations**, **0 unconnected items** |
+| Schematic ↔ PCB parity | **0 issues** |
+
+```bash
+kicad-cli sch erc --severity-all IPDS_SensorNode.kicad_sch
+kicad-cli pcb drc --severity-all --schematic-parity IPDS_SensorNode.kicad_pcb
+```
 
 ---
 
-## Files in This Project
+## Files
 
 | File | Description |
 |---|---|
-| `IPDS_SensorNode.kicad_pro` | KiCad project settings & DRC rules |
-| `IPDS_SensorNode.kicad_sch` | Full schematic — all components & nets |
-| `IPDS_SensorNode.kicad_pcb` | PCB layout — footprints, traces, GND plane |
-| `sym-lib-table` | Symbol library references |
-| `fp-lib-table` | Footprint library references |
+| `IPDS_SensorNode.kicad_pro` | Project settings and design rules |
+| `IPDS_SensorNode.kicad_sch` | Schematic |
+| `IPDS_SensorNode.kicad_pcb` | PCB layout |
+| `IPDS.kicad_sym` | Project symbols: ESP32-DevKitC and the three breakout modules (named pins) |
+| `IPDS.pretty/` | Project footprint: ESP32-DevKitC 38-pin socket |
+| `fabrication/IPDS_SensorNode_gerbers.zip` | Gerbers + Excellon drill files, ready to upload to a PCB fab |
+| `fabrication/IPDS_SensorNode_schematic.pdf` | Schematic as PDF |
+| `fabrication/IPDS_SensorNode_BOM.csv` | Bill of materials |
 
 ---
 
-## How to Open
+## Connections
 
-1. Install **KiCad 7** (https://www.kicad.org/download/)
-2. Open `IPDS_SensorNode.kicad_pro` — KiCad will load the project
-3. Open **Schematic Editor** (Eeschema) to view the schematic
-4. Open **PCB Editor** (PcbNew) to view and edit the PCB layout
-
----
-
-## Design Overview
-
-### Components
-
-| Ref | Value | Description | Footprint |
-|---|---|---|---|
-| J1 | ESP32_Left | ESP32 DevKit V1 Left 19-pin header | PinHeader_1x19_P2.54mm |
-| J2 | ESP32_Right | ESP32 DevKit V1 Right 19-pin header | PinHeader_1x19_P2.54mm |
-| J3 | MPU6050 | 3-Axis Accel+Gyro I²C module | PinHeader_1x06_P2.54mm |
-| J4 | DS3231_RTC | TCXO RTC I²C module w/ CR2032 | PinHeader_1x04_P2.54mm |
-| J5 | NEO-6M_GPS | u-blox GPS UART module | PinHeader_1x04_P2.54mm |
-| J6 | USB_Micro_B | USB Micro-B power input (5V → VIN) | USB_Micro-B_Molex_47589 |
-| R1 | 4.7 kΩ | SDA pull-up (I²C) | R_0402_1005Metric |
-| R2 | 4.7 kΩ | SCL pull-up (I²C) | R_0402_1005Metric |
-| C1 | 100 nF | 3.3V decoupling capacitor | C_0402_1005Metric |
-| C2 | 10 µF | 3.3V bulk capacitor | C_0805_2012Metric |
-| H1–H4 | M3 | PCB mounting holes (3.2 mm drill) | MountingHole_3.2mm_M3 |
-| TP1–TP4 | — | Test points: +3V3, GND, SDA, SCL | TestPoint_Pad_1.0x1.0mm |
-
-### Net List
-
-| Net | Signal | Connected To |
+| Net | ESP32 pin | Connected to |
 |---|---|---|
-| `+3V3` | 3.3V power | ESP32 3V3 pin → all VCC |
-| `GND` | Ground | Common GND + B.Cu pour |
-| `SDA` | I²C Data | GPIO21 ↔ MPU6050 SDA ↔ DS3231 SDA + R1 |
-| `SCL` | I²C Clock | GPIO22 ↔ MPU6050 SCL ↔ DS3231 SCL + R2 |
-| `GPS_TX` | UART2 RX in | NEO-6M TX → GPIO16 (RX2) |
-| `GPS_RX` | UART2 TX out | GPIO17 (TX2) → NEO-6M RX |
-| `VIN` | 5V from USB | USB VBUS → ESP32 VIN |
+| `+3V3` | 3V3 (onboard regulator) | MPU VCC, MPU **AD0**, RTC VCC, GPS VCC, R1, R2, C1, C2 |
+| `GND` | GND ×3 | All modules, J1 pin 2, C1, C2 |
+| `+5V` | 5V | D1 cathode (external 5 V input) |
+| `SDA` | GPIO21 | MPU SDA, RTC SDA, R1 4.7 kΩ pull-up |
+| `SCL` | GPIO22 | MPU SCL, RTC SCL, R2 4.7 kΩ pull-up |
+| `ESP_TX2` | GPIO17 (TX2) | GPS **RX** |
+| `ESP_RX2` | GPIO16 (RX2) | GPS **TX** |
+| `VIN_EXT` | n/a | J1 pin 1 → D1 anode |
 
-### I²C Addresses
+### I²C addresses
 
-| Device | Address |
-|---|---|
-| MPU6050 | `0x68` (AD0 = GND) |
-| DS3231 | `0x57` (fixed) |
+| Device | Address | Note |
+|---|---|---|
+| DS3231 RTC | `0x68` | fixed |
+| AT24C32 EEPROM (on the ZS-042 board) | `0x57` | unused |
+| MPU6050 | **`0x69`** | AD0 is tied to 3V3 on this PCB, because `0x68` is already taken by the DS3231 |
 
-### UART Settings
+The sensor firmware (`ESP_32_Code/esp_32_final`) uses exactly these pins and addresses. GPS UART runs at 9600 baud, 8N1.
 
-| Parameter | Value |
-|---|---|
-| Port | UART2 |
-| Baud rate | 9600 bps |
-| Data bits | 8 |
-| Parity | None |
-| Stop bits | 1 |
+### Module pin order (match the silkscreen)
 
----
+| Socket | Module | Pin order (pin 1 = square pad, top) |
+|---|---|---|
+| U2 (1×8) | GY-521 MPU6050 | VCC, GND, SCL, SDA, XDA, XCL, AD0, INT |
+| U3 (1×6) | ZS-042 DS3231 | 32K, SQW, SCL, SDA, VCC, GND |
+| U4 (1×4) | GY-NEO6MV2 | VCC, RX, TX, GND |
 
-## PCB Design Rules
-
-| Rule | Value |
-|---|---|
-| Min trace width | 0.2 mm |
-| Power trace width | 0.5 mm |
-| Signal trace width | 0.25 mm |
-| Min clearance | 0.2 mm |
-| Via drill | 0.4 mm |
-| Via diameter | 0.8 mm |
-| Min hole-to-hole | 0.25 mm |
-| Min copper-to-edge | 0.5 mm |
-| Solder mask expansion | 0.05 mm |
-| Board thickness | 1.6 mm |
+Breakout boards from different sellers sometimes order their pins differently. **Check your module's printed labels against the table before plugging it in.**
 
 ---
 
-## Gerber Export (for fabrication)
+## Before you order
 
-In KiCad PCB Editor:
+1. **Measure your ESP32 board.** The footprint expects the two pin rows **25.4 mm (1.0") apart**, as on Espressif's DevKitC V4 and most 38-pin clones. Some "narrow" clones are 22.86 mm; if yours is, move the right-hand row in `IPDS.pretty`.
+2. **Power:** feed 5 V into J1 (e.g. a car USB adapter) **or** use the DevKit's USB port. If your DevKit has no diode on its USB 5 V line, don't connect both at once: D1 stops J1 from being back-fed, but USB could be back-fed from J1.
+3. **ZS-042 with a CR2032:** the module has a charging circuit meant for rechargeable LIR2032 cells. With a normal CR2032, remove its 200 Ω resistor (or the diode next to it).
 
-1. **File → Fabrication Outputs → Gerbers (.gbr)**
-2. Output directory: `Gerbers/`
-3. Enable layers:
-   - `F.Cu` (front copper)
-   - `B.Cu` (back copper / GND plane)
-   - `F.SilkS` (front silkscreen)
-   - `B.SilkS` (back silkscreen)
-   - `F.Mask` (front solder mask)
-   - `B.Mask` (back solder mask)
-   - `Edge.Cuts` (board outline)
-4. **File → Fabrication Outputs → Drill Files (.drl)**
-   - Format: Excellon
-   - Origin: Absolute
+## Bill of materials
 
-### Recommended Fabs
-- [JLCPCB](https://jlcpcb.com) — upload Gerbers zip
-- [PCBWay](https://www.pcbway.com)
-- [OSH Park](https://oshpark.com)
-
----
-
-## BOM — Bill of Materials
-
-| Qty | Ref | Value | MPN / Note |
+| Qty | Ref | Part | Notes |
 |---|---|---|---|
-| 1 | J1,J2 | ESP32 DevKit V1 | AI-Thinker / Random Nerd |
-| 1 | J3 | MPU6050 Module | GY-521 breakout |
-| 1 | J4 | DS3231 RTC Module | DS3231 breakout w/ CR2032 |
-| 1 | J5 | NEO-6M GPS | u-blox NEO-6M module |
-| 1 | J6 | USB Micro-B | Molex 47589-0001 |
-| 2 | R1,R2 | 4.7 kΩ 0402 | Vishay CRCW04024K70FKED |
-| 1 | C1 | 100 nF 0402 10V | Murata GRM155R71A104KA01D |
-| 1 | C2 | 10 µF 0805 10V | Murata GRM21BR61A106KE18L |
-| 4 | H1–H4 | M3 standoffs | 10 mm brass hex standoff |
+| 1 | U1 | ESP32-DevKitC 38-pin | plus **2 × 1×19 female headers**, 2.54 mm |
+| 1 | U2 | GY-521 MPU6050 module | 1×8 female header |
+| 1 | U3 | ZS-042 DS3231 module + CR2032 | 1×6 female header |
+| 1 | U4 | GY-NEO6MV2 NEO-6M GPS module + antenna | 1×4 female header |
+| 1 | J1 | Phoenix MKDS 1,5/2-5.08 screw terminal | or any 5.08 mm 2-pin terminal |
+| 1 | D1 | SS14 Schottky diode, SMA | 1 A, 40 V |
+| 2 | R1, R2 | 4.7 kΩ, 0805 | I²C pull-ups |
+| 1 | C1 | 100 nF, 0805 | decoupling |
+| 1 | C2 | 10 µF, 0805, ≥10 V | bulk |
+| 4 | — | M3 standoffs + screws | mounting |
 
----
+## Ordering the PCB
 
-## Notes
+Upload `fabrication/IPDS_SensorNode_gerbers.zip` to JLCPCB, PCBWay or a similar fab with the defaults: 2 layers, 1.6 mm, HASL, 1 oz copper. All tracks are ≥ 0.25 mm and clearances ≥ 0.2 mm, so standard (cheapest) capabilities are enough.
 
-- **Power:** Feed 5V via USB Micro-B (J6) or directly to ESP32 `VIN`. ESP32 onboard AMS1117 regulates to 3.3V.
-- **I²C pull-ups:** R1 and R2 are mandatory. Omitting them will cause unreliable I²C comms.
-- **GPS antenna:** The NEO-6M module has an integrated ceramic patch antenna. Ensure no copper pours below it or use an active external antenna.
-- **AD0 (MPU6050):** Tied to GND on the module, sets I²C address to `0x68`. If using two MPU6050s, tie AD0 of the second to 3.3V for address `0x69`.
-- **After PCB modifications:** Re-run DRC (Design → Design Rules Checker) and re-generate netlist before Gerber export.
+To regenerate the outputs after editing: **File → Fabrication Outputs → Gerbers** and **Drill Files** in the PCB editor, after re-running **Inspect → Design Rules Checker**.

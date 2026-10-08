@@ -1,8 +1,4 @@
 (fp_lib_table
   (version 7)
-  (lib (name "Resistor_SMD")(type "KiCad")(uri "${KICAD7_FOOTPRINT_DIR}/Resistor_SMD.pretty")(options "")(descr "SMD resistors"))
-  (lib (name "Capacitor_SMD")(type "KiCad")(uri "${KICAD7_FOOTPRINT_DIR}/Capacitor_SMD.pretty")(options "")(descr "SMD capacitors"))
-  (lib (name "Connector_PinHeader_2.54mm")(type "KiCad")(uri "${KICAD7_FOOTPRINT_DIR}/Connector_PinHeader_2.54mm.pretty")(options "")(descr "2.54mm pin headers"))
-  (lib (name "Connector_USB")(type "KiCad")(uri "${KICAD7_FOOTPRINT_DIR}/Connector_USB.pretty")(options "")(descr "USB connectors"))
-  (lib (name "TestPoint")(type "KiCad")(uri "${KICAD7_FOOTPRINT_DIR}/TestPoint.pretty")(options "")(descr "Test points"))
+  (lib (name "IPDS")(type "KiCad")(uri "${KIPRJMOD}/IPDS.pretty")(options "")(descr "IPDS project footprints"))
 )
