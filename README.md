@@ -356,6 +356,7 @@ PotHoleDetection/
 ├── training/                      # Dataset conversion + YOLOv8 training scripts
 ├── KiCad/                         # Sensor-node schematic and PCB
 ├── Diagrams/                      # Interactive HTML block diagrams
+├── assets/                        # Demo GIF and hardware photos
 ├── index.html                     # Project website (GitHub Pages)
 ├── docs/                          # Architecture, hardware, full spec, paper PDF
 ├── outputs/sample_logs/           # Field-test CSV
