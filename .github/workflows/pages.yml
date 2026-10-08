@@ -1,0 +1,50 @@
+name: Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "index.html"
+      - "Diagrams/**"
+      - "assets/demo/**"
+      - "docs/IPDS_Pothole_Detection.pdf"
+      - "KiCad/IPDS_SensorNode/fabrication/**"
+      - ".github/workflows/pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      # Copy only what the site uses, keeping repo paths so index.html
+      # links work the same on Pages and when opened locally.
+      - name: Assemble site
+        run: |
+          mkdir -p _site
+          for f in index.html Diagrams assets/demo/demo.gif docs/IPDS_Pothole_Detection.pdf \
+                   KiCad/IPDS_SensorNode/fabrication/pcb_render_top.png \
+                   KiCad/IPDS_SensorNode/fabrication/IPDS_SensorNode_schematic.pdf \
+                   KiCad/IPDS_SensorNode/fabrication/IPDS_SensorNode_gerbers.zip; do
+            mkdir -p "_site/$(dirname "$f")"
+            cp -r "$f" "_site/$f"
+          done
+          touch _site/.nojekyll
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: deployment
+        uses: actions/deploy-pages@v4

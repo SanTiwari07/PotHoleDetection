@@ -58,3 +58,6 @@ flagged/
 # Training data and runs
 datasets/
 runs/
+
+# GitHub Pages build output
+_site/

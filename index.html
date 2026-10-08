@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IPDS: Intelligent Pothole Detection System</title>
+  <meta name="description" content="A low-cost dual-ESP32 + YOLOv8 system that detects potholes in real time, tracks them, scores severity from accelerometer jerk, and logs them with GPS and timestamps." />
+  <meta name="theme-color" content="#0b0e11" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="IPDS: Intelligent Pothole Detection System" />
+  <meta property="og:description" content="Real-time pothole detection with YOLOv8, SORT tracking and accelerometer-based severity on two ESP32 boards. Open source, under Rs 2,500 per unit." />
+  <meta property="og:url" content="https://santiwari07.github.io/PotHoleDetection/" />
+  <meta property="og:image" content="https://santiwari07.github.io/PotHoleDetection/KiCad/IPDS_SensorNode/fabrication/pcb_render_top.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230b0e11'/%3E%3Cellipse cx='16' cy='17' rx='10' ry='5.5' fill='none' stroke='%23FCD535' stroke-width='2.6'/%3E%3Cellipse cx='16' cy='17' rx='4' ry='2.2' fill='%23FCD535'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      /* colors */
+      --canvas: #0b0e11;
+      --card: #1e2329;
+      --elevated: #2b3139;
+      --hairline: #2b3139;
+      --primary: #FCD535;
+      --primary-active: #f0b90b;
+      --primary-disabled: #3a3a1f;
+      --ink: #181a20;
+      --body: #eaecef;
+      --muted: #707a8a;
+      --muted-strong: #929aa5;
+      --on-dark: #ffffff;
+      --soft-light: #fafafa;
+      --hairline-light: #eaecef;
+      --info-ring: rgba(59, 130, 246, 0.5);
+      /* type */
+      --nova: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --plex: 'IBM Plex Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      /* radius */
+      --r-sm: 4px; --r-md: 6px; --r-lg: 8px; --r-xl: 12px; --r-pill: 9999px;
+      /* layout */
+      --section: 80px;
+      --max: 1280px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; scroll-padding-top: 72px; }
+    body {
+      background: var(--canvas);
+      color: var(--body);
+      font-family: var(--nova);
+      font-size: 14px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+    body.menu-open { overflow: hidden; }
+    a { color: inherit; text-decoration: none; }
+    img { max-width: 100%; display: block; }
+    button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+    :focus-visible { outline: none; box-shadow: 0 0 0 2px var(--info-ring); border-radius: var(--r-md); }
+    .num { font-family: var(--plex); font-variant-numeric: tabular-nums; }
+    .wrap { max-width: var(--max); margin: 0 auto; padding: 0 24px; }
+    .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+    /* ---------- buttons ---------- */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      height: 40px; padding: 0 24px;
+      border-radius: var(--r-md);
+      font-size: 14px; font-weight: 600; line-height: 1;
+      white-space: nowrap;
+      transition: background-color .12s ease;
+    }
+    .btn svg { width: 16px; height: 16px; flex-shrink: 0; }
+    .btn-primary { background: var(--primary); color: var(--ink); }
+    .btn-primary:hover, .btn-primary:active { background: var(--primary-active); }
+    .btn-secondary { background: var(--card); color: var(--on-dark); }
+    .btn-secondary:hover, .btn-secondary:active { background: var(--elevated); }
+    .card .btn-secondary { background: var(--elevated); }
+    .card .btn-secondary:hover, .card .btn-secondary:active { background: #3a414b; }
+    .btn-pill { border-radius: var(--r-pill); height: 48px; padding: 0 32px; font-size: 16px; }
+    .btn-pill svg { width: 18px; height: 18px; }
+    .btn-xl { height: 56px; padding: 0 40px; font-size: 18px; }
+    .btn-xl svg { width: 22px; height: 22px; }
+    .star-count {
+      font-family: var(--plex); font-variant-numeric: tabular-nums;
+      font-size: 13px; font-weight: 600;
+      padding: 3px 8px; border-radius: var(--r-sm);
+      background: rgba(24, 26, 32, 0.14);
+    }
+    .btn-xl .star-count { font-size: 15px; }
+    .star-count:empty { display: none; }
+    .text-link { display: inline-flex; align-items: center; gap: 6px; color: var(--primary); font-weight: 600; }
+    .text-link svg { width: 14px; height: 14px; }
+    .text-link:hover { color: var(--primary-active); }
+
+    /* ---------- top nav ---------- */
+    .nav { position: sticky; top: 0; z-index: 60; background: var(--canvas); border-bottom: 1px solid var(--hairline); }
+    .nav .wrap { display: flex; align-items: center; gap: 32px; height: 64px; }
+    .brand { display: flex; align-items: center; gap: 10px; color: var(--primary); font-weight: 700; font-size: 20px; letter-spacing: 0.5px; }
+    .brand svg { width: 28px; height: 28px; }
+    .nav-links { display: flex; gap: 24px; font-size: 14px; font-weight: 500; color: var(--body); }
+    .nav-links a:hover { color: var(--primary); }
+    .nav-right { margin-left: auto; display: flex; align-items: center; gap: 20px; }
+    .nav-right .gh { display: inline-flex; align-items: center; gap: 8px; font-weight: 500; }
+    .nav-right .gh svg { width: 18px; height: 18px; }
+    .nav-right .gh:hover { color: var(--primary); }
+    .burger { display: none; width: 40px; height: 40px; border-radius: var(--r-md); align-items: center; justify-content: center; }
+    .burger:hover { background: var(--card); }
+    .burger svg { width: 22px; height: 22px; }
+
+    .sheet {
+      position: fixed; inset: 64px 0 0 0; z-index: 55;
+      background: var(--canvas);
+      display: none; flex-direction: column;
+      padding: 16px 16px 24px;
+    }
+    .sheet.open { display: flex; }
+    .sheet nav { display: flex; flex-direction: column; }
+    .sheet nav a { padding: 16px 4px; font-size: 18px; font-weight: 600; border-bottom: 1px solid var(--hairline); }
+    .sheet .sheet-cta { margin-top: auto; display: grid; gap: 12px; }
+    .sheet .sheet-cta .btn { height: 48px; font-size: 16px; }
+
+    /* ---------- hero ---------- */
+    .hero { padding: var(--section) 0; }
+    .hero .wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; }
+    .hero .wrap > * { min-width: 0; }
+    .badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--card); border-radius: var(--r-lg);
+      padding: 8px 14px; font-size: 13px; font-weight: 500; color: var(--muted-strong);
+    }
+    .badge b { color: var(--primary); font-weight: 700; }
+    .hero h1 {
+      margin-top: 24px;
+      font-size: 64px; line-height: 1.07; font-weight: 700; letter-spacing: -1px;
+      color: var(--on-dark);
+    }
+    .hero h1 span { color: var(--primary); display: block; }
+    .hero .lede { margin-top: 20px; font-size: 18px; line-height: 1.55; color: var(--body); max-width: 560px; }
+    .hero .ctas { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 32px; align-items: center; }
+    .hero .ctas .btn:not(.btn-pill) { height: 48px; }
+    .ticks { margin-top: 24px; display: flex; flex-wrap: wrap; gap: 8px 20px; color: var(--muted-strong); font-size: 13px; }
+    .ticks span { display: inline-flex; align-items: center; gap: 6px; }
+    .ticks svg { width: 14px; height: 14px; color: var(--primary); }
+
+    .demo-card { background: var(--card); border-radius: var(--r-xl); overflow: hidden; }
+    .demo-head { display: flex; align-items: center; gap: 16px; padding: 14px 20px; border-bottom: 1px solid var(--hairline); font-size: 13px; }
+    .demo-head .tab { color: var(--muted); font-weight: 500; }
+    .demo-head .tab.on { color: var(--on-dark); font-weight: 600; position: relative; }
+    .demo-head .tab.on::after { content: ""; position: absolute; left: 0; right: 0; bottom: -15px; height: 2px; background: var(--primary); }
+    .demo-head .live { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; color: var(--muted-strong); font-family: var(--mono); font-size: 12px; }
+    .demo-head .live::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--primary); }
+    .demo-card img { width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; background: #000; }
+    .demo-foot { padding: 14px 20px; color: var(--muted); font-size: 13px; }
+
+    /* ---------- stat band ---------- */
+    .stats { border-top: 1px solid var(--hairline); border-bottom: 1px solid var(--hairline); }
+    .stats .wrap { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; padding-top: 40px; padding-bottom: 40px; }
+    .stat b { display: block; font-family: var(--plex); font-variant-numeric: tabular-nums; font-size: 40px; line-height: 1.1; font-weight: 700; letter-spacing: -0.3px; color: var(--primary); }
+    .stat span { display: block; margin-top: 6px; font-size: 14px; color: var(--muted-strong); }
+
+    /* ---------- sections ---------- */
+    section.block { padding: var(--section) 0; }
+    section.block + section.block { border-top: 1px solid var(--hairline); }
+    .head { margin-bottom: 40px; max-width: 760px; }
+    .eyebrow { font-size: 14px; font-weight: 600; color: var(--primary); }
+    h2 { margin-top: 8px; font-size: 40px; line-height: 1.15; font-weight: 700; letter-spacing: -0.3px; color: var(--on-dark); }
+    .sub { margin-top: 12px; font-size: 16px; color: var(--muted-strong); }
+
+    .card { background: var(--card); border-radius: var(--r-xl); padding: 24px; min-width: 0; }
+    .card h3 { font-size: 20px; line-height: 1.35; font-weight: 600; color: var(--on-dark); }
+    .card p { color: var(--muted-strong); }
+
+    /* steps */
+    .steps { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; }
+    .step .top { display: flex; align-items: center; justify-content: space-between; }
+    .step .n { font-family: var(--plex); font-weight: 700; font-size: 14px; color: var(--primary); }
+    .icon { width: 40px; height: 40px; border-radius: var(--r-lg); background: var(--elevated); display: grid; place-items: center; color: var(--on-dark); }
+    .icon svg { width: 20px; height: 20px; }
+    .step h3 { margin-top: 20px; font-size: 18px; }
+    .step p { margin-top: 8px; }
+
+    /* architecture */
+    .arch { display: grid; grid-template-columns: 1fr 1fr 1.3fr; gap: 16px; }
+    .node .role { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; }
+    .node h3 { margin-top: 6px; }
+    .node p { margin-top: 8px; }
+    .node code { font-family: var(--mono); font-size: 12.5px; color: var(--body); background: var(--elevated); padding: 1px 6px; border-radius: var(--r-sm); }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+    .chip { font-size: 12px; font-weight: 500; padding: 4px 10px; border-radius: var(--r-sm); background: var(--elevated); color: var(--body); }
+    .flow { list-style: none; margin-top: 14px; }
+    .flow li { display: grid; grid-template-columns: 28px 1fr; gap: 12px; padding: 10px 0; border-top: 1px solid var(--hairline); color: var(--muted-strong); }
+    .flow li:first-child { border-top: 0; }
+    .flow li b { color: var(--body); font-weight: 600; }
+    .flow .n { font-family: var(--plex); font-weight: 700; color: var(--primary); }
+    .note { margin-top: 16px; display: grid; grid-template-columns: auto 1fr; gap: 16px; align-items: start; background: var(--card); border-radius: var(--r-xl); padding: 20px 24px; }
+    .note .tag { font-weight: 700; color: var(--primary); font-size: 16px; }
+    .note p { color: var(--muted-strong); }
+
+    /* results tables */
+    .results { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .tbl { width: 100%; border-collapse: collapse; margin-top: 16px; }
+    .tbl th { text-align: left; font-size: 12px; font-weight: 500; color: var(--muted); padding: 0 0 10px; }
+    .tbl th.r, .tbl td.r { text-align: right; }
+    .tbl td { padding: 12px 0; border-top: 1px solid var(--hairline); font-size: 14px; color: var(--body); vertical-align: middle; }
+    .tbl td.v { font-family: var(--plex); font-variant-numeric: tabular-nums; font-weight: 600; font-size: 16px; color: var(--on-dark); }
+    .meter { width: 100%; height: 6px; background: var(--elevated); border-radius: 3px; overflow: hidden; }
+    .meter i { display: block; height: 100%; background: var(--primary); }
+    .tbl td.m { width: 34%; padding-left: 16px; }
+    .card .meta { margin-top: 4px; font-size: 13px; color: var(--muted); }
+    .formula {
+      margin-top: 20px; background: var(--canvas); border-radius: var(--r-lg);
+      padding: 16px 18px; font-family: var(--mono); font-size: 13px; line-height: 1.8; color: var(--body); overflow-x: auto;
+    }
+    .formula .k { color: var(--primary); }
+
+    /* hardware */
+    .hw { display: grid; grid-template-columns: 1.2fr 1fr; gap: 16px; }
+    .pcb { padding: 0; overflow: hidden; display: flex; flex-direction: column; }
+    .pcb .img { background: var(--soft-light); }
+    .pcb .img img { width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; object-position: 50% 52%; }
+    .pcb .foot { padding: 20px 24px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+    .pcb .foot .drc { margin-right: auto; color: var(--muted-strong); }
+    .pcb .foot .drc b { color: var(--on-dark); }
+    .rows { list-style: none; margin-top: 12px; }
+    .rows li { display: flex; justify-content: space-between; gap: 16px; padding: 12px 0; border-top: 1px solid var(--hairline); }
+    .rows li:first-child { border-top: 0; }
+    .rows b { font-weight: 600; color: var(--on-dark); }
+    .rows span { color: var(--muted); text-align: right; }
+
+    /* diagrams */
+    .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+    a.card { display: flex; flex-direction: column; transition: background-color .12s ease; }
+    a.card:hover { background: var(--elevated); }
+    .thumb { height: 150px; border-radius: var(--r-lg); background: var(--canvas); margin-bottom: 20px; display: grid; place-items: center; }
+    .thumb svg { width: 86%; height: 80%; }
+    a.card p { margin-top: 8px; flex: 1; }
+    a.card .text-link { margin-top: 16px; }
+
+    /* try */
+    .try .card { display: flex; flex-direction: column; }
+    .try .need { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; }
+    .try h3 { margin-top: 8px; }
+    .try p { margin-top: 8px; flex: 1; }
+    .try .btn { margin-top: 20px; align-self: flex-start; }
+    .code {
+      position: relative; margin-top: 24px;
+      background: var(--card); border-radius: var(--r-xl);
+      padding: 20px 24px; padding-right: 96px;
+      font-family: var(--mono); font-size: 13.5px; line-height: 1.75; color: var(--body);
+      overflow-x: auto; white-space: pre;
+    }
+    .code .c { color: var(--muted); }
+    .code .k { color: var(--primary); }
+    .copy {
+      position: absolute; top: 14px; right: 14px;
+      height: 32px; padding: 0 14px; border-radius: var(--r-md);
+      background: var(--elevated); color: var(--on-dark);
+      font-family: var(--nova); font-size: 13px; font-weight: 600;
+    }
+    .copy:hover { background: #3a414b; }
+    .copy.done { background: var(--primary); color: var(--ink); }
+
+    /* docs */
+    .docs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+    .docs a.card h3 { font-size: 16px; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+    .docs a.card h3 svg { width: 16px; height: 16px; color: var(--muted); }
+
+    /* faq */
+    .faq { max-width: 880px; }
+    .faq details { border-top: 1px solid var(--hairline); }
+    .faq details:last-child { border-bottom: 1px solid var(--hairline); }
+    .faq summary {
+      list-style: none; cursor: pointer;
+      display: flex; justify-content: space-between; align-items: center; gap: 16px;
+      padding: 20px 0; font-size: 16px; font-weight: 600; color: var(--on-dark);
+    }
+    .faq summary::-webkit-details-marker { display: none; }
+    .faq summary svg { width: 18px; height: 18px; color: var(--muted-strong); flex-shrink: 0; transition: transform .15s ease; }
+    .faq details[open] summary svg { transform: rotate(180deg); }
+    .faq details p { padding: 0 0 20px; color: var(--muted-strong); font-size: 14px; max-width: 760px; }
+    .faq details p a { color: var(--primary); }
+
+    /* star band */
+    .star-band { padding: var(--section) 0; border-top: 1px solid var(--hairline); text-align: center; }
+    .big-star { width: 160px; height: 160px; margin: 0 auto; color: var(--primary); }
+    .star-band h2 { margin-top: 24px; font-size: 48px; line-height: 1.1; letter-spacing: -0.5px; color: var(--primary); }
+    .star-band p { margin: 16px auto 0; max-width: 560px; font-size: 18px; color: var(--muted-strong); }
+    .star-band .btn { margin-top: 32px; }
+
+    /* team + cite */
+    .cite { display: grid; grid-template-columns: 1fr 1.25fr; gap: 24px; align-items: start; }
+    .people { list-style: none; margin-top: 8px; }
+    .people li { display: flex; align-items: center; gap: 14px; padding: 12px 0; border-top: 1px solid var(--hairline); }
+    .people li:first-child { border-top: 0; }
+    .avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--elevated); color: var(--primary); display: grid; place-items: center; font-weight: 700; font-size: 14px; flex-shrink: 0; }
+    .people b { display: block; color: var(--on-dark); font-weight: 600; }
+    .people span { color: var(--muted); font-size: 13px; }
+    .cite .code { margin-top: 16px; background: var(--canvas); }
+
+    /* light footer */
+    footer { background: var(--soft-light); color: var(--ink); padding: 64px 0 32px; }
+    .foot-grid { display: grid; grid-template-columns: 1.6fr repeat(4, 1fr); gap: 32px; }
+    .foot-brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 20px; }
+    .foot-brand svg { width: 28px; height: 28px; }
+    .foot-grid p { margin-top: 12px; color: var(--muted); font-size: 13px; max-width: 300px; }
+    .foot-grid h4 { font-size: 16px; font-weight: 600; margin-bottom: 14px; }
+    .foot-grid ul { list-style: none; display: grid; gap: 10px; }
+    .foot-grid ul a { color: var(--muted); font-size: 14px; }
+    .foot-grid ul a:hover { color: var(--ink); }
+    .foot-bottom { margin-top: 48px; padding-top: 20px; border-top: 1px solid var(--hairline-light); display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; color: var(--muted); font-size: 13px; }
+
+    /* ---------- responsive ---------- */
+    @media (max-width: 1100px) {
+      .steps { grid-template-columns: repeat(3, 1fr); }
+      .arch { grid-template-columns: 1fr 1fr; }
+      .arch .hub { grid-column: 1 / -1; }
+      .docs { grid-template-columns: repeat(2, 1fr); }
+      .nav-links { gap: 18px; }
+    }
+    @media (max-width: 1024px) {
+      .hero .wrap, .results, .hw, .cite { grid-template-columns: 1fr; }
+      .grid3 { grid-template-columns: 1fr 1fr; }
+      .foot-grid { grid-template-columns: repeat(3, 1fr); }
+      .foot-grid > :first-child { grid-column: 1 / -1; }
+      .nav-right .gh { display: none; }
+    }
+    @media (max-width: 767px) {
+      :root { --section: 56px; }
+      .wrap { padding: 0 16px; }
+      .nav-links, .nav-right .nav-star { display: none; }
+      .burger { display: inline-flex; }
+      .hero h1 { font-size: 36px; letter-spacing: -0.5px; }
+      .hero .lede { font-size: 16px; }
+      .hero .ctas .btn { width: 100%; }
+      .stats .wrap { grid-template-columns: 1fr 1fr; gap: 24px 16px; padding-top: 32px; padding-bottom: 32px; }
+      .stat b { font-size: 28px; }
+      h2 { font-size: 28px; }
+      .steps, .arch, .grid3, .docs, .try.grid3 { grid-template-columns: 1fr; }
+      .note { grid-template-columns: 1fr; gap: 6px; }
+      .star-band h2 { font-size: 32px; }
+      .big-star { width: 112px; height: 112px; }
+      .btn-xl { width: 100%; padding: 0 20px; font-size: 16px; }
+      .foot-grid { grid-template-columns: 1fr 1fr; }
+      .tbl td.m { width: 28%; }
+      .code { font-size: 12.5px; padding: 56px 16px 16px; }
+      .demo-head .live { display: none; }
+    }
+  </style>
+</head>
+
+<body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="i-star" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2.6l2.9 5.88 6.49.94-4.7 4.58 1.11 6.47L12 17.42l-5.8 3.05 1.11-6.47-4.7-4.58 6.49-.94L12 2.6z"/></symbol>
+      <symbol id="i-github" viewBox="0 0 24 24"><path fill="currentColor" d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.36-3.88-1.36-.52-1.33-1.28-1.69-1.28-1.69-1.04-.71.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.76 2.7 1.25 3.36.96.1-.75.4-1.25.73-1.54-2.56-.29-5.25-1.28-5.25-5.7 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.84 1.19 3.1 0 4.43-2.7 5.4-5.27 5.69.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5z"/></symbol>
+      <symbol id="i-arrow" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 6l6 6-6 6"/></symbol>
+      <symbol id="i-ext" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M7 17L17 7M9 7h8v8"/></symbol>
+      <symbol id="i-check" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+      <symbol id="i-doc" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5zM14 3v5h5M9 13h6M9 17h6"/></symbol>
+      <symbol id="i-play" viewBox="0 0 24 24"><path fill="currentColor" d="M7 4.8v14.4a1 1 0 0 0 1.52.85l11.5-7.2a1 1 0 0 0 0-1.7L8.52 3.95A1 1 0 0 0 7 4.8z"/></symbol>
+      <symbol id="i-down" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M12 4v12M6 11l6 6 6-6M5 20h14"/></symbol>
+      <symbol id="i-chev" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></symbol>
+      <symbol id="i-logo" viewBox="0 0 32 32"><rect width="32" height="32" rx="6" fill="currentColor" opacity=".12"/><ellipse cx="16" cy="17" rx="10" ry="5.5" fill="none" stroke="currentColor" stroke-width="2.6"/><ellipse cx="16" cy="17" rx="4" ry="2.2" fill="currentColor"/></symbol>
+    </defs>
+  </svg>
+
+  <!-- TOP NAV -->
+  <header class="nav">
+    <div class="wrap">
+      <a class="brand" href="#top" aria-label="IPDS home"><svg><use href="#i-logo"/></svg>IPDS</a>
+      <nav class="nav-links" aria-label="Sections">
+        <a href="#how">How it works</a>
+        <a href="#results">Results</a>
+        <a href="#hardware">Hardware</a>
+        <a href="#diagrams">Diagrams</a>
+        <a href="#try">Try it</a>
+        <a href="#faq">FAQ</a>
+      </nav>
+      <div class="nav-right">
+        <a class="gh" href="https://github.com/SanTiwari07/PotHoleDetection" target="_blank" rel="noopener"><svg><use href="#i-github"/></svg>GitHub</a>
+        <a class="btn btn-primary nav-star" href="https://github.com/SanTiwari07/PotHoleDetection" target="_blank" rel="noopener"><svg><use href="#i-star"/></svg>Star<span class="star-count" data-stars></span></a>
+        <button class="burger" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="sheet">
+          <svg class="i-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+          <svg class="i-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" style="display:none"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="sheet" id="sheet">
+    <nav aria-label="Mobile">
+      <a href="#how">How it works</a>
+      <a href="#results">Results</a>
+      <a href="#hardware">Hardware</a>
+      <a href="#diagrams">Diagrams</a>
+      <a href="#try">Try it</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+    <div class="sheet-cta">
+      <a class="btn btn-secondary" href="docs/IPDS_Pothole_Detection.pdf" target="_blank" rel="noopener"><svg><use href="#i-doc"/></svg>Read the paper</a>
+      <a class="btn btn-primary" href="https://github.com/SanTiwari07/PotHoleDetection" target="_blank" rel="noopener"><svg><use href="#i-star"/></svg>Star on GitHub<span class="star-count" data-stars></span></a>
+    </div>
+  </div>
+
+  <main id="top">
+    <!-- HERO -->
+    <section class="hero">
+      <div class="wrap">
+        <div>
+          <span class="badge"><b>Open source</b>Research preprint &middot; PICT, Pune</span>
+          <h1>See it. Feel it.<span>Log every pothole.</span></h1>
+          <p class="lede">IPDS is a low-cost dual-ESP32 and YOLOv8 system that detects potholes in real time, tracks each one, scores its severity from accelerometer jerk, and logs it with GPS and a timestamp.</p>
+          <div class="ctas">
+            <a class="btn btn-primary btn-pill" href="https://github.com/SanTiwari07/PotHoleDetection" target="_blank" rel="noopener"><svg><use href="#i-star"/></svg>Star on GitHub<span class="star-count" data-stars></span></a>
+            <a class="btn btn-secondary" href="https://colab.research.google.com/github/SanTiwari07/PotHoleDetection/blob/main/notebooks/quickstart.ipynb" target="_blank" rel="noopener"><svg><use href="#i-play"/></svg>Try in Colab</a>
+            <a class="btn btn-secondary" href="docs/IPDS_Pothole_Detection.pdf" target="_blank" rel="noopener"><svg><use href="#i-doc"/></svg>Read the paper</a>
+          </div>
+          <div class="ticks">
+            <span><svg><use href="#i-check"/></svg>MIT licensed</span>
+            <span><svg><use href="#i-check"/></svg>Runs without hardware</span>
+            <span><svg><use href="#i-check"/></svg>Custom PCB included</span>
+          </div>
+        </div>
+
+        <figure class="demo-card">
+          <div class="demo-head">
+            <span class="tab on">Detection</span>
+            <span class="tab">Tracking</span>
+            <span class="tab">Logging</span>
+            <span class="live">python/main.py</span>
+          </div>
+          <img src="assets/demo/demo.gif" alt="IPDS detecting and tracking potholes, each with a persistent ID, confidence and severity score" width="480" height="270" />
+          <figcaption class="demo-foot">YOLOv8m detections with SORT tracking. Each pothole keeps one ID and is logged once when it crosses the reference line.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- STATS -->
+    <div class="stats">
+      <div class="wrap">
+        <div class="stat"><b>81.7%</b><span>mAP@0.5 on validation</span></div>
+        <div class="stat"><b>10&ndash;15 FPS</b><span>on a CPU-only laptop</span></div>
+        <div class="stat"><b>~200 ms</b><span>frame to logged CSV row</span></div>
+        <div class="stat"><b>&lt;&#8377;2,500</b><span>hardware cost per unit</span></div>
+      </div>
+    </div>
+
+    <!-- HOW IT WORKS -->
+    <section class="block" id="how">
+      <div class="wrap">
+        <div class="head">
+          <div class="eyebrow">How it works</div>
+          <h2>From camera frame to a ranked maintenance log</h2>
+          <p class="sub">Most pothole projects stop at drawing a box on an image. IPDS only logs a pothole when the camera sees it and the vehicle feels it.</p>
+        </div>
+        <div class="steps">
+          <div class="card step">
+            <div class="top"><div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><rect x="7" y="8" width="10" height="8" rx="1.5"/></svg></div><span class="n">01</span></div>
+            <h3>Detect</h3>
+            <p>YOLOv8m, fine-tuned for potholes, finds them in each frame of the ESP32-CAM stream.</p>
+          </div>
+          <div class="card step">
+            <div class="top"><div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="17" r="2"/><circle cx="12" cy="10" r="2"/><circle cx="19" cy="5" r="2"/><path d="M6.5 15.5l4-4M13.6 8.6l3.8-2.4"/></svg></div><span class="n">02</span></div>
+            <h3>Track</h3>
+            <p>SORT (Kalman filter and Hungarian matching) gives each pothole a stable ID, so it is counted once.</p>
+          </div>
+          <div class="card step">
+            <div class="top"><div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h3l2-6 4 13 3-10 2 5h6"/></svg></div><span class="n">03</span></div>
+            <h3>Feel</h3>
+            <p>At the wheel line, the hub asks the sensor node for an MPU6050 burst and computes peak jerk.</p>
+          </div>
+          <div class="card step">
+            <div class="top"><div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="6"/><circle cx="15" cy="12" r="6"/></svg></div><span class="n">04</span></div>
+            <h3>Fuse</h3>
+            <p>No impact, no log. Severity combines detection confidence (70%) with measured impact (30%).</p>
+          </div>
+          <div class="card step">
+            <div class="top"><div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg></div><span class="n">05</span></div>
+            <h3>Log</h3>
+            <p>Each event goes to CSV with RTC time and GPS position, plus an annotated MP4 of the drive.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ARCHITECTURE -->
+    <section class="block" id="architecture">
+      <div class="wrap">
+        <div class="head">
+          <div class="eyebrow">Architecture</div>
+          <h2>Two ESP32 boards, one processing hub</h2>
+          <p class="sub">The camera streams continuously. The sensors only answer when asked. A Python hub ties them together.</p>
+        </div>
+        <div class="arch">
+          <div class="card node">
+            <div class="role">Vision node</div>
+            <h3>ESP32-CAM</h3>
+            <p>Streams 320&times;240 MJPEG frames from an OV2640 camera over WiFi.</p>
+            <div class="chips"><span class="chip">OV2640</span><span class="chip">MJPEG on :81</span></div>
+          </div>
+          <div class="card node">
+            <div class="role">Sensor node</div>
+            <h3>ESP32 dev board</h3>
+            <p>Answers <code>GET /query?pothole_id=N</code> with accelerometer, timestamp and GPS fields as JSON.</p>
+            <div class="chips"><span class="chip">MPU6050</span><span class="chip">NEO-6M GPS</span><span class="chip">DS3231 RTC</span></div>
+          </div>
+          <div class="card node hub">
+            <div class="role">Processing hub</div>
+            <h3>Python on a laptop or Jetson</h3>
+            <ol class="flow">
+              <li><span class="n">1</span><span><b>YOLOv8m</b> detects potholes and <b>SORT</b> assigns persistent IDs.</span></li>
+              <li><span class="n">2</span><span>Holds back tracks that are too large, too wide, or stationary for more than 10 frames.</span></li>
+              <li><span class="n">3</span><span>When a track crosses the reference line, it <b>queries the sensor node</b> five times.</span></li>
+              <li><span class="n">4</span><span>Computes <b>peak jerk</b>. No impact means the event is rejected.</span></li>
+              <li><span class="n">5</span><span>Scores <b>severity</b>, appends a CSV row and annotates the video.</span></li>
+            </ol>
+          </div>
+        </div>
+        <div class="note">
+          <span class="tag">Why two ESP32s?</span>
+          <p>Reading I&sup2;C sensors on the ESP32-CAM blocks frame capture and drops the frame rate. Moving all sensor I/O to a second, event-driven board keeps the video smooth, and both boards stay cheap.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- RESULTS -->
+    <section class="block" id="results">
+      <div class="wrap">
+        <div class="head">
+          <div class="eyebrow">Results</div>
+          <h2>Measured, not just claimed</h2>
+          <p class="sub">Model metrics on the validation split, and a real 12-minute field drive in Pune on 20 March 2026.</p>
+        </div>
+        <div class="results">
+          <div class="card">
+            <h3>Model accuracy</h3>
+            <p class="meta">YOLOv8m &middot; 640&times;640 input &middot; 598 train / 67 validation images</p>
+            <table class="tbl">
+              <thead><tr><th>Metric</th><th class="r">Value</th><th class="r"><span class="sr-only">Bar</span></th></tr></thead>
+              <tbody>
+                <tr><td>mAP@0.5</td><td class="v r">81.68%</td><td class="m"><div class="meter"><i style="width:81.68%"></i></div></td></tr>
+                <tr><td>mAP@0.5:0.95</td><td class="v r">55.95%</td><td class="m"><div class="meter"><i style="width:55.95%"></i></div></td></tr>
+                <tr><td>Precision</td><td class="v r">82.33%</td><td class="m"><div class="meter"><i style="width:82.33%"></i></div></td></tr>
+                <tr><td>Recall</td><td class="v r">74.42%</td><td class="m"><div class="meter"><i style="width:74.42%"></i></div></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="card">
+            <h3>Field log: 50 potholes in one drive</h3>
+            <p class="meta">Severity bands by peak jerk (m/s&sup3;) from <a class="text-link" href="https://github.com/SanTiwari07/PotHoleDetection/blob/main/outputs/sample_logs/output.csv" target="_blank" rel="noopener">output.csv</a></p>
+            <table class="tbl">
+              <thead><tr><th>Band</th><th class="r">Peak jerk</th><th class="r">Rows</th><th class="r">Share</th></tr></thead>
+              <tbody>
+                <tr><td>Low</td><td class="v r">1.6&ndash;2.7</td><td class="v r">8</td><td class="m"><div class="meter"><i style="width:16%"></i></div></td></tr>
+                <tr><td>Medium</td><td class="v r">3.0&ndash;5.9</td><td class="v r">22</td><td class="m"><div class="meter"><i style="width:44%"></i></div></td></tr>
+                <tr><td>High</td><td class="v r">6.0&ndash;9.4</td><td class="v r">20</td><td class="m"><div class="meter"><i style="width:40%"></i></div></td></tr>
+              </tbody>
+            </table>
+            <pre class="formula">jerk_norm = min(peak_jerk / <span class="k">20</span>, <span class="k">1</span>)
+severity  = <span class="k">0.7</span> &times; confidence + <span class="k">0.3</span> &times; jerk_norm</pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- HARDWARE -->
+    <section class="block" id="hardware">
+      <div class="wrap">
+        <div class="head">
+          <div class="eyebrow">Hardware</div>
+          <h2>Common parts, and a custom PCB</h2>
+          <p class="sub">A 2-layer carrier board for the ESP32-DevKitC and its three modules. Gerbers, BOM and schematic are ready to order.</p>
+        </div>
+        <div class="hw">
+          <div class="card pcb">
+            <div class="img"><img src="KiCad/IPDS_SensorNode/fabrication/pcb_render_top.png" alt="Top render of the IPDS sensor node PCB" width="1768" height="1050" /></div>
+            <div class="foot">
+              <span class="drc">KiCad ERC / DRC: <b class="num">0</b> violations</span>
+              <a class="btn btn-primary" href="KiCad/IPDS_SensorNode/fabrication/IPDS_SensorNode_gerbers.zip" download><svg><use href="#i-down"/></svg>Gerbers</a>
+              <a class="btn btn-secondary" href="KiCad/IPDS_SensorNode/fabrication/IPDS_SensorNode_schematic.pdf" target="_blank" rel="noopener"><svg><use href="#i-doc"/></svg>Schematic</a>
+            </div>
+          </div>
+          <div class="card">
+            <h3>Bill of materials</h3>
+            <ul class="rows">
+              <li><b>ESP32-CAM (AI-Thinker)</b><span>Vision node, MJPEG stream</span></li>
+              <li><b>ESP32 dev board</b><span>Sensor node, HTTP API</span></li>
+              <li><b>MPU6050</b><span>6-axis IMU, peak jerk</span></li>
+              <li><b>NEO-6M GPS</b><span>Latitude and longitude</span></li>
+              <li><b>DS3231 RTC</b><span>Timestamps offline</span></li>
+              <li><b>Laptop or Jetson Nano</b><span>YOLOv8 inference</span></li>
+            </ul>
+            <div style="margin-top:16px;display:flex;flex-wrap:wrap;gap:20px">
+              <a class="text-link" href="https://github.com/SanTiwari07/PotHoleDetection/blob/main/docs/HARDWARE.md" target="_blank" rel="noopener">Wiring and setup guide<svg><use href="#i-arrow"/></svg></a>
+              <a class="text-link" href="https://github.com/SanTiwari07/PotHoleDetection/tree/main/KiCad/IPDS_SensorNode" target="_blank" rel="noopener">KiCad project<svg><use href="#i-arrow"/></svg></a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- DIAGRAMS -->
+    <section class="block" id="diagrams">
+      <div class="wrap">
+        <div class="head">
+          <div class="eyebrow">Diagrams</div>
+          <h2>Explore the system visually</h2>
+          <p class="sub">Three detailed diagrams of the architecture, the detection logic and the sensor-node wiring.</p>
+        </div>
+        <div class="grid3">
+          <a class="card" href="Diagrams/ipds_block_diagram.html">
+            <div class="thumb">
+              <svg viewBox="0 0 200 110" aria-hidden="true"><g fill="none" stroke-width="1.4">
+                <rect x="8" y="6" width="54" height="16" rx="3" stroke="#929aa5" fill="#1e2329"/>
+                <rect x="73" y="6" width="54" height="16" rx="3" stroke="#929aa5" fill="#1e2329"/>
+                <rect x="138" y="6" width="54" height="16" rx="3" stroke="#929aa5" fill="#1e2329"/>
+                <rect x="30" y="34" width="60" height="16" rx="3" stroke="#929aa5" fill="#1e2329"/>
+                <rect x="110" y="34" width="60" height="16" rx="3" stroke="#929aa5" fill="#1e2329"/>
+                <rect x="50" y="62" width="100" height="16" rx="3" stroke="#FCD535" fill="#2b2a17"/>
+                <rect x="70" y="90" width="60" height="14" rx="3" stroke="#929aa5" fill="#1e2329"/>
+                <path d="M35 22v12M100 22l-40 12M165 22l-25 12M60 50v12M140 50v12M100 78v12" stroke="#2b3139"/>
+              </g></svg>
+            </div>
+            <h3>System block diagram</h3>
+            <p>Seven layers from sensors and firmware to computer vision, fusion and storage.</p>
+            <span class="text-link">Open diagram<svg><use href="#i-arrow"/></svg></span>
+          </a>
+          <a class="card" href="Diagrams/ipds_flowchart.html">
+            <div class="thumb">
+              <svg viewBox="0 0 200 110" aria-hidden="true"><g fill="none" stroke-width="1.4">
+                <rect x="80" y="4" width="40" height="12" rx="6" stroke="#929aa5" fill="#1e2329"/>
+                <rect x="72" y="24" width="56" height="13" rx="3" stroke="#929aa5" fill="#1e2329"/>
+                <path d="M100 45l14 9-14 9-14-9z" stroke="#FCD535" fill="#2b2a17"/>
+                <rect x="72" y="72" width="56" height="13" rx="3" stroke="#929aa5" fill="#1e2329"/>
+                <rect x="80" y="93" width="40" height="12" rx="6" stroke="#929aa5" fill="#1e2329"/>
+                <rect x="146" y="48" width="40" height="12" rx="3" stroke="#707a8a" fill="#1e2329"/>
+                <path d="M100 16v8M100 37v8M100 63v9M100 85v8M114 54h32M30 54h56M30 54V30h42" stroke="#2b3139"/>
+              </g></svg>
+            </div>
+            <h3>Detection flowchart</h3>
+            <p>Every decision a frame passes through, from capture to the CSV log.</p>
+            <span class="text-link">Open diagram<svg><use href="#i-arrow"/></svg></span>
+          </a>
+          <a class="card" href="Diagrams/ipds_schematic.html">
+            <div class="thumb">
+              <svg viewBox="0 0 200 110" aria-hidden="true"><g fill="none" stroke-width="1.4">
+                <rect x="70" y="24" width="56" height="70" rx="3" stroke="#FCD535" fill="#2b2a17"/>
+                <rect x="12" y="14" width="34" height="26" rx="2" stroke="#929aa5" fill="#1e2329"/>
+                <rect x="12" y="62" width="34" height="26" rx="2" stroke="#929aa5" fill="#1e2329"/>
+                <rect x="154" y="40" width="34" height="26" rx="2" stroke="#929aa5" fill="#1e2329"/>
+                <path d="M46 24h24M46 32h24M46 70h24M46 78h24M126 48h28M126 58h28" stroke="#2b3139"/>
+              </g><g fill="#707a8a"><circle cx="58" cy="24" r="2"/><circle cx="58" cy="70" r="2"/></g></svg>
+            </div>
+            <h3>Sensor-node schematic</h3>
+            <p>Pin-level wiring for the MPU6050, DS3231 and NEO-6M, with I&sup2;C pull-ups.</p>
+            <span class="text-link">Open diagram<svg><use href="#i-arrow"/></svg></span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- TRY -->
+    <section class="block" id="try">
+      <div class="wrap">
+        <div class="head">
+          <div class="eyebrow">Try it</div>
+          <h2>Running in 30 seconds, no hardware needed</h2>
+        </div>
+        <div class="grid3 try">
+          <div class="card">
+            <span class="need">No install</span>
+            <h3>Google Colab</h3>
+            <p>Run detection and tracking on a sample image or your own road video in the browser.</p>
+            <a class="btn btn-primary" href="https://colab.research.google.com/github/SanTiwari07/PotHoleDetection/blob/main/notebooks/quickstart.ipynb" target="_blank" rel="noopener"><svg><use href="#i-play"/></svg>Open notebook</a>
+          </div>
+          <div class="card">
+            <span class="need">No hardware</span>
+            <h3>Wokwi simulation</h3>
+            <p>The ESP32 sensor node with MPU6050, NEO-6M GPS and DS3231 running in your browser.</p>
+            <a class="btn btn-secondary" href="https://wokwi.com/projects/453817129999607809" target="_blank" rel="noopener">Open simulation<svg><use href="#i-ext"/></svg></a>
+          </div>
+          <div class="card">
+            <span class="need">Web UI</span>
+            <h3>Gradio demo</h3>
+            <p>Upload images or videos and see detections. Deployable as a Hugging Face Space.</p>
+            <a class="btn btn-secondary" href="https://github.com/SanTiwari07/PotHoleDetection/tree/main/demo" target="_blank" rel="noopener">View demo app<svg><use href="#i-ext"/></svg></a>
+          </div>
+        </div>
+        <pre class="code" id="quickstart"><button class="copy" type="button" data-copy="quickstart">Copy</button><span class="k">git</span> clone https://github.com/SanTiwari07/PotHoleDetection.git
+<span class="k">cd</span> PotHoleDetection
+<span class="k">pip</span> install -r requirements.txt
+
+<span class="c"># Vision-only on any road video (weights download on first run)</span>
+<span class="k">python</span> python/main.py --source path/to/road_video.mp4</pre>
+      </div>
+    </section>
+
+    <!-- DOCS -->
+    <section class="block" id="docs">
+      <div class="wrap">
+        <div class="head">
+          <div class="eyebrow">Documentation</div>
+          <h2>Go deeper</h2>
+        </div>
+        <div class="docs">
+          <a class="card" href="docs/IPDS_Pothole_Detection.pdf" target="_blank" rel="noopener">
+            <h3>Research paper<svg><use href="#i-ext"/></svg></h3>
+            <p>Full method, equations and field trials (PDF).</p>
+          </a>
+          <a class="card" href="https://github.com/SanTiwari07/PotHoleDetection/blob/main/docs/ARCHITECTURE.md" target="_blank" rel="noopener">
+            <h3>Architecture<svg><use href="#i-ext"/></svg></h3>
+            <p>Nodes, protocols and data flow.</p>
+          </a>
+          <a class="card" href="https://github.com/SanTiwari07/PotHoleDetection/blob/main/docs/HARDWARE.md" target="_blank" rel="noopener">
+            <h3>Hardware and wiring<svg><use href="#i-ext"/></svg></h3>
+            <p>Pinouts, flashing and MPU6050 calibration.</p>
+          </a>
+          <a class="card" href="https://github.com/SanTiwari07/PotHoleDetection/blob/main/docs/DETAIL.md" target="_blank" rel="noopener">
+            <h3>Technical spec<svg><use href="#i-ext"/></svg></h3>
+            <p>Every parameter, threshold and result.</p>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="block" id="faq">
+      <div class="wrap">
+        <div class="head">
+          <div class="eyebrow">FAQ</div>
+          <h2>Common questions</h2>
+        </div>
+        <div class="faq">
+          <details>
+            <summary>Do I need the ESP32 hardware to try it?<svg><use href="#i-chev"/></svg></summary>
+            <p>No. Offline mode runs the vision pipeline on any road video, the <a href="https://colab.research.google.com/github/SanTiwari07/PotHoleDetection/blob/main/notebooks/quickstart.ipynb" target="_blank" rel="noopener">Colab notebook</a> runs in the browser, and the <a href="https://wokwi.com/projects/453817129999607809" target="_blank" rel="noopener">Wokwi simulation</a> runs the sensor node. In offline mode severity is vision-only and the jerk and GPS columns stay empty.</p>
+          </details>
+          <details>
+            <summary>How is severity calculated?<svg><use href="#i-chev"/></svg></summary>
+            <p>Peak jerk from the MPU6050 burst is normalised against 20 m/s&sup3; and capped at 1. Severity is 0.7 &times; YOLO confidence + 0.3 &times; normalised jerk. Events below the jerk threshold (default 1.5 m/s&sup3;) are rejected, so a pothole must be both seen and felt.</p>
+          </details>
+          <details>
+            <summary>What data was the model trained on?<svg><use href="#i-chev"/></svg></summary>
+            <p>The <a href="https://www.kaggle.com/datasets/andrewmvd/pothole-detection" target="_blank" rel="noopener">Pothole Detection dataset by andrewmvd on Kaggle</a>: 665 images converted from Pascal VOC to YOLO format, split 598 / 67. The training scripts in the repo reproduce the model.</p>
+          </details>
+          <details>
+            <summary>Why use two ESP32 boards instead of one?<svg><use href="#i-chev"/></svg></summary>
+            <p>I&sup2;C sensor reads on the ESP32-CAM block frame capture and cut the frame rate. A second board handles all sensor I/O on demand, keeping the video stream smooth while the total cost stays under &#8377;2,500.</p>
+          </details>
+          <details>
+            <summary>Can I use IPDS in my own project?<svg><use href="#i-chev"/></svg></summary>
+            <p>Yes. The project code is MIT licensed. Third-party parts keep their own licenses: <code>sort.py</code> is GPL-3.0 and Ultralytics YOLOv8 is AGPL-3.0. If you use it in research, please cite the paper.</p>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <!-- STAR BAND -->
+    <section class="star-band" id="star">
+      <div class="wrap">
+        <svg class="big-star" aria-hidden="true"><use href="#i-star"/></svg>
+        <h2>Like IPDS? Give it a star.</h2>
+        <p>Stars help other students, researchers and city engineers find the project. It takes one click.</p>
+        <a class="btn btn-primary btn-pill btn-xl" href="https://github.com/SanTiwari07/PotHoleDetection" target="_blank" rel="noopener"><svg><use href="#i-github"/></svg>Star IPDS on GitHub<span class="star-count" data-stars></span></a>
+      </div>
+    </section>
+
+    <!-- TEAM + CITE -->
+    <section class="block" id="cite">
+      <div class="wrap cite">
+        <div class="card">
+          <h3>Built at PICT, Pune</h3>
+          <p class="meta">Dept. of Electronics and Telecommunication Engineering, Pune Institute of Computer Technology</p>
+          <ul class="people">
+            <li><span class="avatar">ST</span><div><b>Sanskar Tiwari</b><span>Core architecture and ML pipeline</span></div></li>
+            <li><span class="avatar">SB</span><div><b>Swarali Bansod</b><span>Sensor integration and firmware</span></div></li>
+            <li><span class="avatar">EK</span><div><b>Eshwari Kognole</b><span>Hardware design and testing</span></div></li>
+            <li><span class="avatar">SS</span><div><b>Shruti Shinde</b><span>Data collection and validation</span></div></li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Cite this work</h3>
+          <p class="meta">Paper on <a class="text-link" href="https://zenodo.org/records/20760578" target="_blank" rel="noopener">Zenodo</a>, or cite the software:</p>
+          <pre class="code" id="bibtex"><button class="copy" type="button" data-copy="bibtex">Copy</button><span class="k">@software</span>{tiwari2026ipds,
+  author  = {Tiwari, Sanskar and Bansod, Swarali and
+             Kognole, Eshwari and Shinde, Shruti},
+  title   = {Real-Time Pothole Detection Based on
+             Vision-Dominant Sensor Fusion and
+             Dual ESP32 Architecture},
+  year    = {2026},
+  version = {1.0.0},
+  url     = {https://github.com/SanTiwari07/PotHoleDetection}
+}</pre>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- LIGHT FOOTER -->
+  <footer>
+    <div class="wrap">
+      <div class="foot-grid">
+        <div>
+          <div class="foot-brand"><svg style="color:#f0b90b"><use href="#i-logo"/></svg>IPDS</div>
+          <p>Intelligent Pothole Detection System. Open-source research from PICT, Pune.</p>
+        </div>
+        <div>
+          <h4>Project</h4>
+          <ul>
+            <li><a href="https://github.com/SanTiwari07/PotHoleDetection" target="_blank" rel="noopener">GitHub</a></li>
+            <li><a href="https://github.com/SanTiwari07/PotHoleDetection/releases" target="_blank" rel="noopener">Releases</a></li>
+            <li><a href="https://github.com/SanTiwari07/PotHoleDetection/blob/main/LICENSE" target="_blank" rel="noopener">License</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Try it</h4>
+          <ul>
+            <li><a href="https://colab.research.google.com/github/SanTiwari07/PotHoleDetection/blob/main/notebooks/quickstart.ipynb" target="_blank" rel="noopener">Colab</a></li>
+            <li><a href="https://wokwi.com/projects/453817129999607809" target="_blank" rel="noopener">Wokwi</a></li>
+            <li><a href="#try">Quickstart</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Learn</h4>
+          <ul>
+            <li><a href="docs/IPDS_Pothole_Detection.pdf" target="_blank" rel="noopener">Paper</a></li>
+            <li><a href="#diagrams">Diagrams</a></li>
+            <li><a href="https://zenodo.org/records/20760578" target="_blank" rel="noopener">Zenodo</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Community</h4>
+          <ul>
+            <li><a href="https://github.com/SanTiwari07/PotHoleDetection/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">Contribute</a></li>
+            <li><a href="https://github.com/SanTiwari07/PotHoleDetection/issues" target="_blank" rel="noopener">Report an issue</a></li>
+            <li><a href="https://github.com/SanTiwari07/PotHoleDetection/blob/main/CITATION.cff" target="_blank" rel="noopener">Citation file</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="foot-bottom">
+        <span>&copy; 2026 the IPDS authors &middot; MIT License</span>
+        <a href="#top">Back to top</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Mobile menu
+    (function () {
+      var burger = document.querySelector('.burger');
+      var sheet = document.getElementById('sheet');
+      function set(open) {
+        sheet.classList.toggle('open', open);
+        document.body.classList.toggle('menu-open', open);
+        burger.setAttribute('aria-expanded', String(open));
+        burger.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+        burger.querySelector('.i-open').style.display = open ? 'none' : '';
+        burger.querySelector('.i-close').style.display = open ? '' : 'none';
+      }
+      burger.addEventListener('click', function () { set(!sheet.classList.contains('open')); });
+      sheet.querySelectorAll('a').forEach(function (a) {
+        a.addEventListener('click', function (e) {
+          var id = a.getAttribute('href');
+          set(false);
+          // The body is scroll-locked while the sheet is open, so jump after unlocking.
+          if (id.charAt(0) === '#') {
+            var target = document.querySelector(id);
+            if (target) {
+              e.preventDefault();
+              requestAnimationFrame(function () {
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                history.replaceState(null, '', id);
+              });
+            }
+          }
+        });
+      });
+      document.addEventListener('keydown', function (e) { if (e.key === 'Escape') set(false); });
+      window.matchMedia('(min-width: 768px)').addEventListener('change', function (m) { if (m.matches) set(false); });
+    })();
+
+    // Live star count from the GitHub API; the buttons work without it.
+    (function () {
+      var KEY = 'ipds-stars';
+      function show(n) {
+        if (typeof n !== 'number') return;
+        var label = n >= 1000 ? (n / 1000).toFixed(1).replace(/\.0$/, '') + 'k' : String(n);
+        document.querySelectorAll('[data-stars]').forEach(function (el) { el.textContent = label; });
+      }
+      try {
+        var cached = JSON.parse(sessionStorage.getItem(KEY) || 'null');
+        if (cached && Date.now() - cached.t < 10 * 60 * 1000) { show(cached.n); return; }
+      } catch (e) {}
+      fetch('https://api.github.com/repos/SanTiwari07/PotHoleDetection')
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (d) {
+          if (!d) return;
+          show(d.stargazers_count);
+          try { sessionStorage.setItem(KEY, JSON.stringify({ n: d.stargazers_count, t: Date.now() })); } catch (e) {}
+        })
+        .catch(function () {});
+    })();
+
+    // Copy buttons, with a fallback for pages opened from disk
+    (function () {
+      function fallback(text) {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.setAttribute('readonly', '');
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        var ok = false;
+        try { ok = document.execCommand('copy'); } catch (e) {}
+        document.body.removeChild(ta);
+        return ok ? Promise.resolve() : Promise.reject();
+      }
+      document.querySelectorAll('[data-copy]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var pre = document.getElementById(btn.getAttribute('data-copy')).cloneNode(true);
+          pre.querySelector('.copy').remove();
+          var text = pre.textContent;
+          var p = (navigator.clipboard && window.isSecureContext)
+            ? navigator.clipboard.writeText(text).catch(function () { return fallback(text); })
+            : fallback(text);
+          p.then(function () {
+            btn.textContent = 'Copied';
+            btn.classList.add('done');
+          }, function () {
+            btn.textContent = 'Press Ctrl+C';
+          }).then(function () {
+            setTimeout(function () { btn.textContent = 'Copy'; btn.classList.remove('done'); }, 1600);
+          });
+        });
+      });
+    })();
+  </script>
+</body>
+</html>
