@@ -6,6 +6,7 @@ ENV_PATH = os.path.join(BASE_DIR, '.env')
 def main():
     if not os.path.exists(ENV_PATH):
         print(f"Error: {ENV_PATH} not found.")
+        print("Create it from the template first:  cp .env.example .env  (then edit WIFI_SSID / WIFI_PASSWORD)")
         return
 
     ssid = ""

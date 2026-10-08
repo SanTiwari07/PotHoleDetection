@@ -19,11 +19,6 @@ from __future__ import print_function
 
 import os
 import numpy as np
-import matplotlib
-matplotlib.use('TkAgg')
-import matplotlib.pyplot as plt
-import matplotlib.patches as patches
-from skimage import io
 
 import glob
 import time
@@ -277,6 +272,13 @@ if __name__ == '__main__':
   total_frames = 0
   colours = np.random.rand(32, 3) #used only for display
   if(display):
+    # Plotting deps are only needed for this standalone MOT demo, so they are
+    # imported here to keep the tracker importable on headless machines.
+    import matplotlib
+    matplotlib.use('TkAgg')
+    import matplotlib.pyplot as plt
+    import matplotlib.patches as patches
+    from skimage import io
     if not os.path.exists('mot_benchmark'):
       print('\n\tERROR: mot_benchmark link not found!\n\n    Create a symbolic link to the MOT benchmark\n    (https://motchallenge.net/data/2D_MOT_2015/#download). E.g.:\n\n    $ ln -s /path/to/MOT2015_challenge/2DMOT2015 mot_benchmark\n\n')
       exit()
