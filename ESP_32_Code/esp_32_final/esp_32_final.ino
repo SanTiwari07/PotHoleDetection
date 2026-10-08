@@ -9,6 +9,7 @@
  *    MPU6050 AD0 -> 3V3 so it sits at 0x69 (the DS3231 already owns 0x68)
  *
  *  Libraries: RTClib, TinyGPSPlus
+ *  At boot the MPU6050 and DS3231 must answer on I2C, otherwise the node halts.
  *************************************************/
 
 #include <WiFi.h>
@@ -35,6 +36,19 @@
 #define POTHOLE_THRESHOLD 20000
 
 #define WIFI_RETRY_MS 5000
+#define I2C_CLOCK_HZ 100000 // standard-mode I2C (paper, Section 3.5)
+
+// ================= MPU6050 CALIBRATION OFFSETS =================
+// Run ESP_32_Code/mpu6050_calibration once with the node mounted in the vehicle, paste the
+// offsets it prints here and set MPU_OFFSETS_CALIBRATED to 1 (paper, Section 4.4).
+// While it is 0 the chip's factory offsets are left alone (writing zeros would erase them).
+#define MPU_OFFSETS_CALIBRATED 0
+#define MPU_ACCEL_OFFSET_X 0
+#define MPU_ACCEL_OFFSET_Y 0
+#define MPU_ACCEL_OFFSET_Z 0
+#define MPU_GYRO_OFFSET_X 0
+#define MPU_GYRO_OFFSET_Y 0
+#define MPU_GYRO_OFFSET_Z 0
 
 // ================= GLOBAL OBJECTS =================
 WebServer server(80);
@@ -72,6 +86,39 @@ bool initMPU() {
   Serial.print("MPU Error: ");
   Serial.println(error);
   return false;
+}
+
+// ----------- CALIBRATION OFFSETS -------------
+void writeMPUWord(uint8_t reg, int16_t value) {
+  Wire.beginTransmission(MPU_ADDR);
+  Wire.write(reg);
+  Wire.write((uint8_t)(value >> 8));
+  Wire.write((uint8_t)(value & 0xFF));
+  Wire.endTransmission();
+}
+
+void applyMPUOffsets() {
+#if MPU_OFFSETS_CALIBRATED
+  // MPU6050 offset registers: XA/YA/ZA_OFFS_H = 0x06/0x08/0x0A, X/Y/ZG_OFFS_USRH = 0x13/0x15/0x17
+  writeMPUWord(0x06, MPU_ACCEL_OFFSET_X);
+  writeMPUWord(0x08, MPU_ACCEL_OFFSET_Y);
+  writeMPUWord(0x0A, MPU_ACCEL_OFFSET_Z);
+  writeMPUWord(0x13, MPU_GYRO_OFFSET_X);
+  writeMPUWord(0x15, MPU_GYRO_OFFSET_Y);
+  writeMPUWord(0x17, MPU_GYRO_OFFSET_Z);
+  Serial.println("MPU calibration offsets applied.");
+#else
+  Serial.println("MPU not calibrated yet: run ESP_32_Code/mpu6050_calibration (see docs/HARDWARE.md).");
+#endif
+}
+
+// ----------- BOOT SELF-TEST ----------------
+// If a required I2C device is missing, stop here instead of serving wrong data (paper, Section 3.5)
+void haltWithDiagnostic(const char *msg) {
+  while (true) {
+    Serial.printf("HALTED: %s\n", msg);
+    delay(5000);
+  }
 }
 
 // ----------- READ ACCEL --------------------
@@ -186,13 +233,18 @@ void setup() {
   delay(1000);
 
   Wire.begin(SDA_PIN, SCL_PIN);
-  initMPU();
+  Wire.setClock(I2C_CLOCK_HZ);
+
+  if (!initMPU()) {
+    haltWithDiagnostic("MPU6050 not found at 0x69. Check wiring, and that AD0 is tied to 3V3.");
+  }
+  applyMPUOffsets();
 
   // Initialize RTC
   Serial.println("Initializing RTC...");
   rtc_found = rtc.begin();
   if (!rtc_found) {
-    Serial.println("RTC NOT found!");
+    haltWithDiagnostic("DS3231 RTC not found at 0x68. Check wiring and power.");
   } else {
     Serial.println("RTC found.");
     if (rtc.lostPower()) {

@@ -104,14 +104,14 @@ void setup() {
   // MPU6050 init
   mpu.initialize();
   if (!mpu.testConnection()) {
-    Serial.println("❌ MPU6050 not connected");
+    Serial.println("MPU6050 not connected");
   } else {
-    Serial.println("✅ MPU6050 connected");
+    Serial.println("MPU6050 connected");
   }
 
   // RTC init
   if (!rtc.begin()) {
-    Serial.println("❌ RTC not found");
+    Serial.println("RTC not found");
   }
 
   if (!rtc.isrunning()) {
@@ -131,18 +131,18 @@ void setup() {
   }
 
   if (WiFi.status() == WL_CONNECTED) {
-    Serial.println("\n✅ WiFi Connected!");
+    Serial.println("\nWiFi Connected!");
     Serial.print("ESP32 Sensor IP Address: ");
     Serial.println(WiFi.localIP()); 
   } else {
-    Serial.println("\n❌ Failed to connect to WiFi.");
+    Serial.println("\nFailed to connect to WiFi.");
   }
 
   // Start Server
   server.on("/query", handleQuery);
   server.begin();
-  Serial.println("✅ HTTP Server started on port 80.");
-  Serial.println("✅ ESP32 Pothole System Ready");
+  Serial.println("HTTP Server started on port 80.");
+  Serial.println("ESP32 Pothole System Ready");
 }
 
 // ================= LOOP ====================
@@ -169,7 +169,7 @@ void loop() {
   // ----- Pothole Detection (Console only, as server relies on query) -----
   if (abs(az_g) > POTHOLE_THRESHOLD && gps.location.isValid()) {
     potholeDetected = true;
-    Serial.println("🚧 POTHOLE DETECTED");
+    Serial.println("POTHOLE DETECTED");
     
     DateTime now = rtc.now();
     Serial.print("Time: ");

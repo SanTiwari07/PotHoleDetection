@@ -21,6 +21,10 @@ static const char* _STREAM_BOUNDARY =
 static const char* _STREAM_PART =
   "Content-Type: image/jpeg\r\nContent-Length: %u\r\n\r\n";
 
+/* ================= WATCHDOG CONFIGURATION ================= */
+// Restart if WiFi stays down this long (e.g. the WiFi stack hangs under thermal load)
+#define WIFI_WATCHDOG_MS 30000
+
 /* ================= GLOBAL OBJECTS ================= */
 httpd_handle_t stream_httpd = NULL;
 httpd_handle_t control_httpd = NULL;
@@ -108,8 +112,9 @@ void setup() {
   delay(1000);
 
   // ===== WATCHDOG =====
-  // Removed custom WDT initialization as the Arduino core 3.x already handles it
-  // and overriding it causes the IDLE1 Task to starve and panic.
+  // The core's task watchdog already guards the idle tasks; re-initialising it here starves
+  // IDLE1 and panics. Instead, loop() is subscribed to it below and restarts the board if
+  // WiFi stays down for WIFI_WATCHDOG_MS.
 
   // ===== CAMERA CONFIG =====
   camera_config_t config = {};  // zero-init: core 3.x adds fields (fb_location, grab_mode, ...)
@@ -134,7 +139,7 @@ void setup() {
   config.xclk_freq_hz = 20000000;
   config.pixel_format = PIXFORMAT_JPEG;
   config.frame_size = FRAMESIZE_QVGA;
-  config.jpeg_quality = 12;
+  config.jpeg_quality = 10;
   config.fb_count = 2;
   config.grab_mode = CAMERA_GRAB_LATEST;  // always send the newest frame (lowest latency)
   config.fb_location = psramFound() ? CAMERA_FB_IN_PSRAM : CAMERA_FB_IN_DRAM;
@@ -145,6 +150,10 @@ void setup() {
     delay(3000);
     ESP.restart();
   }
+
+  // Vertical flip enabled as in the paper (Section 3.4); set to 0 if your camera image is upside down
+  sensor_t *sensor = esp_camera_sensor_get();
+  sensor->set_vflip(sensor, 1);
 
   // ===== WIFI =====
   WiFi.mode(WIFI_STA);
@@ -158,9 +167,20 @@ void setup() {
   Serial.println(WiFi.localIP());
 
   startStreamServer();
+
+  // Hardware task watchdog on loop(): resets the board if loop() itself ever hangs
+  enableLoopWDT();
 }
 
 /* ================= LOOP ================= */
+unsigned long lastWifiOk = 0;
+
 void loop() {
+  if (WiFi.status() == WL_CONNECTED) {
+    lastWifiOk = millis();
+  } else if (millis() - lastWifiOk > WIFI_WATCHDOG_MS) {
+    Serial.println("WiFi down for too long, restarting...");
+    ESP.restart();
+  }
   delay(100);
 }
