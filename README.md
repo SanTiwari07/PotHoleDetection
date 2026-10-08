@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🛣️ IPDS: Intelligent Pothole Detection System
+# IPDS: Intelligent Pothole Detection System
 
 ### See it. Feel it. Map it.
 
@@ -8,7 +8,7 @@
 
 <br>
 
-<a href="https://santiwari07.github.io/PotHoleDetection/"><img src="https://img.shields.io/badge/🌐_Visit_the_Project_Website-santiwari07.github.io%2FPotHoleDetection-f59e0b?style=for-the-badge" alt="Visit the project website"></a>
+<a href="https://santiwari07.github.io/PotHoleDetection/"><img src="https://img.shields.io/badge/Visit_the_Project_Website-santiwari07.github.io%2FPotHoleDetection-f59e0b?style=for-the-badge" alt="Visit the project website"></a>
 
 <br><br>
 
@@ -20,12 +20,12 @@
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 [![GitHub stars](https://img.shields.io/github/stars/SanTiwari07/PotHoleDetection?style=social)](https://github.com/SanTiwari07/PotHoleDetection/stargazers)
 
-**[🌐 Website](https://santiwari07.github.io/PotHoleDetection/)** ·
-**[📄 Paper](https://zenodo.org/records/20760578)** ·
-**[🚀 Colab](https://colab.research.google.com/github/SanTiwari07/PotHoleDetection/blob/main/notebooks/quickstart.ipynb)** ·
-**[🔌 Wokwi Simulation](https://wokwi.com/projects/453817129999607809)** ·
-**[📚 Docs](docs/)** ·
-**[🤝 Contribute](CONTRIBUTING.md)**
+**[Website](https://santiwari07.github.io/PotHoleDetection/)** ·
+**[Paper](https://zenodo.org/records/20760578)** ·
+**[Colab](https://colab.research.google.com/github/SanTiwari07/PotHoleDetection/blob/main/notebooks/quickstart.ipynb)** ·
+**[Wokwi Simulation](https://wokwi.com/projects/453817129999607809)** ·
+**[Docs](docs/)** ·
+**[Contribute](CONTRIBUTING.md)**
 
 <br>
 
@@ -37,23 +37,23 @@
 
 ---
 
-## 📑 Table of contents
+## Table of contents
 
-- [Why IPDS?](#-why-ipds)
-- [Try it in 30 seconds](#-try-it-in-30-seconds)
-- [How it works](#️-how-it-works)
-- [Results](#-results)
-- [Build the hardware](#-build-the-hardware)
-- [Repository structure](#-repository-structure)
-- [Contributing](#-contributing)
-- [Roadmap](#️-roadmap)
-- [Citation](#-citation)
-- [Authors](#-authors)
-- [License](#-license)
+- [Why IPDS?](#why-ipds)
+- [Try it in 30 seconds](#try-it-in-30-seconds)
+- [How it works](#how-it-works)
+- [Results](#results)
+- [Build the hardware](#build-the-hardware)
+- [Repository structure](#repository-structure)
+- [Contributing](#contributing)
+- [Roadmap](#roadmap)
+- [Citation](#citation)
+- [Authors](#authors)
+- [License](#license)
 
 ---
 
-## ✨ Why IPDS?
+## Why IPDS?
 
 Most pothole projects stop at "draw a box on an image". IPDS goes all the way from camera to a **geo-tagged, severity-ranked maintenance log**.
 
@@ -61,19 +61,19 @@ Most pothole projects stop at "draw a box on an image". IPDS goes all the way fr
 <tr>
 <td width="33%" valign="top">
 
-### 👁️ Detect
+### Detect
 YOLOv8m fine-tuned for potholes, reaching **mAP@0.5 = 81.7%**.
 
 </td>
 <td width="33%" valign="top">
 
-### 🎯 Track
+### Track
 SORT (Kalman filter + Hungarian matching) gives every pothole a stable ID, so each one is **counted once**, not once per frame.
 
 </td>
 <td width="33%" valign="top">
 
-### 📳 Feel
+### Feel
 When a tracked pothole reaches the wheel line, the hub asks a second ESP32 for an **MPU6050 accelerometer burst** and computes peak jerk.
 
 </td>
@@ -81,19 +81,19 @@ When a tracked pothole reaches the wheel line, the hub asks a second ESP32 for a
 <tr>
 <td width="33%" valign="top">
 
-### 🔗 Fuse
+### Fuse
 A pothole is logged only if the camera sees it **and** the accelerometer feels it. Severity (0–1) = 70% detection confidence + 30% measured impact.
 
 </td>
 <td width="33%" valign="top">
 
-### 📍 Log
+### Log
 Every event goes to CSV with a DS3231 RTC timestamp and NEO-6M GPS fields, alongside an annotated MP4.
 
 </td>
 <td width="33%" valign="top">
 
-### 💸 Cheap
+### Cheap
 Two ESP32 boards and common breakout modules, **under ₹2,500 per unit** (as reported in the paper). Inference runs on a laptop.
 
 </td>
@@ -102,22 +102,22 @@ Two ESP32 boards and common breakout modules, **under ₹2,500 per unit** (as re
 
 ---
 
-## 🚀 Try it in 30 seconds
+## Try it in 30 seconds
 
 No hardware? No problem. Pick whichever suits you:
 
 | Option | What you get | Hardware needed |
 |---|---|:---:|
-| [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/SanTiwari07/PotHoleDetection/blob/main/notebooks/quickstart.ipynb) | Run detection + tracking on a sample image or your own video | ❌ None |
-| [![Wokwi](https://img.shields.io/badge/simulate-Wokwi-green.svg)](https://wokwi.com/projects/453817129999607809) | The ESP32 sensor node (MPU6050, NEO-6M GPS, DS3231) running in your browser | ❌ None |
-| [`demo/app.py`](demo/) | Gradio web UI for images and videos (deployable as a Hugging Face Space) | ❌ None |
-| Local install (below) | The full pipeline: offline on video, or live with ESP32 boards | ⚙️ Optional |
+| [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/SanTiwari07/PotHoleDetection/blob/main/notebooks/quickstart.ipynb) | Run detection + tracking on a sample image or your own video | None |
+| [![Wokwi](https://img.shields.io/badge/simulate-Wokwi-green.svg)](https://wokwi.com/projects/453817129999607809) | The ESP32 sensor node (MPU6050, NEO-6M GPS, DS3231) running in your browser | None |
+| [`demo/app.py`](demo/) | Gradio web UI for images and videos (deployable as a Hugging Face Space) | None |
+| Local install (below) | The full pipeline: offline on video, or live with ESP32 boards | Optional |
 
 <!-- After deploying demo/ as a Hugging Face Space, add:
 [![HF Space](https://img.shields.io/badge/demo-Hugging%20Face-yellow.svg)](https://huggingface.co/spaces/<user>/<space>)
 -->
 
-### 💻 Local quickstart
+### Local quickstart
 
 ```bash
 git clone https://github.com/SanTiwari07/PotHoleDetection.git
@@ -132,15 +132,15 @@ Outputs land in `outputs/videos/` (annotated MP4) and `outputs/logs/` (CSV). Pre
 
 ---
 
-## ⚙️ How it works
+## How it works
 
 ```mermaid
 flowchart LR
-    subgraph CAM["📷 ESP32-CAM · vision node"]
+    subgraph CAM["ESP32-CAM · vision node"]
         OV["OV2640 camera"]
     end
 
-    subgraph HUB["💻 Python processing hub"]
+    subgraph HUB["Python processing hub"]
         direction TB
         Y["YOLOv8m detector"] --> S["SORT tracker"]
         S --> F["Geometric filters"]
@@ -151,7 +151,7 @@ flowchart LR
         SEV --> OUT["CSV log + annotated MP4"]
     end
 
-    subgraph SENSE["📡 ESP32 · sensor node"]
+    subgraph SENSE["ESP32 · sensor node"]
         IMU["MPU6050 IMU"]
         GPS["NEO-6M GPS"]
         RTC["DS3231 RTC"]
@@ -173,7 +173,7 @@ flowchart LR
 | 5 | Sensor node | Returns accelerometer, RTC timestamp and GPS fields as JSON |
 | 6 | Hub | Computes peak jerk. No impact means the event is rejected; otherwise it computes severity, appends a CSV row and annotates the video |
 
-### 📐 Severity scoring
+### Severity scoring
 
 ```
 jerk_norm = min(peak_jerk / 20 m/s³, 1)
@@ -182,11 +182,11 @@ severity  = 0.7 × YOLO confidence + 0.3 × jerk_norm
 
 These are Eqs. 6–7 of the paper, implemented in [`python/pothole_detection/fusion.py`](python/pothole_detection/fusion.py). Events whose peak jerk is below `--jerk-threshold` (default 1.5 m/s³; calibrate it for your vehicle) are rejected by the fusion gate. In offline mode there is no sensor node, so the gate is skipped, severity is vision-only, and the jerk/GPS columns are left empty.
 
-📖 **Deep dives:** [Architecture](docs/ARCHITECTURE.md) · [Hardware & wiring](docs/HARDWARE.md) · [Full technical spec](docs/DETAIL.md) · [Paper (PDF)](docs/IPDS_Pothole_Detection.pdf) · [Project website](https://santiwari07.github.io/PotHoleDetection/)
+**Deep dives:** [Architecture](docs/ARCHITECTURE.md) · [Hardware & wiring](docs/HARDWARE.md) · [Full technical spec](docs/DETAIL.md) · [Paper (PDF)](docs/IPDS_Pothole_Detection.pdf) · [Project website](https://santiwari07.github.io/PotHoleDetection/)
 
 ---
 
-## 📊 Results
+## Results
 
 ### Model (validation split)
 
@@ -206,21 +206,21 @@ model.predict("road.jpg", conf=0.25)[0].show()
 
 | Measure | Result |
 |---|---|
-| ⚡ Inference speed | 10–15 FPS on a CPU-only laptop (320×240 input) |
-| ⏱️ Latency, frame capture → CSV row | ~170–200 ms |
-| 💰 Hardware cost | under ₹2,500 per unit |
+| Inference speed | 10–15 FPS on a CPU-only laptop (320×240 input) |
+| Latency, frame capture → CSV row | ~170–200 ms |
+| Hardware cost | under ₹2,500 per unit |
 
 The paper also reports false-positive trials (shadows, manhole covers, speed bumps and others); see [docs/DETAIL.md](docs/DETAIL.md#7-reported-system-results-paper).
 
-### 🗺️ Sample field log (20 March 2026, Pune)
+### Sample field log (20 March 2026, Pune)
 
 [`outputs/sample_logs/output.csv`](outputs/sample_logs/output.csv) has 50 logged potholes from a drive between 1:56 and 2:08 pm. This file records severity as text bands by peak jerk, while the current `main.py` writes the numeric 0–1 score instead:
 
 | Band | Peak jerk in the file | Rows | Share |
 |---|---|:---:|:---:|
-| 🟢 Low | 1.6 – 2.7 | 8 | 16% |
-| 🟡 Medium | 3.0 – 5.9 | 22 | 44% |
-| 🔴 High | 6.0 – 9.4 | 20 | 40% |
+| Low | 1.6 – 2.7 | 8 | 16% |
+| Medium | 3.0 – 5.9 | 22 | 44% |
+| High | 6.0 – 9.4 | 20 | 40% |
 
 <details>
 <summary><b>CSV column reference</b></summary>
@@ -254,7 +254,7 @@ The best checkpoint is copied to `assets/models/pothole_yolov8.pt` and validatio
 
 ---
 
-## 🔧 Build the hardware
+## Build the hardware
 
 | Component | Role |
 |---|---|
@@ -265,7 +265,7 @@ The best checkpoint is copied to `assets/models/pothole_yolov8.pt` and validatio
 | **DS3231 RTC** | Accurate timestamps without internet |
 | **Laptop or edge device** | Runs YOLOv8 inference (e.g. Jetson Nano) |
 
-### 🔌 Sensor-node wiring
+### Sensor-node wiring
 
 | Module pin | ESP32 pin |
 |---|---|
@@ -276,13 +276,13 @@ The best checkpoint is copied to `assets/models/pothole_yolov8.pt` and validatio
 | NEO-6M RX ← | GPIO17 (TX2) |
 | All VCC / GND | 3V3 / GND |
 
-### 🟩 Custom PCB
+### Custom PCB
 
 A 2-layer carrier board for the ESP32-DevKitC and the three modules is in [`KiCad/IPDS_SensorNode/`](KiCad/IPDS_SensorNode/). It passes KiCad's ERC/DRC with 0 violations, and ready-to-order Gerbers, a BOM and a schematic PDF are in its `fabrication/` folder. Interactive diagrams: [`Diagrams/`](Diagrams/).
 
 <p align="center"><img src="KiCad/IPDS_SensorNode/fabrication/pcb_render_top.png" alt="IPDS sensor node PCB" width="560"></p>
 
-### 🛠️ Setup
+### Setup
 
 1. **WiFi credentials.** Both boards and the laptop join the same network (a phone hotspot works):
    ```bash
@@ -321,7 +321,7 @@ A 2-layer carrier board for the ESP32-DevKitC and the three modules is in [`KiCa
 
 ---
 
-## 📁 Repository structure
+## Repository structure
 
 ```text
 PotHoleDetection/
@@ -353,15 +353,15 @@ PotHoleDetection/
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 IPDS is open source and built to be extended. Contributions of every size are welcome, from a typo fix to a whole new hardware port. Field data from roads in your city is especially valuable.
 
 **Good places to start**
 
-- 🐛 **Found a bug or have an idea?** [Open an issue](https://github.com/SanTiwari07/PotHoleDetection/issues/new/choose).
-- 🌱 **First contribution?** Look for [`good first issue`](https://github.com/SanTiwari07/PotHoleDetection/labels/good%20first%20issue) and [`help wanted`](https://github.com/SanTiwari07/PotHoleDetection/labels/help%20wanted).
-- 🗺️ **Want something bigger?** Pick an item from the [roadmap](#️-roadmap) below.
+- **Found a bug or have an idea?** [Open an issue](https://github.com/SanTiwari07/PotHoleDetection/issues/new/choose).
+- **First contribution?** Look for [`good first issue`](https://github.com/SanTiwari07/PotHoleDetection/labels/good%20first%20issue) and [`help wanted`](https://github.com/SanTiwari07/PotHoleDetection/labels/help%20wanted).
+- **Want something bigger?** Pick an item from the [roadmap](#roadmap) below.
 
 **Dev setup in four commands**
 
@@ -374,7 +374,7 @@ pytest tests
 
 Then fork, branch from `main`, keep each PR focused, and make sure `pytest tests` passes. **Never commit credentials** (`.env` and `credentials.h` are git-ignored). The full guide is in [**CONTRIBUTING.md**](CONTRIBUTING.md).
 
-### 💛 Contributors
+### Contributors
 
 <a href="https://github.com/SanTiwari07/PotHoleDetection/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=SanTiwari07/PotHoleDetection" alt="Contributors">
@@ -382,18 +382,18 @@ Then fork, branch from `main`, keep each PR focused, and make sure `pytest tests
 
 ---
 
-## 🗺️ Roadmap
+## Roadmap
 
-- [ ] 📱 Smartphone / dashcam mode (no ESP32 needed)
-- [ ] 🌍 Export detections to GeoJSON / OpenStreetMap
-- [ ] ⚡ Edge deployment on Coral TPU / Hailo-8 / Jetson
-- [ ] 🐳 Docker image for the processing hub
-- [ ] 🔥 Web dashboard with a live pothole heatmap
-- [ ] 🧩 Segmentation model for pothole area / depth estimation
+- [ ] Smartphone / dashcam mode (no ESP32 needed)
+- [ ] Export detections to GeoJSON / OpenStreetMap
+- [ ] Edge deployment on Coral TPU / Hailo-8 / Jetson
+- [ ] Docker image for the processing hub
+- [ ] Web dashboard with a live pothole heatmap
+- [ ] Segmentation model for pothole area / depth estimation
 
 ---
 
-## 📝 Citation
+## Citation
 
 If you use IPDS in your research, please cite the paper ([Zenodo record](https://zenodo.org/records/20760578)) or the software:
 
@@ -413,7 +413,7 @@ A machine-readable [`CITATION.cff`](CITATION.cff) is included; GitHub's **"Cite 
 
 ---
 
-## 👥 Authors
+## Authors
 
 Department of Electronics and Telecommunication Engineering, **Pune Institute of Computer Technology (PICT)**, Pune, India.
 
@@ -424,7 +424,7 @@ Department of Electronics and Telecommunication Engineering, **Pune Institute of
 | **Eshwari Kognole** | Hardware design & testing |
 | **Shruti Shinde** | Data collection & validation |
 
-## 📜 License
+## License
 
 Project code is released under the [MIT License](LICENSE).
 
@@ -434,15 +434,15 @@ Third-party components keep their own licenses: [`sort.py`](python/pothole_detec
 
 <div align="center">
 
-### ⭐ If IPDS is useful to you, please give it a star on GitHub. It helps others find the project!
+### If IPDS is useful to you, please give it a star on GitHub. It helps others find the project!
 
-<a href="https://santiwari07.github.io/PotHoleDetection/"><img src="https://img.shields.io/badge/🌐_Explore_the_Website-f59e0b?style=for-the-badge" alt="Explore the website"></a>
-<a href="https://github.com/SanTiwari07/PotHoleDetection/stargazers"><img src="https://img.shields.io/badge/⭐_Star_on_GitHub-181717?style=for-the-badge&logo=github" alt="Star on GitHub"></a>
+<a href="https://santiwari07.github.io/PotHoleDetection/"><img src="https://img.shields.io/badge/Explore_the_Website-f59e0b?style=for-the-badge" alt="Explore the website"></a>
+<a href="https://github.com/SanTiwari07/PotHoleDetection/stargazers"><img src="https://img.shields.io/badge/Star_on_GitHub-181717?style=for-the-badge&logo=github" alt="Star on GitHub"></a>
 
 <br><br>
 
 [![Star History Chart](https://api.star-history.com/svg?repos=SanTiwari07/PotHoleDetection&type=Date)](https://star-history.com/#SanTiwari07/PotHoleDetection&Date)
 
-<sub>Made with ❤️ at PICT, Pune</sub>
+<sub>Made at PICT, Pune</sub>
 
 </div>
