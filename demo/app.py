@@ -72,7 +72,7 @@ examples = sorted(glob.glob(os.path.join(DEMO_DIR, "examples", "*.jpg")))
 
 with gr.Blocks(title="IPDS Pothole Detector") as demo:
     gr.Markdown(
-        "# 🕳️ IPDS: Real-Time Pothole Detection\n"
+        "# IPDS: Real-Time Pothole Detection\n"
         "YOLOv8m fine-tuned for potholes (mAP@0.5 = 81.7%). "
         "This demo runs the vision model only; the full system adds an ESP32 sensor node for "
         "accelerometer-based severity and GPS tagging.\n\n"

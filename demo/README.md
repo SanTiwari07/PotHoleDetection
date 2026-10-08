@@ -1,6 +1,5 @@
 ---
 title: IPDS Pothole Detector
-emoji: 🕳️
 colorFrom: yellow
 colorTo: gray
 sdk: gradio
