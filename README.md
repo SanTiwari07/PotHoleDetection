@@ -18,7 +18,6 @@
 [![CI](https://github.com/SanTiwari07/PotHoleDetection/actions/workflows/ci.yml/badge.svg)](https://github.com/SanTiwari07/PotHoleDetection/actions/workflows/ci.yml)
 [![Paper](https://img.shields.io/badge/paper-Zenodo-1682D4.svg)](https://zenodo.org/records/20760578)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
-[![GitHub stars](https://img.shields.io/github/stars/SanTiwari07/PotHoleDetection?style=social)](https://github.com/SanTiwari07/PotHoleDetection/stargazers)
 
 **[Website](https://santiwari07.github.io/PotHoleDetection/)** ·
 **[Paper](https://zenodo.org/records/20760578)** ·
@@ -436,9 +435,5 @@ Third-party components keep their own licenses: [`sort.py`](python/pothole_detec
 
 <a href="https://santiwari07.github.io/PotHoleDetection/"><img src="https://img.shields.io/badge/Explore_the_Website-f59e0b?style=for-the-badge" alt="Explore the website"></a>
 <a href="https://github.com/SanTiwari07/PotHoleDetection/stargazers"><img src="https://img.shields.io/badge/Star_on_GitHub-181717?style=for-the-badge&logo=github" alt="Star on GitHub"></a>
-
-<br><br>
-
-[![Star History Chart](https://api.star-history.com/svg?repos=SanTiwari07/PotHoleDetection&type=Date)](https://star-history.com/#SanTiwari07/PotHoleDetection&Date)
 
 </div>

@@ -185,7 +185,7 @@ Each of these stages is implemented in the code: confidence threshold, SORT `min
 
 ## 8. Sample field log
 
-[`outputs/sample_logs/output.csv`](../outputs/sample_logs/output.csv) contains 50 rows dated 20 March 2026, 1:56–2:08 pm, in Pune. Its `severity` column uses text bands rather than the numeric score `main.py` writes:
+[`outputs/sample_logs/output.csv`](../outputs/sample_logs/output.csv) contains 50 rows dated 20 March 2026, 1:56–2:08 pm. Its `severity` column uses text bands rather than the numeric score `main.py` writes:
 
 | Band | Rows | Peak-jerk range in the file |
 |---|:---:|---|

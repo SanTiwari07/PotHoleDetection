@@ -502,7 +502,7 @@ def main():
             cv2.destroyAllWindows()
         except cv2.error:
             pass  # opencv-python-headless has no GUI
-    print(f"Processing complete. {len(logged_ids)} potholes logged"
+    print(f"Processing complete. {len(logged_ids)} pothole{'s' if len(logged_ids) != 1 else ''} logged"
           + (f", {rejected_count} rejected by the fusion gate." if live else "."))
     print(f"  > Annotated video: {output_video_path}")
     print(f"  > CSV log:         {log_path}")

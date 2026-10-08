@@ -880,10 +880,12 @@ severity  = <span class="k">0.7</span> &times; confidence + <span class="k">0.3<
     })();
 
     // Live star count from the GitHub API; the buttons work without it.
+    // A tiny count reads as "nobody uses this", so it only appears once it's meaningful.
     (function () {
       var KEY = 'ipds-stars';
+      var MIN_SHOWN = 50;
       function show(n) {
-        if (typeof n !== 'number') return;
+        if (typeof n !== 'number' || n < MIN_SHOWN) return;
         var label = n >= 1000 ? (n / 1000).toFixed(1).replace(/\.0$/, '') + 'k' : String(n);
         document.querySelectorAll('[data-stars]').forEach(function (el) { el.textContent = label; });
       }
