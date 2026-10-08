@@ -49,7 +49,7 @@ The MPU6050 defaults to 0x68 when AD0 is low, which is the same address as the D
 
 ## Vision node (ESP32-CAM)
 
-The firmware ([`esp_32_cam_final.ino`](../ESP_32_Code/esp_32_cam_final/esp_32_cam_final.ino)) uses the AI-Thinker pin map in `camera_pins.h`. The camera settings are QVGA (320×240), JPEG quality 12, two frame buffers (in PSRAM when available) and "grab latest frame" mode. No extra wiring is needed beyond 5 V power.
+The firmware ([`esp_32_cam_final.ino`](../ESP_32_Code/esp_32_cam_final/esp_32_cam_final.ino)) uses the AI-Thinker pin map in `camera_pins.h`. The camera settings follow the paper: QVGA (320×240), JPEG quality 10 and vertical flip on. It also uses two frame buffers (in PSRAM when available) and "grab latest frame" mode. Set `set_vflip(sensor, 0)` if your picture comes out upside down. A watchdog restarts the board if `loop()` hangs or WiFi stays down for 30 s. No extra wiring is needed beyond 5 V power.
 
 **Flashing:** the ESP32-CAM has no USB port. Use a USB-to-serial adapter:
 
@@ -67,6 +67,21 @@ The firmware ([`esp_32_cam_final.ino`](../ESP_32_Code/esp_32_cam_final/esp_32_ca
 5. Put both IPs in `.env` (`ESP32_CAM_IP`, `ESP32_SENSOR_IP`) and run `python python/main.py --live`.
 
 If the DS3231 has lost power (no or flat coin cell), the firmware sets it from the firmware build time at boot. If the RTC isn't found at all, the hub falls back to the computer's clock.
+
+## MPU6050 calibration
+
+Do this once per installation, after the sensor node is mounted in the vehicle (paper, Section 4.4):
+
+1. Park on level ground with the engine off. The MPU6050's Z axis should point up.
+2. Flash [`ESP_32_Code/mpu6050_calibration`](../ESP_32_Code/mpu6050_calibration/mpu6050_calibration.ino) to the sensor node and open the Serial Monitor at 115200 baud.
+3. The sketch discards 100 readings, then repeatedly averages 1,000 readings and adjusts the offset registers until every axis is within 8 LSB of its target (0 for X/Y, 16384 for Z).
+4. Copy the printed `#define` lines into [`esp_32_final.ino`](../ESP_32_Code/esp_32_final/esp_32_final.ino), replacing the placeholder offsets and setting `MPU_OFFSETS_CALIBRATED` to `1`, then flash `esp_32_final` again.
+
+The offsets live in volatile registers, so the sensor firmware writes them at every boot.
+
+## Boot self-test
+
+At power-up the sensor node checks that the MPU6050 (0x69) and the DS3231 (0x68) answer on I²C. If either is missing, it **halts** and prints `HALTED: ...` on the Serial Monitor every 5 s instead of serving bad data. The GPS isn't part of the check, because a fix can take a while.
 
 ## PCB
 
@@ -88,4 +103,3 @@ From the paper's Section 7.3:
 - **Low light:** the OV2640 performs poorly at night, so detection confidence drops.
 - **Vehicle dependence:** peak jerk depends on the vehicle's suspension, so severity values are only directly comparable within one vehicle.
 - **WiFi range:** all nodes must share one 2.4 GHz network.
-- **MPU6050 calibration:** the paper describes an offset-calibration routine for the MPU6050. That calibration sketch is **not included in this repository yet**; the current firmware reads uncalibrated values.

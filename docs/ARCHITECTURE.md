@@ -32,7 +32,8 @@ On the ESP32-CAM, `esp_camera_fb_get()` blocks while a frame is captured and JPE
 | Acquisition | ESP32 DevKit + MPU6050 + DS3231 + NEO-6M | [`ESP_32_Code/esp_32_final/`](../ESP_32_Code/esp_32_final/) | REST endpoint `/query` returning one JSON sensor snapshot; status page `/` |
 | Processing | Detector | [`python/pothole_detection/detector.py`](../python/pothole_detection/detector.py) | YOLOv8m inference via Ultralytics |
 | Processing | Tracker | [`tracker.py`](../python/pothole_detection/tracker.py), [`sort.py`](../python/pothole_detection/sort.py) | SORT (Kalman filter + Hungarian matching) for persistent IDs |
-| Processing | Fusion | [`fusion.py`](../python/pothole_detection/fusion.py) | Peak jerk and severity score |
+| Processing | Filters | [`filters.py`](../python/pothole_detection/filters.py) | Area, aspect-ratio and persistence filters |
+| Processing | Fusion | [`fusion.py`](../python/pothole_detection/fusion.py) | Peak jerk, fusion gate and severity score |
 | Processing | Orchestrator | [`python/main.py`](../python/main.py) | Stream reading, filters, trigger line, sensor query, logging |
 | Output | CSV log + MP4 | `outputs/logs/`, `outputs/videos/` | One row per logged pothole; annotated video |
 
@@ -41,10 +42,10 @@ On the ESP32-CAM, `esp_camera_fb_get()` blocks while a frame is captured and JPE
 1. The ESP32-CAM streams 320×240 JPEG frames. A background thread on the hub decodes them, and the main loop only processes frames it hasn't seen yet.
 2. YOLOv8m detects potholes with confidence ≥ 0.25.
 3. SORT assigns each pothole a persistent track ID (`max_age=30`, `min_hits=3`, IoU threshold 0.3).
-4. Geometric filters skip tracks whose box covers more than 25% of the frame, whose width/height ratio is above 3.0, or which have been tracked for more than 10 frames.
-5. When a track's centre crosses the reference line at 75% of the frame height (and it hasn't been logged yet), the hub sends 5 `GET /query?pothole_id=N` requests to the sensor node.
+4. Geometric filters hold back tracks whose box covers more than 25% of the frame, whose width/height ratio is above 3.0, or whose centre has stayed still for more than 10 consecutive frames.
+5. When a track's centre crosses the reference line at 75% of the frame height (once per track), the hub sends 5 `GET /query?pothole_id=N` requests to the sensor node.
 6. The sensor node answers each request with acceleration (m/s²), RTC timestamp, GPS position and health flags.
-7. The hub computes peak jerk from the 5 samples, then a severity score, appends a CSV row and marks the track as logged so it is never logged twice.
+7. The hub computes peak jerk from the 5 samples. **Fusion gate:** if the jerk is below the impact threshold, the camera saw something the vehicle didn't feel (a shadow, a manhole cover), and the event is rejected. Otherwise it computes the severity score and appends one CSV row.
 
 See [DETAIL.md](DETAIL.md) for the formulas, JSON schema and CSV schema.
 
@@ -59,7 +60,7 @@ See [DETAIL.md](DETAIL.md) for the formulas, JSON schema and CSV schema.
 
 ## Offline mode
 
-Without hardware, `python python/main.py --source video.mp4` runs the same detection, tracking, filtering and trigger logic on a recorded video. No sensor node is queried, so the jerk, latitude and longitude columns are left empty and severity uses the vision term only.
+Without hardware, `python python/main.py --source video.mp4` runs the same detection, tracking, filtering and trigger logic on a recorded video. No sensor node is queried, so the fusion gate is skipped, the jerk, latitude and longitude columns are left empty, and severity uses the vision term only.
 
 ## Extending the system
 

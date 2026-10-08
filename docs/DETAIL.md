@@ -42,25 +42,33 @@ python training/train.py                                              # YOLOv8m,
 | `python python/main.py --live` | ESP32-CAM stream `http://<ESP32_CAM_IP>:81/stream` | Queries `http://<ESP32_SENSOR_IP>/query` |
 | `python python/main.py --source video.mp4` | Video file (or webcam index, e.g. `0`) | None: jerk/GPS columns left empty |
 
-Device IPs come from `.env` or `--cam-ip` / `--sensor-ip`. Other options: `--model`, `--conf`, `--output-dir`, `--no-display`. Ctrl+C (or a service stop) finalises the MP4 and CSV before exiting.
+Device IPs come from `.env` or `--cam-ip` / `--sensor-ip`. Other options: `--model`, `--conf`, `--jerk-threshold`, `--output-dir`, `--no-display`. Ctrl+C (or a service stop) finalises the MP4 and CSV before exiting.
 
 ### Pipeline per frame
 
 1. **Frame input.** In live mode, a background thread reads the MJPEG stream and keeps only the newest decoded frame. The main loop processes each new frame once; it never re-processes a frame it has already seen.
 2. **Detection.** `PotholeDetector` runs YOLOv8 and keeps boxes with confidence ≥ `CONF_THRESHOLD = 0.25`.
 3. **Tracking.** `PotholeTracker` wraps SORT ([Bewley et al., 2016](https://arxiv.org/abs/1602.00763)) with `max_age=30`, `min_hits=3`, `iou_threshold=0.3`.
-4. **Geometric filters.** A track is skipped for logging if any of these hold:
-   - box area / frame area > 0.25 (too large, e.g. a vehicle or tunnel)
-   - box width / height > 3.0 (too wide, e.g. road markings or cracks)
-   - the track has already appeared in more than 10 frames (long-lived tracks are treated as static scene elements)
-5. **Trigger.** When a track's centre y ≥ 0.75 × frame height and its ID hasn't been logged, the best-matching detection's confidence is checked again (≥ 0.25). The sensor node is then queried.
+4. **Geometric filters** (`pothole_detection/filters.py`, paper Section 5.4). A track can't trigger a sensor query while any of these hold:
+   - **Area:** box area / frame area > 0.25 (e.g. a vehicle or tunnel entrance)
+   - **Aspect ratio:** box width / height > 3.0 (e.g. road markings or tar cracks)
+   - **Persistence:** the track's centre has stayed still for more than 10 consecutive frames (e.g. a shadow moving with the vehicle). "Still" means it moved less than 1% of the frame height since the previous frame; the paper doesn't give this tolerance.
+5. **Trigger.** When a track's centre y ≥ 0.75 × frame height and the track hasn't been handled yet, the best-matching detection's confidence is checked again (≥ 0.25). The sensor node is then queried, once per track.
 6. **Sensor burst.** `get_sensor_burst()` sends 5 requests (0.5 s timeout each) and collects acceleration magnitudes √(ax² + ay² + az²).
-7. **Fusion.** Peak jerk and severity are computed (section 4) and one CSV row is written. The track ID is added to `logged_ids`, so each pothole is logged at most once.
-8. **Output.** Boxes, track IDs, confidence and severity are drawn on the frame and written to the MP4.
+7. **Fusion gate.** If the peak jerk is below `--jerk-threshold`, the event is rejected: nothing is logged and the box is labelled `Sev:REJ` in the video (see below).
+8. **Logging.** Otherwise severity is computed (section 5) and one CSV row is written. Each pothole is logged at most once.
+9. **Output.** Boxes, track IDs, confidence and severity are drawn on the frame and written to the MP4.
 
-### Accelerometer role in the current code
+### Fusion gate (paper, Section 6.1)
 
-The paper (Section 6.1) describes the accelerometer as a confirmation gate, where an event is logged only if both camera and accelerometer agree. **In this code base the jerk value only feeds the severity score; it does not block logging.** Every pothole that passes the visual stages is logged, and there is no jerk threshold.
+Vision proposes a pothole; the accelerometer must confirm an impact. Both have to agree before a row is logged:
+
+- **Visual false positives** (shadows, manhole covers) are detected by YOLO but produce no jerk spike, so the gate rejects them.
+- **Inertial false positives** (speed bumps, railway crossings) produce a spike but no YOLO detection, so the sensor node is never queried.
+
+The paper doesn't give a numeric threshold. The default `JERK_GATE = 1.5 m/s³` (in `fusion.py`) sits just below the smallest peak jerk in the sample field log (1.6). Because the jerk depends on the vehicle and the mounting, calibrate it: drive a smooth road, watch the peak-jerk values the hub prints for rejected and logged events, and pass a value above the smooth-road level with `--jerk-threshold`.
+
+If the sensor node doesn't answer, no impact can be confirmed and the event is rejected; the hub prints a warning. In offline mode (no sensor node) the gate is skipped and every visually confirmed pothole is logged with a vision-only severity.
 
 ---
 
@@ -68,7 +76,9 @@ The paper (Section 6.1) describes the accelerometer as a confirmation gate, wher
 
 | Setting | Value |
 |---|---|
-| I²C | SDA GPIO21, SCL GPIO22 |
+| I²C | SDA GPIO21, SCL GPIO22, 100 kHz standard mode |
+| Boot self-test | MPU6050 (WHO_AM_I at 0x69) and DS3231 (0x68) must answer, otherwise the node halts and prints a diagnostic every 5 s |
+| Calibration | offsets from `ESP_32_Code/mpu6050_calibration` are written to the MPU6050 offset registers at boot once `MPU_OFFSETS_CALIBRATED` is set to 1 |
 | MPU6050 | address 0x69 (AD0 high), woken via register 0x6B, 6-byte burst read from 0x3B, ±2 g → `a = raw / 16384 × 9.81` m/s² |
 | DS3231 | RTClib; if it lost power, it is set from the firmware build time at boot |
 | GPS | TinyGPSPlus on UART2 (RX GPIO16, TX GPIO17), 9600 baud, parsed continuously in `loop()`. A fix older than 5 s counts as invalid. |
@@ -102,9 +112,10 @@ The paper (Section 6.1) describes the accelerometer as a confirmation gate, wher
 | Setting | Value |
 |---|---|
 | Board | AI-Thinker ESP32-CAM (pins in `camera_pins.h`) |
-| Frames | JPEG, QVGA 320×240, quality 12, 2 frame buffers, `CAMERA_GRAB_LATEST`, XCLK 20 MHz |
+| Frames | JPEG, QVGA 320×240, quality 10, vertical flip on, 2 frame buffers, `CAMERA_GRAB_LATEST`, XCLK 20 MHz |
 | Endpoints | `:81/stream` (MJPEG), `:80/health` (JSON uptime) |
 | WiFi | station mode, modem sleep disabled for lower latency |
+| Watchdog | `loop()` is on the hardware task watchdog; the board also restarts if WiFi stays down for 30 s |
 | On camera init failure | prints the error code and restarts after 3 s |
 
 ---
@@ -114,14 +125,13 @@ The paper (Section 6.1) describes the accelerometer as a confirmation gate, wher
 ```text
 a_i        = sqrt(ax² + ay² + az²)                      for each of the 5 samples
 peak_jerk  = max |a_i − a_(i−1)| / 0.05 s               (0 if fewer than 2 samples)
-jerk_norm  = clamp(peak_jerk / 20, 0, 1)                J_MIN = 0, J_MAX = 20 m/s³
-severity   = 0.7 × confidence + 0.3 × jerk_norm²        (0 if confidence < 0.25)
+jerk_norm  = min(peak_jerk / J_max, 1)                  J_max = 20 m/s³          (paper Eq. 7)
+severity   = 0.7 × confidence + 0.3 × jerk_norm         (0 if confidence < 0.25) (paper Eq. 6)
 ```
 
 Notes:
 
 - The 0.05 s is an assumed spacing between HTTP reads, not a measured one.
-- The paper (Eq. 7) defines `J_norm = min(J_peak / J_max, 1)` and uses it linearly. **The code squares it**, so a moderate impact contributes less to the score than in the paper's formula.
 - The weights 0.7 / 0.3 are heuristic *(paper, Section 6.3)*.
 - In offline mode the jerk term is 0, so severity = 0.7 × confidence.
 
@@ -169,7 +179,7 @@ The input frames with a green trigger line, per-track boxes labelled `ID / Conf 
 | Railroad crossing | No YOLO detection | rejected 10/10 |
 | Confirmed pothole | All stages | logged 10/10 |
 
-The manhole-cover result relies on the accelerometer gate described in the paper. As noted in section 2, the current code does not gate on jerk.
+Each of these stages is implemented in the code: confidence threshold, SORT `min_hits`, the three geometric filters, and the fusion gate.
 
 ---
 
@@ -198,7 +208,7 @@ The current `main.py` writes a numeric severity score instead, so this file come
 - **Throughput:** CPU-only inference limits frame rate; a GPU host would raise it.
 - **Water-filled potholes** can lower detection confidence.
 - **Jerk estimate:** it comes from 5 HTTP reads with an assumed 50 ms spacing, so it is a coarse estimate of the impact, not a high-rate accelerometer trace.
-- **No calibration:** the MPU6050 offset calibration described in the paper is not in this repository; readings are uncalibrated.
+- **Calibration needed:** the MPU6050 must be calibrated once per installation with `ESP_32_Code/mpu6050_calibration`, and the fusion gate threshold should be tuned per vehicle.
 
 ## 10. Future work *(paper, Section 8)*
 
@@ -216,7 +226,7 @@ The current `main.py` writes a numeric severity score instead, so this file come
 
 | What | How |
 |---|---|
-| Unit tests (fusion maths, SORT tracking, dataset conversion) | `pytest tests` (also run in CI on Python 3.10 and 3.12) |
+| Unit tests (fusion maths and gate, geometric filters, SORT tracking, dataset conversion) | `pytest tests` (also run in CI on Python 3.10 and 3.12) |
 | Offline pipeline | `python python/main.py --source <video> --no-display` |
 | Firmware | compiles with ESP32 Arduino core 3.3.1 (`arduino-cli compile`) |
 | Sensor node, no hardware | Wokwi simulation in [`PotHoleSimu/`](../PotHoleSimu/) |
