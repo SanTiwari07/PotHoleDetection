@@ -2,716 +2,429 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>IPDS Sensor Node — Schematic</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IPDS Sensor Node Schematic</title>
+  <meta name="theme-color" content="#0b0e11" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230b0e11'/%3E%3Cellipse cx='16' cy='17' rx='10' ry='5.5' fill='none' stroke='%23FCD535' stroke-width='2.6'/%3E%3Cellipse cx='16' cy='17' rx='4' ry='2.2' fill='%23FCD535'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --canvas: #0b0e11;
+      --card: #1e2329;
+      --elevated: #2b3139;
+      --hairline: #2b3139;
+      --primary: #FCD535;
+      --primary-active: #f0b90b;
+      --ink: #181a20;
+      --body: #eaecef;
+      --muted: #707a8a;
+      --muted-strong: #929aa5;
+      --on-dark: #ffffff;
+      --soft-light: #fafafa;
+      /* wire colours */
+      --w-pwr: #f6465d;
+      --w-gnd: #707a8a;
+      --w-sda: #FCD535;
+      --w-scl: #3b82f6;
+      --w-rx: #eaecef;
+      --w-tx: #2dbdb6;
+      --nova: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --plex: 'IBM Plex Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--canvas); color: var(--body); font-family: var(--nova); font-size: 14px; line-height: 1.5; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+    a { color: inherit; text-decoration: none; }
+    :focus-visible { outline: none; box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5); border-radius: 6px; }
+    .wrap { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
 
-        body {
-            background: #07090f;
-            font-family: 'Inter', sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 36px 20px 60px;
-            background-image:
-                radial-gradient(ellipse 60% 40% at 20% 8%, rgba(59, 130, 246, 0.05) 0%, transparent 60%),
-                radial-gradient(ellipse 50% 40% at 80% 92%, rgba(16, 185, 129, 0.04) 0%, transparent 60%);
-        }
+    /* ---------- top nav (shared with the site) ---------- */
+    .nav { position: sticky; top: 0; z-index: 50; background: var(--canvas); border-bottom: 1px solid var(--hairline); }
+    .nav .wrap { display: flex; align-items: center; gap: 28px; height: 64px; }
+    .brand { display: flex; align-items: center; gap: 10px; color: var(--primary); font-weight: 700; font-size: 20px; letter-spacing: 0.5px; flex-shrink: 0; }
+    .brand svg { width: 28px; height: 28px; }
+    .tabs { display: flex; gap: 4px; }
+    .tabs a { padding: 8px 12px; border-radius: 6px; font-weight: 500; color: var(--muted-strong); white-space: nowrap; }
+    .tabs a:hover { color: var(--on-dark); background: var(--card); }
+    .tabs a[aria-current="page"] { color: var(--on-dark); background: var(--card); }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 40px; padding: 0 20px; border-radius: 6px; font-weight: 600; font-size: 14px; white-space: nowrap; }
+    .btn svg { width: 16px; height: 16px; }
+    .btn-primary { background: var(--primary); color: var(--ink); margin-left: auto; }
+    .btn-primary:hover, .btn-primary:active { background: var(--primary-active); }
+    .btn-secondary { background: var(--elevated); color: var(--on-dark); }
+    .btn-secondary:hover, .btn-secondary:active { background: #3a414b; }
 
-        /* HEADER */
-        .header {
-            text-align: center;
-            margin-bottom: 28px;
-        }
+    /* ---------- page head ---------- */
+    .page-head { padding: 56px 0 24px; }
+    .eyebrow { font-size: 14px; font-weight: 600; color: var(--primary); }
+    h1 { margin-top: 8px; font-size: 40px; line-height: 1.15; font-weight: 700; letter-spacing: -0.3px; color: var(--on-dark); }
+    .sub { margin-top: 10px; font-size: 16px; color: var(--muted-strong); max-width: 760px; }
 
-        .badge {
-            display: inline-block;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 10px;
-            letter-spacing: 2.5px;
-            text-transform: uppercase;
-            color: #10b981;
-            border: 1px solid rgba(16, 185, 129, .28);
-            background: rgba(16, 185, 129, .05);
-            padding: 4px 14px;
-            border-radius: 20px;
-            margin-bottom: 12px;
-        }
+    .legend { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+    .legend span { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted-strong); background: var(--card); padding: 6px 12px; border-radius: 8px; }
+    .legend i { display: block; width: 20px; height: 3px; border-radius: 2px; }
 
-        h1 {
-            font-size: clamp(17px, 3vw, 26px);
-            font-weight: 800;
-            letter-spacing: -.4px;
-            background: linear-gradient(135deg, #e2e8f0 30%, #7a8faf);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
+    /* ---------- schematic ---------- */
+    .board { background: var(--card); border-radius: 12px; overflow: hidden; }
+    .board-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; padding: 14px 20px; border-bottom: 1px solid var(--hairline); }
+    .board-head h2 { font-size: 16px; font-weight: 600; color: var(--on-dark); }
+    .board-head .hint { display: none; font-size: 12px; color: var(--muted); }
+    .board-head .btn { margin-left: auto; height: 32px; padding: 0 12px; font-size: 13px; }
+    .scroller { overflow-x: auto; -webkit-overflow-scrolling: touch; background: var(--canvas); }
+    .scroller svg { display: block; width: 100%; min-width: 720px; height: auto; }
 
-        p.sub {
-            color: #5a6680;
-            font-size: 12.5px;
-            margin-top: 5px;
-        }
+    /* ---------- tables ---------- */
+    .tables { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 16px; padding-bottom: 80px; }
+    .tbl { background: var(--card); border-radius: 12px; padding: 20px 24px; min-width: 0; }
+    .tbl h2 { font-size: 18px; font-weight: 600; color: var(--on-dark); }
+    table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+    th { text-align: left; font-size: 12px; font-weight: 500; color: var(--muted); padding: 0 8px 8px 0; }
+    td { padding: 10px 8px 10px 0; border-top: 1px solid var(--hairline); font-size: 13.5px; color: var(--muted-strong); vertical-align: middle; }
+    td:first-child { font-family: var(--mono); color: var(--on-dark); font-weight: 500; white-space: nowrap; }
+    td:nth-child(2) { font-family: var(--plex); font-variant-numeric: tabular-nums; color: var(--body); font-weight: 500; }
+    .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 8px; vertical-align: 1px; }
 
-        /* LEGEND */
-        .legend {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 10px;
-            margin-bottom: 24px;
-        }
+    /* ---------- light footer ---------- */
+    footer { background: var(--soft-light); color: var(--ink); padding: 32px 0; }
+    footer .wrap { display: flex; flex-wrap: wrap; gap: 12px 24px; justify-content: space-between; align-items: center; font-size: 13px; color: var(--muted); }
+    footer nav { display: flex; flex-wrap: wrap; gap: 20px; }
+    footer a:hover { color: var(--ink); }
 
-        .leg {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 11px;
-            color: #8a9ab8;
-        }
-
-        .leg-line {
-            width: 22px;
-            height: 3px;
-            border-radius: 2px;
-        }
-
-        /* SCHEMATIC SVG */
-        svg {
-            display: block;
-            max-width: 100%;
-        }
-
-        /* WIRING TABLE */
-        .table-wrap {
-            max-width: 820px;
-            width: 100%;
-            margin-top: 24px;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 14px;
-        }
-
-        .tbl {
-            background: rgba(255, 255, 255, .03);
-            border: 1px solid rgba(255, 255, 255, .07);
-            border-radius: 10px;
-            overflow: hidden;
-        }
-
-        .tbl-title {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 9.5px;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            padding: 9px 14px;
-            color: #5a6680;
-            border-bottom: 1px solid rgba(255, 255, 255, .06);
-            background: rgba(255, 255, 255, .02);
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 9px;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            color: #4a5a78;
-            padding: 6px 12px;
-            text-align: left;
-            border-bottom: 1px solid rgba(255, 255, 255, .05);
-        }
-
-        td {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 10.5px;
-            color: #94a3b8;
-            padding: 5px 12px;
-            border-bottom: 1px solid rgba(255, 255, 255, .04);
-        }
-
-        td:first-child {
-            color: #dde4f0;
-        }
-
-        .dot {
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            margin-right: 5px;
-            vertical-align: middle;
-        }
-
-        @media(max-width:640px) {
-            .table-wrap {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
+    /* ---------- responsive ---------- */
+    @media (max-width: 900px) {
+      .tables { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 767px) {
+      .wrap { padding: 0 16px; }
+      .nav .wrap { height: auto; flex-wrap: wrap; gap: 0 12px; padding-top: 12px; }
+      .brand { height: 40px; }
+      .tabs { order: 3; width: calc(100% + 32px); margin: 8px -16px 0; padding: 0 16px 10px; overflow-x: auto; scrollbar-width: none; }
+      .tabs::-webkit-scrollbar { display: none; }
+      .nav .btn-primary { height: 36px; padding: 0 14px; }
+      .page-head { padding: 32px 0 16px; }
+      h1 { font-size: 28px; }
+      .sub { font-size: 15px; }
+      .board-head { padding: 12px 16px; }
+      .board-head .hint { display: block; width: 100%; order: 3; }
+      .tbl { padding: 16px; }
+      td { font-size: 13px; }
+      .tables { padding-bottom: 56px; }
+    }
+  </style>
 </head>
 
 <body>
-  <a href="../index.html" style="position:fixed;top:16px;left:16px;z-index:100;display:inline-flex;align-items:center;gap:8px;height:36px;padding:0 14px;border-radius:6px;background:#1e2329;color:#eaecef;font:600 13px Inter,system-ui,sans-serif;text-decoration:none"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>IPDS home</a>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="i-logo" viewBox="0 0 32 32"><rect width="32" height="32" rx="6" fill="currentColor" opacity=".12"/><ellipse cx="16" cy="17" rx="10" ry="5.5" fill="none" stroke="currentColor" stroke-width="2.6"/><ellipse cx="16" cy="17" rx="4" ry="2.2" fill="currentColor"/></symbol>
+      <symbol id="i-back" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M19 12H5M11 6l-6 6 6 6"/></symbol>
+      <symbol id="i-doc" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5zM14 3v5h5M9 13h6M9 17h6"/></symbol>
+    </defs>
+  </svg>
 
-    <!-- HEADER -->
-    <div class="header">
-        <div class="badge">Circuit Schematic</div>
-        <h1>IPDS Sensor Node — Wiring Diagram</h1>
-        <p class="sub">ESP32 DevKit V1 · MPU6050 · DS3231 RTC · NEO-6M GPS</p>
+  <header class="nav">
+    <div class="wrap">
+      <a class="brand" href="../index.html"><svg><use href="#i-logo"/></svg>IPDS</a>
+      <nav class="tabs" aria-label="Diagrams">
+        <a href="ipds_block_diagram.html">Block diagram</a>
+        <a href="ipds_flowchart.html">Flowchart</a>
+        <a href="ipds_schematic.html" aria-current="page">Schematic</a>
+      </nav>
+      <a class="btn btn-primary" href="../index.html#diagrams"><svg><use href="#i-back"/></svg>Back to site</a>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="page-head">
+      <div class="eyebrow">Circuit schematic</div>
+      <h1>Sensor node wiring</h1>
+      <p class="sub">ESP32 DevKit V1 with the MPU6050, DS3231 RTC and NEO-6M GPS. The I&sup2;C devices share one bus with 4.7 k&Omega; pull-ups.</p>
+      <div class="legend">
+        <span><i style="background:var(--w-pwr)"></i>3.3 V power</span>
+        <span><i style="background:var(--w-gnd)"></i>GND</span>
+        <span><i style="background:var(--w-sda)"></i>SDA &middot; GPIO 21</span>
+        <span><i style="background:var(--w-scl)"></i>SCL &middot; GPIO 22</span>
+        <span><i style="background:var(--w-rx)"></i>GPS TX &rarr; RX2 &middot; GPIO 16</span>
+        <span><i style="background:var(--w-tx)"></i>TX2 &rarr; GPS RX &middot; GPIO 17</span>
+      </div>
     </div>
 
-    <!-- LEGEND -->
-    <div class="legend">
-        <div class="leg">
-            <div class="leg-line" style="background:#ef4444"></div>3.3 V Power
-        </div>
-        <div class="leg">
-            <div class="leg-line" style="background:#1e293b;border:1.2px solid #475569"></div>GND
-        </div>
-        <div class="leg">
-            <div class="leg-line" style="background:#3b82f6"></div>I²C SDA (GPIO 21)
-        </div>
-        <div class="leg">
-            <div class="leg-line" style="background:#06b6d4"></div>I²C SCL (GPIO 22)
-        </div>
-        <div class="leg">
-            <div class="leg-line" style="background:#f97316"></div>UART TX2 (GPIO 17)
-        </div>
-        <div class="leg">
-            <div class="leg-line" style="background:#22c55e"></div>UART RX2 (GPIO 16)
-        </div>
+    <section class="board">
+      <div class="board-head">
+        <h2>Wiring diagram</h2>
+        <span class="hint">Swipe sideways to see the whole board, or pinch to zoom.</span>
+        <a class="btn btn-secondary" href="../KiCad/IPDS_SensorNode/fabrication/IPDS_SensorNode_schematic.pdf" target="_blank" rel="noopener"><svg><use href="#i-doc"/></svg>KiCad PDF</a>
+      </div>
+      <div class="scroller">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 40 820 590" role="img" aria-label="Wiring diagram of the IPDS sensor node" font-family="JetBrains Mono, monospace">
+          <defs>
+            <pattern id="dots" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r="0.7" fill="#2b3139" /></pattern>
+          </defs>
+          <rect x="0" y="40" width="820" height="590" fill="url(#dots)" />
+
+          <!-- ESP32 DevKit -->
+          <rect x="290" y="140" width="160" height="360" rx="8" fill="#1e2329" stroke="#FCD535" stroke-width="1.6" />
+          <text x="370" y="168" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" font-weight="700" fill="#FCD535">ESP32</text>
+          <text x="370" y="183" text-anchor="middle" font-size="9" fill="#929aa5">DevKit V1 &#183; 38-pin</text>
+          <rect x="318" y="194" width="104" height="280" rx="4" fill="#0b0e11" stroke="#2b3139" />
+          <rect x="340" y="270" width="60" height="60" rx="3" fill="#1e2329" stroke="#2b3139" />
+          <text x="370" y="298" text-anchor="middle" font-size="9" fill="#707a8a">CPU</text>
+          <text x="370" y="311" text-anchor="middle" font-size="8" fill="#707a8a">240 MHz</text>
+
+          <!-- ESP32 left pins -->
+          <line x1="240" y1="210" x2="290" y2="210" stroke="#f6465d" stroke-width="2" />
+          <circle cx="290" cy="210" r="3" fill="#f6465d" />
+          <text x="286" y="206" text-anchor="end" font-size="9.5" fill="#f6465d">3V3</text>
+          <line x1="278" y1="230" x2="290" y2="230" stroke="#474d57" stroke-width="1.5" stroke-dasharray="3 2" />
+          <text x="274" y="233" text-anchor="end" font-size="9.5" fill="#474d57">EN</text>
+          <line x1="240" y1="250" x2="290" y2="250" stroke="#707a8a" stroke-width="2" />
+          <circle cx="290" cy="250" r="3" fill="#707a8a" />
+          <text x="286" y="246" text-anchor="end" font-size="9.5" fill="#929aa5">GND</text>
+          <line x1="240" y1="390" x2="290" y2="390" stroke="#FCD535" stroke-width="2" />
+          <circle cx="290" cy="390" r="3" fill="#FCD535" />
+          <text x="286" y="386" text-anchor="end" font-size="9.5" fill="#FCD535">D21</text>
+          <text x="297" y="402" font-size="9" fill="#929aa5">SDA</text>
+          <line x1="240" y1="420" x2="290" y2="420" stroke="#3b82f6" stroke-width="2" />
+          <circle cx="290" cy="420" r="3" fill="#3b82f6" />
+          <text x="286" y="416" text-anchor="end" font-size="9.5" fill="#3b82f6">D22</text>
+          <text x="297" y="432" font-size="9" fill="#929aa5">SCL</text>
+          <line x1="240" y1="460" x2="290" y2="460" stroke="#eaecef" stroke-width="2" />
+          <circle cx="290" cy="460" r="3" fill="#eaecef" />
+          <text x="286" y="456" text-anchor="end" font-size="9.5" fill="#eaecef">D16</text>
+          <text x="297" y="472" font-size="9" fill="#929aa5">RX2</text>
+          <line x1="240" y1="490" x2="290" y2="490" stroke="#2dbdb6" stroke-width="2" />
+          <circle cx="290" cy="490" r="3" fill="#2dbdb6" />
+          <text x="286" y="486" text-anchor="end" font-size="9.5" fill="#2dbdb6">D17</text>
+          <text x="297" y="502" font-size="9" fill="#929aa5">TX2</text>
+
+          <!-- ESP32 right pins -->
+          <line x1="450" y1="210" x2="480" y2="210" stroke="#474d57" stroke-width="1.5" stroke-dasharray="3 2" />
+          <text x="486" y="213" font-size="9.5" fill="#707a8a">VIN (5 V)</text>
+          <line x1="450" y1="240" x2="480" y2="240" stroke="#474d57" stroke-width="1.5" stroke-dasharray="3 2" />
+          <text x="486" y="243" font-size="9.5" fill="#707a8a">GND</text>
+
+          <!-- I2C bus rails -->
+          <line x1="205" y1="210" x2="205" y2="560" stroke="#FCD535" stroke-width="1.5" stroke-dasharray="5 2" />
+          <line x1="218" y1="210" x2="218" y2="560" stroke="#3b82f6" stroke-width="1.5" stroke-dasharray="5 2" />
+          <line x1="205" y1="390" x2="240" y2="390" stroke="#FCD535" stroke-width="2" />
+          <circle cx="205" cy="390" r="3.5" fill="#FCD535" />
+          <line x1="218" y1="420" x2="240" y2="420" stroke="#3b82f6" stroke-width="2" />
+          <circle cx="218" cy="420" r="3.5" fill="#3b82f6" />
+
+          <!-- 3V3 rail and pull-ups -->
+          <line x1="170" y1="90" x2="510" y2="90" stroke="#f6465d" stroke-width="1.5" />
+          <text x="164" y="94" text-anchor="end" font-size="10" font-weight="600" fill="#f6465d">3V3</text>
+          <circle cx="170" cy="90" r="3" fill="#f6465d" />
+          <line x1="170" y1="90" x2="170" y2="210" stroke="#f6465d" stroke-width="1.5" stroke-dasharray="4 2" />
+          <line x1="170" y1="210" x2="240" y2="210" stroke="#f6465d" stroke-width="2" />
+
+          <line x1="205" y1="90" x2="205" y2="105" stroke="#f6465d" stroke-width="1.5" />
+          <rect x="197" y="105" width="16" height="30" rx="2" fill="#1e2329" stroke="#929aa5" stroke-width="1.2" />
+          <text x="205" y="123" text-anchor="middle" font-size="7" fill="#eaecef">4k7</text>
+          <line x1="205" y1="135" x2="205" y2="210" stroke="#FCD535" stroke-width="1.5" />
+          <text x="194" y="103" text-anchor="end" font-size="9" fill="#929aa5">R1</text>
+
+          <line x1="218" y1="90" x2="218" y2="105" stroke="#f6465d" stroke-width="1.5" />
+          <rect x="210" y="105" width="16" height="30" rx="2" fill="#1e2329" stroke="#929aa5" stroke-width="1.2" />
+          <text x="218" y="123" text-anchor="middle" font-size="7" fill="#eaecef">4k7</text>
+          <line x1="218" y1="135" x2="218" y2="210" stroke="#3b82f6" stroke-width="1.5" />
+          <text x="230" y="103" font-size="9" fill="#929aa5">R2</text>
+
+          <circle cx="205" cy="210" r="3.5" fill="#FCD535" />
+          <circle cx="218" cy="210" r="3.5" fill="#3b82f6" />
+
+          <!-- MPU6050 -->
+          <rect x="26" y="248" width="134" height="164" rx="7" fill="#1e2329" stroke="#474d57" stroke-width="1.4" />
+          <text x="93" y="270" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" font-weight="700" fill="#ffffff">MPU6050</text>
+          <text x="93" y="284" text-anchor="middle" font-size="8.5" fill="#929aa5">accel &#183; gyro</text>
+          <rect x="44" y="295" width="74" height="74" rx="3" fill="#0b0e11" stroke="#2b3139" />
+          <text x="81" y="330" text-anchor="middle" font-size="8" fill="#707a8a">InvenSense</text>
+          <text x="81" y="342" text-anchor="middle" font-size="8" fill="#707a8a">MPU-6050</text>
+          <line x1="160" y1="298" x2="175" y2="298" stroke="#f6465d" stroke-width="2" />
+          <circle cx="160" cy="298" r="2.5" fill="#f6465d" />
+          <text x="156" y="301" text-anchor="end" font-size="9" fill="#f6465d">VCC</text>
+          <line x1="160" y1="318" x2="190" y2="318" stroke="#707a8a" stroke-width="2" />
+          <circle cx="160" cy="318" r="2.5" fill="#707a8a" />
+          <text x="156" y="321" text-anchor="end" font-size="9" fill="#929aa5">GND</text>
+          <line x1="160" y1="338" x2="218" y2="338" stroke="#3b82f6" stroke-width="2" />
+          <circle cx="160" cy="338" r="2.5" fill="#3b82f6" />
+          <circle cx="218" cy="338" r="3.5" fill="#3b82f6" />
+          <text x="156" y="341" text-anchor="end" font-size="9" fill="#3b82f6">SCL</text>
+          <line x1="160" y1="358" x2="205" y2="358" stroke="#FCD535" stroke-width="2" />
+          <circle cx="160" cy="358" r="2.5" fill="#FCD535" />
+          <circle cx="205" cy="358" r="3.5" fill="#FCD535" />
+          <text x="156" y="361" text-anchor="end" font-size="9" fill="#FCD535">SDA</text>
+          <line x1="160" y1="378" x2="175" y2="378" stroke="#f6465d" stroke-width="2" />
+          <circle cx="160" cy="378" r="2.5" fill="#f6465d" />
+          <text x="156" y="381" text-anchor="end" font-size="9" fill="#f6465d">AD0</text>
+          <text x="156" y="393" text-anchor="end" font-size="7.5" fill="#929aa5">to 3V3 = 0x69</text>
+          <line x1="160" y1="404" x2="168" y2="404" stroke="#474d57" stroke-width="1" stroke-dasharray="2 2" />
+          <text x="156" y="407" text-anchor="end" font-size="9" fill="#474d57">INT</text>
+          <line x1="175" y1="298" x2="175" y2="90" stroke="#f6465d" stroke-width="1.5" />
+          <circle cx="175" cy="90" r="3" fill="#f6465d" />
+          <line x1="175" y1="378" x2="175" y2="298" stroke="#f6465d" stroke-width="1.5" />
+          <line x1="190" y1="318" x2="190" y2="570" stroke="#707a8a" stroke-width="1.2" stroke-dasharray="4 2" />
+
+          <!-- DS3231 -->
+          <rect x="26" y="440" width="134" height="148" rx="7" fill="#1e2329" stroke="#474d57" stroke-width="1.4" />
+          <text x="93" y="462" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" font-weight="700" fill="#ffffff">DS3231 RTC</text>
+          <text x="93" y="476" text-anchor="middle" font-size="8.5" fill="#929aa5">TCXO &#183; CR2032</text>
+          <rect x="40" y="486" width="78" height="80" rx="3" fill="#0b0e11" stroke="#2b3139" />
+          <circle cx="62" cy="526" r="14" fill="#1e2329" stroke="#474d57" stroke-width="1.2" />
+          <text x="62" y="523" text-anchor="middle" font-size="6.5" fill="#929aa5">CR2032</text>
+          <text x="62" y="533" text-anchor="middle" font-size="6.5" fill="#707a8a">3.0 V</text>
+          <text x="98" y="529" text-anchor="middle" font-size="7" fill="#707a8a">DS3231</text>
+          <line x1="160" y1="494" x2="175" y2="494" stroke="#f6465d" stroke-width="2" />
+          <circle cx="160" cy="494" r="2.5" fill="#f6465d" />
+          <text x="156" y="497" text-anchor="end" font-size="9" fill="#f6465d">VCC</text>
+          <line x1="160" y1="514" x2="190" y2="514" stroke="#707a8a" stroke-width="2" />
+          <circle cx="160" cy="514" r="2.5" fill="#707a8a" />
+          <circle cx="190" cy="514" r="3" fill="#707a8a" />
+          <text x="156" y="517" text-anchor="end" font-size="9" fill="#929aa5">GND</text>
+          <line x1="160" y1="534" x2="218" y2="534" stroke="#3b82f6" stroke-width="2" />
+          <circle cx="160" cy="534" r="2.5" fill="#3b82f6" />
+          <circle cx="218" cy="534" r="3.5" fill="#3b82f6" />
+          <text x="156" y="537" text-anchor="end" font-size="9" fill="#3b82f6">SCL</text>
+          <line x1="160" y1="554" x2="205" y2="554" stroke="#FCD535" stroke-width="2" />
+          <circle cx="160" cy="554" r="2.5" fill="#FCD535" />
+          <circle cx="205" cy="554" r="3.5" fill="#FCD535" />
+          <text x="156" y="557" text-anchor="end" font-size="9" fill="#FCD535">SDA</text>
+          <line x1="175" y1="494" x2="175" y2="378" stroke="#f6465d" stroke-width="1.5" />
+
+          <!-- NEO-6M GPS -->
+          <rect x="558" y="248" width="204" height="184" rx="7" fill="#1e2329" stroke="#474d57" stroke-width="1.4" />
+          <text x="660" y="270" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" font-weight="700" fill="#ffffff">NEO-6M GPS</text>
+          <text x="660" y="284" text-anchor="middle" font-size="8.5" fill="#929aa5">u-blox &#183; NMEA 0183</text>
+          <rect x="590" y="296" width="76" height="60" rx="3" fill="#0b0e11" stroke="#2b3139" />
+          <text x="628" y="323" text-anchor="middle" font-size="8" fill="#707a8a">u-blox</text>
+          <text x="628" y="335" text-anchor="middle" font-size="8" fill="#707a8a">NEO-6M</text>
+          <line x1="712" y1="296" x2="712" y2="392" stroke="#474d57" stroke-width="1.5" />
+          <line x1="697" y1="318" x2="727" y2="318" stroke="#474d57" stroke-width="1.2" />
+          <line x1="700" y1="332" x2="724" y2="332" stroke="#474d57" />
+          <line x1="704" y1="345" x2="720" y2="345" stroke="#474d57" />
+          <text x="712" y="410" text-anchor="middle" font-size="8" fill="#707a8a">patch</text>
+          <text x="712" y="421" text-anchor="middle" font-size="8" fill="#707a8a">antenna</text>
+          <line x1="510" y1="298" x2="558" y2="298" stroke="#f6465d" stroke-width="2" />
+          <circle cx="558" cy="298" r="2.5" fill="#f6465d" />
+          <text x="564" y="301" font-size="9" fill="#f6465d">VCC</text>
+          <line x1="510" y1="318" x2="558" y2="318" stroke="#707a8a" stroke-width="2" />
+          <circle cx="558" cy="318" r="2.5" fill="#707a8a" />
+          <text x="564" y="321" font-size="9" fill="#929aa5">GND</text>
+          <line x1="520" y1="338" x2="558" y2="338" stroke="#eaecef" stroke-width="2" />
+          <circle cx="558" cy="338" r="2.5" fill="#eaecef" />
+          <text x="564" y="341" font-size="9" fill="#eaecef">TX</text>
+          <line x1="530" y1="362" x2="558" y2="362" stroke="#2dbdb6" stroke-width="2" />
+          <circle cx="558" cy="362" r="2.5" fill="#2dbdb6" />
+          <text x="564" y="365" font-size="9" fill="#2dbdb6">RX</text>
+          <line x1="546" y1="386" x2="558" y2="386" stroke="#474d57" stroke-width="1" stroke-dasharray="2 2" />
+          <text x="564" y="389" font-size="9" fill="#474d57">PPS</text>
+
+          <!-- GPS power / ground runs -->
+          <line x1="510" y1="298" x2="510" y2="90" stroke="#f6465d" stroke-width="1.5" />
+          <circle cx="510" cy="90" r="3" fill="#f6465d" />
+          <line x1="510" y1="318" x2="510" y2="570" stroke="#707a8a" stroke-width="1.5" />
+          <line x1="190" y1="570" x2="510" y2="570" stroke="#707a8a" stroke-width="1.5" />
+          <circle cx="190" cy="570" r="3" fill="#707a8a" />
+          <circle cx="510" cy="570" r="3" fill="#707a8a" />
+
+          <!-- UART -->
+          <polyline points="520,338 520,460 240,460" fill="none" stroke="#eaecef" stroke-width="2" />
+          <polyline points="530,362 530,490 240,490" fill="none" stroke="#2dbdb6" stroke-width="2" />
+
+          <!-- ESP32 GND to ground symbol -->
+          <line x1="250" y1="250" x2="240" y2="250" stroke="#707a8a" stroke-width="2" />
+          <line x1="250" y1="250" x2="250" y2="570" stroke="#707a8a" stroke-width="1.5" />
+          <line x1="380" y1="570" x2="380" y2="590" stroke="#707a8a" stroke-width="2" />
+          <line x1="365" y1="590" x2="395" y2="590" stroke="#707a8a" stroke-width="2" />
+          <line x1="369" y1="596" x2="391" y2="596" stroke="#707a8a" stroke-width="1.5" />
+          <line x1="373" y1="601" x2="387" y2="601" stroke="#707a8a" />
+          <circle cx="250" cy="570" r="3" fill="#707a8a" />
+
+          <!-- Title block -->
+          <rect x="560" y="460" width="202" height="88" rx="6" fill="#0b0e11" stroke="#2b3139" />
+          <text x="574" y="481" font-family="Inter, sans-serif" font-size="11" font-weight="700" fill="#FCD535">IPDS Sensor Node</text>
+          <text x="574" y="498" font-size="8.5" fill="#929aa5">I&#178;C: MPU 0x69 &#183; RTC 0x68</text>
+          <text x="574" y="512" font-size="8.5" fill="#929aa5">UART2: 9600 baud</text>
+          <text x="574" y="526" font-size="8.5" fill="#929aa5">Pull-ups: 4.7 k&#937; SDA, SCL</text>
+          <text x="574" y="540" font-size="8.5" fill="#929aa5">Power: 3.3 V &#183; ~0.6 W active</text>
+        </svg>
+      </div>
+    </section>
+
+    <div class="tables">
+      <section class="tbl">
+        <h2>MPU6050 to ESP32</h2>
+        <table>
+          <thead><tr><th>Pin</th><th>ESP32</th><th>Signal</th></tr></thead>
+          <tbody>
+            <tr><td>VCC</td><td>3V3</td><td><span class="dot" style="background:var(--w-pwr)"></span>3.3 V power</td></tr>
+            <tr><td>GND</td><td>GND</td><td><span class="dot" style="background:var(--w-gnd)"></span>Ground</td></tr>
+            <tr><td>SCL</td><td>GPIO 22</td><td><span class="dot" style="background:var(--w-scl)"></span>I&sup2;C clock</td></tr>
+            <tr><td>SDA</td><td>GPIO 21</td><td><span class="dot" style="background:var(--w-sda)"></span>I&sup2;C data</td></tr>
+            <tr><td>AD0</td><td>3V3</td><td><span class="dot" style="background:var(--w-pwr)"></span>Address 0x69</td></tr>
+            <tr><td>INT</td><td>&ndash;</td><td>Not connected</td></tr>
+          </tbody>
+        </table>
+      </section>
+      <section class="tbl">
+        <h2>DS3231 RTC to ESP32</h2>
+        <table>
+          <thead><tr><th>Pin</th><th>ESP32</th><th>Signal</th></tr></thead>
+          <tbody>
+            <tr><td>VCC</td><td>3V3</td><td><span class="dot" style="background:var(--w-pwr)"></span>3.3 V power</td></tr>
+            <tr><td>GND</td><td>GND</td><td><span class="dot" style="background:var(--w-gnd)"></span>Ground</td></tr>
+            <tr><td>SCL</td><td>GPIO 22</td><td><span class="dot" style="background:var(--w-scl)"></span>I&sup2;C clock (shared)</td></tr>
+            <tr><td>SDA</td><td>GPIO 21</td><td><span class="dot" style="background:var(--w-sda)"></span>I&sup2;C data (shared)</td></tr>
+            <tr><td>BAT</td><td>&ndash;</td><td>CR2032 backup cell</td></tr>
+            <tr><td>SQW</td><td>&ndash;</td><td>Not connected</td></tr>
+          </tbody>
+        </table>
+      </section>
+      <section class="tbl">
+        <h2>NEO-6M GPS to ESP32</h2>
+        <table>
+          <thead><tr><th>Pin</th><th>ESP32</th><th>Signal</th></tr></thead>
+          <tbody>
+            <tr><td>VCC</td><td>3V3</td><td><span class="dot" style="background:var(--w-pwr)"></span>3.3 V power</td></tr>
+            <tr><td>GND</td><td>GND</td><td><span class="dot" style="background:var(--w-gnd)"></span>Ground</td></tr>
+            <tr><td>TX</td><td>GPIO 16 (RX2)</td><td><span class="dot" style="background:var(--w-rx)"></span>UART data out</td></tr>
+            <tr><td>RX</td><td>GPIO 17 (TX2)</td><td><span class="dot" style="background:var(--w-tx)"></span>UART data in</td></tr>
+            <tr><td>PPS</td><td>&ndash;</td><td>Not connected</td></tr>
+          </tbody>
+        </table>
+      </section>
+      <section class="tbl">
+        <h2>I&sup2;C bus and UART</h2>
+        <table>
+          <thead><tr><th>Item</th><th>Value</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>R1 (SDA)</td><td>4.7 k&Omega;</td><td>3.3 V to SDA line</td></tr>
+            <tr><td>R2 (SCL)</td><td>4.7 k&Omega;</td><td>3.3 V to SCL line</td></tr>
+            <tr><td>Bus speed</td><td>100 kHz</td><td>Standard mode</td></tr>
+            <tr><td>MPU addr</td><td>0x69</td><td>AD0 tied to 3V3</td></tr>
+            <tr><td>RTC addr</td><td>0x68</td><td>Fixed (DS3231)</td></tr>
+            <tr><td>UART2</td><td>9600</td><td>baud, GPS serial</td></tr>
+          </tbody>
+        </table>
+      </section>
     </div>
+  </main>
 
-    <!-- ════════════════════════════  SVG SCHEMATIC  ════════════════════════════ -->
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 640" width="820">
-        <defs>
-            <filter id="glow">
-                <feGaussianBlur stdDeviation="2.5" result="b" />
-                <feMerge>
-                    <feMergeNode in="b" />
-                    <feMergeNode in="SourceGraphic" />
-                </feMerge>
-            </filter>
-            <!-- resistor symbol reusable -->
-        </defs>
-
-        <!-- ─── BACKGROUND GRID ─── -->
-        <pattern id="dots" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
-            <circle cx="1" cy="1" r="0.7" fill="rgba(255,255,255,0.045)" />
-        </pattern>
-        <rect width="820" height="640" fill="url(#dots)" />
-
-        <!-- ════════════════════════
-       ESP32 DevKit V1
-       Rect: x=290 y=140 w=160 h=360
-  ════════════════════════ -->
-        <rect x="290" y="140" width="160" height="360" rx="8" fill="#0d1829" stroke="#3b82f6" stroke-width="1.8"
-            filter="url(#glow)" />
-        <!-- chip label -->
-        <text x="370" y="168" text-anchor="middle" font-family="Inter" font-size="11" font-weight="700"
-            fill="#93c5fd">ESP32</text>
-        <text x="370" y="182" text-anchor="middle" font-family="JetBrains Mono" font-size="8.5"
-            fill="rgba(147,197,253,.55)">DevKit V1 · 38-pin</text>
-        <!-- inner chip body -->
-        <rect x="318" y="194" width="104" height="280" rx="4" fill="#0a1120" stroke="rgba(59,130,246,.2)"
-            stroke-width="1" />
-        <!-- CPU die symbol -->
-        <rect x="340" y="270" width="60" height="60" rx="3" fill="#0f1e35" stroke="rgba(59,130,246,.3)"
-            stroke-width="1" />
-        <text x="370" y="300" text-anchor="middle" font-family="JetBrains Mono" font-size="8"
-            fill="rgba(147,197,253,.4)">CPU</text>
-        <text x="370" y="312" text-anchor="middle" font-family="JetBrains Mono" font-size="7"
-            fill="rgba(147,197,253,.3)">240MHz</text>
-
-        <!-- == LEFT PINS (x=290) == -->
-        <!-- Pin rows at y: 210,230,250,270,290,310,330,350,370,390,410,430,450,470 -->
-
-        <!-- 3V3 -->
-        <line x1="240" y1="210" x2="290" y2="210" stroke="#ef4444" stroke-width="2" />
-        <circle cx="290" cy="210" r="3" fill="#ef4444" />
-        <text x="286" y="207" text-anchor="end" font-family="JetBrains Mono" font-size="9"
-            fill="rgba(239,68,68,.9)">3V3</text>
-        <text x="296" y="223" font-family="JetBrains Mono" font-size="8" fill="rgba(147,197,253,.45)">3.3V</text>
-
-        <!-- EN (not connected) -->
-        <line x1="278" y1="230" x2="290" y2="230" stroke="rgba(100,116,139,.3)" stroke-width="1.5"
-            stroke-dasharray="3 2" />
-        <text x="274" y="233" text-anchor="end" font-family="JetBrains Mono" font-size="9" fill="#334155">EN</text>
-
-        <!-- GND left -->
-        <line x1="240" y1="250" x2="290" y2="250" stroke="#64748b" stroke-width="2" />
-        <circle cx="290" cy="250" r="3" fill="#64748b" />
-        <text x="286" y="247" text-anchor="end" font-family="JetBrains Mono" font-size="9"
-            fill="rgba(100,116,139,.9)">GND</text>
-
-        <!-- GPIO 21 — SDA -->
-        <line x1="240" y1="390" x2="290" y2="390" stroke="#3b82f6" stroke-width="2" />
-        <circle cx="290" cy="390" r="3" fill="#3b82f6" />
-        <text x="286" y="387" text-anchor="end" font-family="JetBrains Mono" font-size="9"
-            fill="rgba(59,130,246,.9)">D21</text>
-        <text x="296" y="402" font-family="JetBrains Mono" font-size="8" fill="rgba(59,130,246,.5)">SDA</text>
-
-        <!-- GPIO 22 — SCL -->
-        <line x1="240" y1="420" x2="290" y2="420" stroke="#06b6d4" stroke-width="2" />
-        <circle cx="290" cy="420" r="3" fill="#06b6d4" />
-        <text x="286" y="417" text-anchor="end" font-family="JetBrains Mono" font-size="9"
-            fill="rgba(6,182,212,.9)">D22</text>
-        <text x="296" y="432" font-family="JetBrains Mono" font-size="8" fill="rgba(6,182,212,.5)">SCL</text>
-
-        <!-- GPIO 16 — RX2 -->
-        <line x1="240" y1="460" x2="290" y2="460" stroke="#22c55e" stroke-width="2" />
-        <circle cx="290" cy="460" r="3" fill="#22c55e" />
-        <text x="286" y="457" text-anchor="end" font-family="JetBrains Mono" font-size="9"
-            fill="rgba(34,197,94,.9)">D16</text>
-        <text x="296" y="472" font-family="JetBrains Mono" font-size="8" fill="rgba(34,197,94,.5)">RX2</text>
-
-        <!-- GPIO 17 — TX2 -->
-        <line x1="240" y1="490" x2="290" y2="490" stroke="#f97316" stroke-width="2" />
-        <circle cx="290" cy="490" r="3" fill="#f97316" />
-        <text x="286" y="487" text-anchor="end" font-family="JetBrains Mono" font-size="9"
-            fill="rgba(249,115,22,.9)">D17</text>
-        <text x="296" y="502" font-family="JetBrains Mono" font-size="8" fill="rgba(249,115,22,.5)">TX2</text>
-
-        <!-- == RIGHT PINS (x=450) == -->
-
-        <!-- VIN -->
-        <line x1="450" y1="210" x2="510" y2="210" stroke="#ef4444" stroke-width="2" />
-        <circle cx="450" cy="210" r="3" fill="#ef4444" />
-        <text x="514" y="213" font-family="JetBrains Mono" font-size="9" fill="rgba(239,68,68,.9)">VIN (5V)</text>
-
-        <!-- GND right -->
-        <line x1="450" y1="240" x2="510" y2="240" stroke="#64748b" stroke-width="2" />
-        <circle cx="450" cy="240" r="3" fill="#64748b" />
-        <text x="514" y="243" font-family="JetBrains Mono" font-size="9" fill="rgba(100,116,139,.9)">GND</text>
-
-        <!-- ════════════════════
-       I2C BUS RAIL (shared)
-       ════════════════════ -->
-        <!-- SDA bus rail vertical: x=205, y=210→560 -->
-        <line x1="205" y1="210" x2="205" y2="560" stroke="#3b82f6" stroke-width="1.5" stroke-dasharray="5 2" />
-        <!-- SCL bus rail vertical: x=218, y=210→560 -->
-        <line x1="218" y1="210" x2="218" y2="560" stroke="#06b6d4" stroke-width="1.5" stroke-dasharray="5 2" />
-
-        <!-- SDA from ESP32 D21 to bus -->
-        <line x1="205" y1="390" x2="240" y2="390" stroke="#3b82f6" stroke-width="2" />
-        <circle cx="205" cy="390" r="3.5" fill="#3b82f6" />
-
-        <!-- SCL from ESP32 D22 to bus -->
-        <line x1="218" y1="420" x2="240" y2="420" stroke="#06b6d4" stroke-width="2" />
-        <circle cx="218" cy="420" r="3.5" fill="#06b6d4" />
-
-        <!-- Pull-up resistors (4.7kΩ) on SDA & SCL to 3.3V -->
-        <!-- 3.3V rail: y=90 horizontal -->
-        <line x1="170" y1="90" x2="240" y2="90" stroke="#ef4444" stroke-width="1.5" />
-
-        <!-- R1 — SDA pull-up  x=205 -->
-        <!-- resistor body: y=90→140 -->
-        <line x1="205" y1="90" x2="205" y2="105" stroke="#ef4444" stroke-width="1.5" />
-        <rect x="197" y="105" width="16" height="30" rx="2" fill="#0d1829" stroke="#94a3b8" stroke-width="1.2" />
-        <text x="205" y="124" text-anchor="middle" font-family="JetBrains Mono" font-size="7" fill="#94a3b8">4k7</text>
-        <line x1="205" y1="135" x2="205" y2="210" stroke="#3b82f6" stroke-width="1.5" />
-        <text x="195" y="103" text-anchor="end" font-family="JetBrains Mono" font-size="8" fill="#64748b">R1</text>
-
-        <!-- R2 — SCL pull-up x=218 -->
-        <line x1="218" y1="90" x2="218" y2="105" stroke="#ef4444" stroke-width="1.5" />
-        <rect x="210" y="105" width="16" height="30" rx="2" fill="#0d1829" stroke="#94a3b8" stroke-width="1.2" />
-        <text x="218" y="124" text-anchor="middle" font-family="JetBrains Mono" font-size="7" fill="#94a3b8">4k7</text>
-        <line x1="218" y1="135" x2="218" y2="210" stroke="#06b6d4" stroke-width="1.5" />
-        <text x="228" y="103" font-family="JetBrains Mono" font-size="8" fill="#64748b">R2</text>
-
-        <!-- 3V3 label at rail -->
-        <text x="165" y="93" text-anchor="end" font-family="JetBrains Mono" font-size="9" font-weight="600"
-            fill="#ef4444">3V3</text>
-        <circle cx="170" cy="90" r="3" fill="#ef4444" />
-        <!-- connect 3v3 to ESP32 3V3 line -->
-        <line x1="170" y1="90" x2="170" y2="210" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="4 2" />
-        <line x1="170" y1="210" x2="240" y2="210" stroke="#ef4444" stroke-width="2" />
-
-        <!-- ════════════════════════════
-       MPU6050 Module
-       Rect: x=30 y=250 w=130 h=160
-  ════════════════════════════ -->
-        <rect x="26" y="248" width="134" height="164" rx="7" fill="#0d1829" stroke="#8b5cf6" stroke-width="1.5"
-            filter="url(#glow)" />
-        <text x="93" y="270" text-anchor="middle" font-family="Inter" font-size="11" font-weight="700"
-            fill="#c4b5fd">MPU6050</text>
-        <text x="93" y="284" text-anchor="middle" font-family="JetBrains Mono" font-size="8"
-            fill="rgba(196,181,253,.5)">3-Axis Accel · Gyro</text>
-        <!-- chip die -->
-        <rect x="56" y="295" width="74" height="74" rx="3" fill="#0a1120" stroke="rgba(139,92,246,.25)"
-            stroke-width="1" />
-        <text x="93" y="336" text-anchor="middle" font-family="JetBrains Mono" font-size="7.5"
-            fill="rgba(196,181,253,.35)">InvenSense</text>
-        <text x="93" y="348" text-anchor="middle" font-family="JetBrains Mono" font-size="7.5"
-            fill="rgba(196,181,253,.35)">MPU-6050</text>
-        <!-- MPU pins (right side of module) at x=160 -->
-        <!-- VCC -->
-        <line x1="160" y1="298" x2="175" y2="298" stroke="#ef4444" stroke-width="2" />
-        <circle cx="160" cy="298" r="2.5" fill="#ef4444" />
-        <text x="163" y="294" font-family="JetBrains Mono" font-size="8.5" fill="rgba(239,68,68,.8)">VCC</text>
-        <!-- GND -->
-        <line x1="160" y1="318" x2="175" y2="318" stroke="#64748b" stroke-width="2" />
-        <circle cx="160" cy="318" r="2.5" fill="#64748b" />
-        <text x="163" y="314" font-family="JetBrains Mono" font-size="8.5" fill="rgba(100,116,139,.8)">GND</text>
-        <!-- SCL -->
-        <line x1="160" y1="338" x2="218" y2="338" stroke="#06b6d4" stroke-width="2" />
-        <circle cx="160" cy="338" r="2.5" fill="#06b6d4" />
-        <circle cx="218" cy="338" r="3.5" fill="#06b6d4" />
-        <text x="163" y="334" font-family="JetBrains Mono" font-size="8.5" fill="rgba(6,182,212,.8)">SCL</text>
-        <!-- SDA -->
-        <line x1="160" y1="358" x2="205" y2="358" stroke="#3b82f6" stroke-width="2" />
-        <circle cx="160" cy="358" r="2.5" fill="#3b82f6" />
-        <circle cx="205" cy="358" r="3.5" fill="#3b82f6" />
-        <text x="163" y="354" font-family="JetBrains Mono" font-size="8.5" fill="rgba(59,130,246,.8)">SDA</text>
-        <!-- AD0 → 3V3 (addr 0x69) -->
-        <line x1="160" y1="378" x2="175" y2="378" stroke="#ef4444" stroke-width="2" />
-        <circle cx="160" cy="378" r="2.5" fill="#ef4444" />
-        <text x="163" y="374" font-family="JetBrains Mono" font-size="8.5" fill="rgba(239,68,68,.8)">AD0</text>
-        <text x="163" y="387" font-family="JetBrains Mono" font-size="7" fill="rgba(239,68,68,.5)">→3V3 (0x69)</text>
-        <!-- INT not connected -->
-        <line x1="160" y1="398" x2="168" y2="398" stroke="rgba(100,116,139,.2)" stroke-width="1"
-            stroke-dasharray="2 2" />
-        <text x="163" y="394" font-family="JetBrains Mono" font-size="8.5" fill="#1e293b">INT</text>
-
-        <!-- MPU VCC & GND wires to bus -->
-        <line x1="175" y1="298" x2="175" y2="90" stroke="#ef4444" stroke-width="1.5" />
-        <circle cx="175" cy="90" r="3" fill="#ef4444" />
-        <line x1="175" y1="318" x2="190" y2="318" stroke="#64748b" stroke-width="1.5" />
-        <!-- GND bus (horizontal) -->
-        <line x1="190" y1="318" x2="190" y2="570" stroke="#64748b" stroke-width="1.2" stroke-dasharray="4 2" />
-
-        <!-- ════════════════════════════
-       DS3231 RTC Module
-       Rect: x=30 y=440 w=130 h=150
-  ════════════════════════════ -->
-        <rect x="26" y="440" width="134" height="148" rx="7" fill="#0d1829" stroke="#06b6d4" stroke-width="1.5"
-            filter="url(#glow)" />
-        <text x="93" y="462" text-anchor="middle" font-family="Inter" font-size="11" font-weight="700"
-            fill="#a5f3fc">DS3231 RTC</text>
-        <text x="93" y="476" text-anchor="middle" font-family="JetBrains Mono" font-size="8"
-            fill="rgba(165,243,252,.5)">TCXO · I²C · CR2032</text>
-        <!-- chip die -->
-        <rect x="54" y="484" width="78" height="68" rx="3" fill="#0a1120" stroke="rgba(6,182,212,.2)"
-            stroke-width="1" />
-        <!-- CR2032 symbol -->
-        <circle cx="68" cy="518" r="14" fill="#0d1829" stroke="rgba(6,182,212,.3)" stroke-width="1.2" />
-        <text x="68" y="514" text-anchor="middle" font-family="JetBrains Mono" font-size="6"
-            fill="rgba(165,243,252,.4)">CR2032</text>
-        <text x="68" y="524" text-anchor="middle" font-family="JetBrains Mono" font-size="6"
-            fill="rgba(165,243,252,.3)">3.0V</text>
-        <text x="100" y="518" text-anchor="middle" font-family="JetBrains Mono" font-size="6.5"
-            fill="rgba(165,243,252,.35)">DS3231SN</text>
-
-        <!-- Pins right side -->
-        <!-- VCC -->
-        <line x1="160" y1="494" x2="175" y2="494" stroke="#ef4444" stroke-width="2" />
-        <circle cx="160" cy="494" r="2.5" fill="#ef4444" />
-        <text x="163" y="490" font-family="JetBrains Mono" font-size="8.5" fill="rgba(239,68,68,.8)">VCC</text>
-        <!-- GND -->
-        <line x1="160" y1="514" x2="190" y2="514" stroke="#64748b" stroke-width="2" />
-        <circle cx="160" cy="514" r="2.5" fill="#64748b" />
-        <circle cx="190" cy="514" r="3" fill="#64748b" />
-        <text x="163" y="510" font-family="JetBrains Mono" font-size="8.5" fill="rgba(100,116,139,.8)">GND</text>
-        <!-- SCL -->
-        <line x1="160" y1="534" x2="218" y2="534" stroke="#06b6d4" stroke-width="2" />
-        <circle cx="160" cy="534" r="2.5" fill="#06b6d4" />
-        <circle cx="218" cy="534" r="3.5" fill="#06b6d4" />
-        <text x="163" y="530" font-family="JetBrains Mono" font-size="8.5" fill="rgba(6,182,212,.8)">SCL</text>
-        <!-- SDA -->
-        <line x1="160" y1="554" x2="205" y2="554" stroke="#3b82f6" stroke-width="2" />
-        <circle cx="160" cy="554" r="2.5" fill="#3b82f6" />
-        <circle cx="205" cy="554" r="3.5" fill="#3b82f6" />
-        <text x="163" y="550" font-family="JetBrains Mono" font-size="8.5" fill="rgba(59,130,246,.8)">SDA</text>
-
-        <!-- RTC VCC wire up to power rail -->
-        <line x1="175" y1="494" x2="175" y2="298" stroke="#ef4444" stroke-width="1.5" />
-
-        <!-- ════════════════════════════
-       NEO-6M GPS Module
-       Rect: x=560 y=250 w=200 h=180
-  ════════════════════════════ -->
-        <rect x="558" y="248" width="204" height="184" rx="7" fill="#0d1829" stroke="#22c55e" stroke-width="1.5"
-            filter="url(#glow)" />
-        <text x="660" y="270" text-anchor="middle" font-family="Inter" font-size="11" font-weight="700"
-            fill="#86efac">NEO-6M GPS</text>
-        <text x="660" y="284" text-anchor="middle" font-family="JetBrains Mono" font-size="8"
-            fill="rgba(134,239,172,.5)">u-blox · L1 · NMEA 0183</text>
-        <!-- chip area -->
-        <rect x="580" y="296" width="80" height="60" rx="3" fill="#0a1120" stroke="rgba(34,197,94,.2)"
-            stroke-width="1" />
-        <text x="620" y="325" text-anchor="middle" font-family="JetBrains Mono" font-size="7"
-            fill="rgba(134,239,172,.35)">u-blox</text>
-        <text x="620" y="337" text-anchor="middle" font-family="JetBrains Mono" font-size="7"
-            fill="rgba(134,239,172,.3)">NEO-6M</text>
-        <!-- Antenna symbol -->
-        <line x1="700" y1="296" x2="700" y2="400" stroke="rgba(134,239,172,.25)" stroke-width="1.5" />
-        <line x1="685" y1="318" x2="715" y2="318" stroke="rgba(134,239,172,.3)" stroke-width="1.2" />
-        <line x1="688" y1="332" x2="712" y2="332" stroke="rgba(134,239,172,.25)" stroke-width="1" />
-        <line x1="692" y1="345" x2="708" y2="345" stroke="rgba(134,239,172,.2)" stroke-width="1" />
-        <text x="700" y="415" text-anchor="middle" font-family="JetBrains Mono" font-size="7.5"
-            fill="rgba(134,239,172,.4)">Patch</text>
-        <text x="700" y="426" text-anchor="middle" font-family="JetBrains Mono" font-size="7.5"
-            fill="rgba(134,239,172,.35)">Antenna</text>
-
-        <!-- GPS Pins LEFT side at x=558 -->
-        <!-- VCC -->
-        <line x1="510" y1="298" x2="558" y2="298" stroke="#ef4444" stroke-width="2" />
-        <circle cx="558" cy="298" r="2.5" fill="#ef4444" />
-        <text x="554" y="294" text-anchor="end" font-family="JetBrains Mono" font-size="8.5"
-            fill="rgba(239,68,68,.8)">VCC</text>
-        <!-- GND -->
-        <line x1="510" y1="318" x2="558" y2="318" stroke="#64748b" stroke-width="2" />
-        <circle cx="558" cy="318" r="2.5" fill="#64748b" />
-        <text x="554" y="314" text-anchor="end" font-family="JetBrains Mono" font-size="8.5"
-            fill="rgba(100,116,139,.8)">GND</text>
-        <!-- TX → ESP32 RX2 (GPIO16) -->
-        <line x1="510" y1="338" x2="558" y2="338" stroke="#22c55e" stroke-width="2" />
-        <circle cx="558" cy="338" r="2.5" fill="#22c55e" />
-        <text x="554" y="334" text-anchor="end" font-family="JetBrains Mono" font-size="8.5"
-            fill="rgba(34,197,94,.8)">TX</text>
-        <text x="554" y="347" text-anchor="end" font-family="JetBrains Mono" font-size="7" fill="rgba(34,197,94,.45)">→
-            D16/RX2</text>
-        <!-- RX → ESP32 TX2 (GPIO17) -->
-        <line x1="510" y1="362" x2="558" y2="362" stroke="#f97316" stroke-width="2" />
-        <circle cx="558" cy="362" r="2.5" fill="#f97316" />
-        <text x="554" y="358" text-anchor="end" font-family="JetBrains Mono" font-size="8.5"
-            fill="rgba(249,115,22,.8)">RX</text>
-        <text x="554" y="371" text-anchor="end" font-family="JetBrains Mono" font-size="7" fill="rgba(249,115,22,.45)">←
-            D17/TX2</text>
-        <!-- PPS not connected -->
-        <line x1="536" y1="386" x2="558" y2="386" stroke="rgba(100,116,139,.2)" stroke-width="1"
-            stroke-dasharray="2 2" />
-        <text x="532" y="389" text-anchor="end" font-family="JetBrains Mono" font-size="8.5" fill="#1e293b">PPS</text>
-
-        <!-- GPS VCC wire: from ESP32 VIN area (right side) to GPS -->
-        <line x1="510" y1="298" x2="510" y2="90" stroke="#ef4444" stroke-width="1.5" />
-        <line x1="240" y1="90" x2="510" y2="90" stroke="#ef4444" stroke-width="1.5" />
-        <circle cx="510" cy="90" r="3" fill="#ef4444" />
-
-        <!-- GPS GND wire -->
-        <line x1="510" y1="318" x2="510" y2="570" stroke="#64748b" stroke-width="1.5" />
-        <line x1="190" y1="570" x2="510" y2="570" stroke="#64748b" stroke-width="1.5" />
-        <circle cx="190" cy="570" r="3" fill="#64748b" />
-        <circle cx="510" cy="570" r="3" fill="#64748b" />
-
-        <!-- GPS TX wire → ESP32 GPIO16 -->
-        <!-- Goes: GPS TX(558,338) → left to x=520 → down to y=460 → left to ESP32 D16 (240,460) -->
-        <polyline points="510,338 520,338 520,460 240,460" fill="none" stroke="#22c55e" stroke-width="2" />
-
-        <!-- GPS RX wire → ESP32 GPIO17 -->
-        <!-- Goes: GPS RX(558,362) → left to x=530 → down to y=490 → left to ESP32 D17 (240,490) -->
-        <polyline points="510,362 530,362 530,490 240,490" fill="none" stroke="#f97316" stroke-width="2" />
-
-        <!-- ─── GND SYMBOL bottom ─── -->
-        <line x1="380" y1="570" x2="380" y2="590" stroke="#64748b" stroke-width="2" />
-        <line x1="365" y1="590" x2="395" y2="590" stroke="#64748b" stroke-width="2" />
-        <line x1="369" y1="596" x2="391" y2="596" stroke="#64748b" stroke-width="1.5" />
-        <line x1="373" y1="601" x2="387" y2="601" stroke="#64748b" stroke-width="1" />
-        <!-- connect ESP32 GND to ground symbol -->
-        <line x1="290" y1="250" x2="250" y2="250" stroke="#64748b" stroke-width="2" />
-        <line x1="250" y1="250" x2="250" y2="575" stroke="#64748b" stroke-width="1.5" />
-        <line x1="250" y1="575" x2="380" y2="575" stroke="#64748b" stroke-width="1.5" />
-        <line x1="380" y1="575" x2="380" y2="590" stroke="#64748b" stroke-width="2" />
-
-        <!-- ─── TITLE BOX ─── -->
-        <rect x="560" y="460" width="200" height="80" rx="6" fill="rgba(0,0,0,.4)" stroke="rgba(255,255,255,.06)"
-            stroke-width="1" />
-        <text x="660" y="480" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#475569">IPDS Sensor
-            Node</text>
-        <text x="660" y="495" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#334155">I²C Addr:
-            MPU 0x69 · RTC 0x68</text>
-        <text x="660" y="508" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#334155">UART2: 9600
-            baud</text>
-        <text x="660" y="521" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#334155">Pull-up:
-            4.7kΩ on SDA &amp; SCL</text>
-        <text x="660" y="534" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#334155">Power: 3.3V
-            · ~0.6W active</text>
-
-        <!-- ─── NODE DOT JUNCTIONS ─── -->
-        <!-- I2C bus junctions -->
-        <circle cx="205" cy="210" r="3.5" fill="#3b82f6" />
-        <circle cx="218" cy="210" r="3.5" fill="#06b6d4" />
-
-    </svg>
-
-    <!-- ═══════════════ WIRING TABLES ═══════════════ -->
-    <div class="table-wrap">
-
-        <div class="tbl">
-            <div class="tbl-title">MPU6050 — ESP32 Connections</div>
-            <table>
-                <tr>
-                    <th>MPU6050 Pin</th>
-                    <th>ESP32 Pin</th>
-                    <th>Signal</th>
-                </tr>
-                <tr>
-                    <td>VCC</td>
-                    <td>3V3</td>
-                    <td><span class="dot" style="background:#ef4444"></span>3.3V Power</td>
-                </tr>
-                <tr>
-                    <td>GND</td>
-                    <td>GND</td>
-                    <td><span class="dot" style="background:#64748b"></span>Ground</td>
-                </tr>
-                <tr>
-                    <td>SCL</td>
-                    <td>GPIO 22</td>
-                    <td><span class="dot" style="background:#06b6d4"></span>I²C Clock</td>
-                </tr>
-                <tr>
-                    <td>SDA</td>
-                    <td>GPIO 21</td>
-                    <td><span class="dot" style="background:#3b82f6"></span>I²C Data</td>
-                </tr>
-                <tr>
-                    <td>AD0</td>
-                    <td>3V3</td>
-                    <td><span class="dot" style="background:#ef4444"></span>Addr = 0x69</td>
-                </tr>
-                <tr>
-                    <td>INT</td>
-                    <td>—</td>
-                    <td>Not connected</td>
-                </tr>
-            </table>
-        </div>
-
-        <div class="tbl">
-            <div class="tbl-title">DS3231 RTC — ESP32 Connections</div>
-            <table>
-                <tr>
-                    <th>DS3231 Pin</th>
-                    <th>ESP32 Pin</th>
-                    <th>Signal</th>
-                </tr>
-                <tr>
-                    <td>VCC</td>
-                    <td>3V3</td>
-                    <td><span class="dot" style="background:#ef4444"></span>3.3V Power</td>
-                </tr>
-                <tr>
-                    <td>GND</td>
-                    <td>GND</td>
-                    <td><span class="dot" style="background:#64748b"></span>Ground</td>
-                </tr>
-                <tr>
-                    <td>SCL</td>
-                    <td>GPIO 22</td>
-                    <td><span class="dot" style="background:#06b6d4"></span>I²C Clock (shared)</td>
-                </tr>
-                <tr>
-                    <td>SDA</td>
-                    <td>GPIO 21</td>
-                    <td><span class="dot" style="background:#3b82f6"></span>I²C Data (shared)</td>
-                </tr>
-                <tr>
-                    <td>BAT</td>
-                    <td>—</td>
-                    <td>CR2032 backup cell</td>
-                </tr>
-                <tr>
-                    <td>SQW</td>
-                    <td>—</td>
-                    <td>Not connected</td>
-                </tr>
-            </table>
-        </div>
-
-        <div class="tbl">
-            <div class="tbl-title">NEO-6M GPS — ESP32 Connections</div>
-            <table>
-                <tr>
-                    <th>NEO-6M Pin</th>
-                    <th>ESP32 Pin</th>
-                    <th>Signal</th>
-                </tr>
-                <tr>
-                    <td>VCC</td>
-                    <td>3V3 / VIN</td>
-                    <td><span class="dot" style="background:#ef4444"></span>3.3V Power</td>
-                </tr>
-                <tr>
-                    <td>GND</td>
-                    <td>GND</td>
-                    <td><span class="dot" style="background:#64748b"></span>Ground</td>
-                </tr>
-                <tr>
-                    <td>TX</td>
-                    <td>GPIO 16 (RX2)</td>
-                    <td><span class="dot" style="background:#22c55e"></span>UART Data Out</td>
-                </tr>
-                <tr>
-                    <td>RX</td>
-                    <td>GPIO 17 (TX2)</td>
-                    <td><span class="dot" style="background:#f97316"></span>UART Data In</td>
-                </tr>
-                <tr>
-                    <td>PPS</td>
-                    <td>—</td>
-                    <td>Not connected</td>
-                </tr>
-            </table>
-        </div>
-
-        <div class="tbl">
-            <div class="tbl-title">I²C Bus — Pull-up Resistors</div>
-            <table>
-                <tr>
-                    <th>Component</th>
-                    <th>Value</th>
-                    <th>Connected Between</th>
-                </tr>
-                <tr>
-                    <td>R1 (SDA)</td>
-                    <td>4.7 kΩ</td>
-                    <td>3.3V ↔ SDA line</td>
-                </tr>
-                <tr>
-                    <td>R2 (SCL)</td>
-                    <td>4.7 kΩ</td>
-                    <td>3.3V ↔ SCL line</td>
-                </tr>
-                <tr>
-                    <td>Bus speed</td>
-                    <td>100 kHz</td>
-                    <td>Standard mode (Sm)</td>
-                </tr>
-                <tr>
-                    <td>MPU address</td>
-                    <td>0x69</td>
-                    <td>AD0 tied to 3V3</td>
-                </tr>
-                <tr>
-                    <td>RTC address</td>
-                    <td>0x68</td>
-                    <td>Fixed (DS3231)</td>
-                </tr>
-                <tr>
-                    <td>UART baud</td>
-                    <td>9600</td>
-                    <td>UART2 Serial port</td>
-                </tr>
-            </table>
-        </div>
-
+  <footer>
+    <div class="wrap">
+      <span>IPDS &middot; MIT License</span>
+      <nav aria-label="Footer">
+        <a href="../index.html">Home</a>
+        <a href="ipds_block_diagram.html">Block diagram</a>
+        <a href="ipds_flowchart.html">Flowchart</a>
+        <a href="https://github.com/SanTiwari07/PotHoleDetection" target="_blank" rel="noopener">GitHub</a>
+      </nav>
     </div>
-
+  </footer>
 </body>
 
 </html>

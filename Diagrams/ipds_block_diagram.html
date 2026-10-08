@@ -4,1026 +4,421 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>IPDS System Architecture Block Diagram</title>
+  <title>IPDS Block Diagram</title>
+  <meta name="theme-color" content="#0b0e11" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230b0e11'/%3E%3Cellipse cx='16' cy='17' rx='10' ry='5.5' fill='none' stroke='%23FCD535' stroke-width='2.6'/%3E%3Cellipse cx='16' cy='17' rx='4' ry='2.2' fill='%23FCD535'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
-
     :root {
-      --bg: #07090f;
-      --surface: rgba(255, 255, 255, 0.03);
-      --border: rgba(255, 255, 255, 0.07);
-      --text: #dde4f0;
-      --muted: #5a6680;
-      --col-hw: #3b82f6;
-      --col-fw: #8b5cf6;
-      --col-tr: #06b6d4;
-      --col-cv: #10b981;
-      --col-fu: #f59e0b;
-      --col-st: #ef4444;
-      --col-out: #ec4899;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'Inter', sans-serif;
-      min-height: 100vh;
-      padding: 36px 28px 56px;
-      background-image:
-        radial-gradient(ellipse 70% 50% at 15% 8%, rgba(59, 130, 246, 0.05) 0%, transparent 60%),
-        radial-gradient(ellipse 55% 45% at 85% 92%, rgba(139, 92, 246, 0.06) 0%, transparent 60%);
-    }
-
-    /* ── HEADER ── */
-    .header {
-      text-align: center;
-      margin-bottom: 36px;
-    }
-
-    .header .badge {
-      display: inline-block;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 10px;
-      letter-spacing: 2.5px;
-      text-transform: uppercase;
-      color: var(--col-cv);
-      border: 1px solid rgba(16, 185, 129, 0.28);
-      background: rgba(16, 185, 129, 0.05);
-      padding: 4px 14px;
-      border-radius: 20px;
-      margin-bottom: 14px;
-    }
-
-    .header h1 {
-      font-size: clamp(20px, 3.5vw, 32px);
-      font-weight: 800;
-      letter-spacing: -0.5px;
-      background: linear-gradient(135deg, #e2e8f0 30%, #7a8faf);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .header p {
-      color: var(--muted);
-      font-size: 13px;
-      margin-top: 6px;
-    }
-
-    /* ── LEGEND ── */
-    .legend {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 8px;
-      margin-bottom: 34px;
-    }
-
-    .legend-item {
-      display: flex;
-      align-items: center;
-      gap: 7px;
-      font-size: 11.5px;
-      color: #8a9ab8;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      padding: 4px 12px;
-      border-radius: 20px;
-    }
-
-    .legend-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-    }
-
-    /* ── DIAGRAM ── */
-    .diagram {
-      max-width: 1200px;
-      margin: 0 auto;
-      display: flex;
-      flex-direction: column;
-      gap: 0;
-    }
-
-    /* ── LAYER ROW ── */
-    .layer-row {
-      display: flex;
-      align-items: stretch;
-    }
-
-    .layer-label {
-      writing-mode: vertical-rl;
-      text-orientation: mixed;
-      transform: rotate(180deg);
-      font-size: 9.5px;
-      font-family: 'JetBrains Mono', monospace;
-      letter-spacing: 2.5px;
-      text-transform: uppercase;
-      font-weight: 600;
-      padding: 10px 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-width: 34px;
-      border-radius: 8px 0 0 8px;
-      flex-shrink: 0;
-    }
-
-    .layer-content {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 12px;
-      padding: 16px 20px;
-      border-radius: 0 8px 8px 0;
-      border: 1px solid var(--border);
-      border-left: none;
-    }
-
-    /* ── CONNECTOR ── */
-    .connector-multi {
-      display: flex;
-      justify-content: center;
-      gap: 80px;
-      height: 46px;
-      padding: 0 100px;
-      position: relative;
-    }
-
-    .connector-single {
-      display: flex;
-      justify-content: center;
-      height: 42px;
-    }
-
-    .arrow-down {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0;
-    }
-
-    .arrow-line {
-      width: 1px;
-      flex: 1;
-      background: linear-gradient(to bottom, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.04));
-    }
-
-    .arrow-head {
-      width: 0;
-      height: 0;
-      border-left: 5px solid transparent;
-      border-right: 5px solid transparent;
-      border-top: 7px solid rgba(255, 255, 255, 0.22);
-    }
-
-    .arrow-label {
-      font-size: 9.5px;
-      color: var(--muted);
-      font-family: 'JetBrains Mono', monospace;
-      margin-top: 4px;
-      letter-spacing: 0.3px;
-      white-space: nowrap;
-    }
-
-    /* ── BLOCK ── */
-    .block {
-      border-radius: 10px;
-      padding: 14px 16px;
-      min-width: 148px;
-      max-width: 210px;
-      border: 1px solid;
-      transition: transform 0.18s ease, box-shadow 0.18s ease;
-      cursor: default;
-    }
-
-    .block:hover {
-      transform: translateY(-3px);
-    }
-
-    /* Icon container */
-    .block-icon {
-      width: 28px;
-      height: 28px;
-      margin-bottom: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 6px;
-      flex-shrink: 0;
-    }
-
-    .block-icon svg {
-      width: 16px;
-      height: 16px;
-    }
-
-    .block-name {
-      font-size: 12.5px;
-      font-weight: 700;
-      line-height: 1.25;
-      margin-bottom: 5px;
-    }
-
-    .block-sub {
-      font-size: 10px;
-      color: rgba(221, 228, 240, 0.5);
-      line-height: 1.5;
-      font-family: 'JetBrains Mono', monospace;
-    }
-
-    .block-tag {
-      display: inline-block;
-      font-size: 8.5px;
-      padding: 2px 7px;
-      border-radius: 6px;
-      margin-top: 8px;
-      text-transform: uppercase;
-      letter-spacing: 0.9px;
-      font-weight: 600;
-    }
-
-    /* COLOR THEMES */
-    .hw {
-      background: rgba(59, 130, 246, 0.07);
-      border-color: rgba(59, 130, 246, 0.3);
-      box-shadow: 0 4px 20px rgba(59, 130, 246, 0.08);
-    }
-
-    .hw:hover {
-      box-shadow: 0 8px 28px rgba(59, 130, 246, 0.2);
-    }
-
-    .hw .block-icon {
-      background: rgba(59, 130, 246, 0.12);
-    }
-
-    .hw .block-icon svg {
-      stroke: #93c5fd;
-    }
-
-    .hw .block-tag {
-      background: rgba(59, 130, 246, 0.15);
-      color: #93c5fd;
-    }
-
-    .fw {
-      background: rgba(139, 92, 246, 0.07);
-      border-color: rgba(139, 92, 246, 0.3);
-      box-shadow: 0 4px 20px rgba(139, 92, 246, 0.08);
-    }
-
-    .fw:hover {
-      box-shadow: 0 8px 28px rgba(139, 92, 246, 0.2);
-    }
-
-    .fw .block-icon {
-      background: rgba(139, 92, 246, 0.12);
-    }
-
-    .fw .block-icon svg {
-      stroke: #c4b5fd;
-    }
-
-    .fw .block-tag {
-      background: rgba(139, 92, 246, 0.15);
-      color: #c4b5fd;
-    }
-
-    .tr {
-      background: rgba(6, 182, 212, 0.07);
-      border-color: rgba(6, 182, 212, 0.3);
-      box-shadow: 0 4px 20px rgba(6, 182, 212, 0.08);
-    }
-
-    .tr:hover {
-      box-shadow: 0 8px 28px rgba(6, 182, 212, 0.2);
-    }
-
-    .tr .block-icon {
-      background: rgba(6, 182, 212, 0.12);
-    }
-
-    .tr .block-icon svg {
-      stroke: #67e8f9;
-    }
-
-    .tr .block-tag {
-      background: rgba(6, 182, 212, 0.15);
-      color: #67e8f9;
-    }
-
-    .cv {
-      background: rgba(16, 185, 129, 0.07);
-      border-color: rgba(16, 185, 129, 0.3);
-      box-shadow: 0 4px 20px rgba(16, 185, 129, 0.08);
-    }
-
-    .cv:hover {
-      box-shadow: 0 8px 28px rgba(16, 185, 129, 0.2);
-    }
-
-    .cv .block-icon {
-      background: rgba(16, 185, 129, 0.12);
-    }
-
-    .cv .block-icon svg {
-      stroke: #6ee7b7;
-    }
-
-    .cv .block-tag {
-      background: rgba(16, 185, 129, 0.15);
-      color: #6ee7b7;
-    }
-
-    .fu {
-      background: rgba(245, 158, 11, 0.07);
-      border-color: rgba(245, 158, 11, 0.3);
-      box-shadow: 0 4px 20px rgba(245, 158, 11, 0.08);
-    }
-
-    .fu:hover {
-      box-shadow: 0 8px 28px rgba(245, 158, 11, 0.2);
-    }
-
-    .fu .block-icon {
-      background: rgba(245, 158, 11, 0.12);
-    }
-
-    .fu .block-icon svg {
-      stroke: #fcd34d;
-    }
-
-    .fu .block-tag {
-      background: rgba(245, 158, 11, 0.15);
-      color: #fcd34d;
-    }
-
-    .st {
-      background: rgba(239, 68, 68, 0.07);
-      border-color: rgba(239, 68, 68, 0.3);
-      box-shadow: 0 4px 20px rgba(239, 68, 68, 0.08);
-    }
-
-    .st:hover {
-      box-shadow: 0 8px 28px rgba(239, 68, 68, 0.2);
-    }
-
-    .st .block-icon {
-      background: rgba(239, 68, 68, 0.12);
-    }
-
-    .st .block-icon svg {
-      stroke: #fca5a5;
-    }
-
-    .st .block-tag {
-      background: rgba(239, 68, 68, 0.15);
-      color: #fca5a5;
-    }
-
-    .out {
-      background: rgba(236, 72, 153, 0.07);
-      border-color: rgba(236, 72, 153, 0.3);
-      box-shadow: 0 4px 20px rgba(236, 72, 153, 0.08);
-    }
-
-    .out:hover {
-      box-shadow: 0 8px 28px rgba(236, 72, 153, 0.2);
-    }
-
-    .out .block-icon {
-      background: rgba(236, 72, 153, 0.12);
-    }
-
-    .out .block-icon svg {
-      stroke: #f9a8d4;
-    }
-
-    .out .block-tag {
-      background: rgba(236, 72, 153, 0.15);
-      color: #f9a8d4;
-    }
-
-    /* LAYER LABEL COLORS */
-    .lbl-hw {
-      background: rgba(59, 130, 246, 0.12);
-      color: #93c5fd;
-    }
-
-    .lbl-fw {
-      background: rgba(139, 92, 246, 0.12);
-      color: #c4b5fd;
-    }
-
-    .lbl-tr {
-      background: rgba(6, 182, 212, 0.12);
-      color: #67e8f9;
-    }
-
-    .lbl-cv {
-      background: rgba(16, 185, 129, 0.12);
-      color: #6ee7b7;
-    }
-
-    .lbl-fu {
-      background: rgba(245, 158, 11, 0.12);
-      color: #fcd34d;
-    }
-
-    .lbl-st {
-      background: rgba(239, 68, 68, 0.12);
-      color: #fca5a5;
-    }
-
-    .lbl-out {
-      background: rgba(236, 72, 153, 0.12);
-      color: #f9a8d4;
-    }
-
-    /* LAYER CONTENT BG */
-    .bg-hw {
-      background: rgba(59, 130, 246, 0.03);
-    }
-
-    .bg-fw {
-      background: rgba(139, 92, 246, 0.03);
-    }
-
-    .bg-tr {
-      background: rgba(6, 182, 212, 0.03);
-    }
-
-    .bg-cv {
-      background: rgba(16, 185, 129, 0.03);
-    }
-
-    .bg-fu {
-      background: rgba(245, 158, 11, 0.03);
-    }
-
-    .bg-st {
-      background: rgba(239, 68, 68, 0.03);
-    }
-
-    .bg-out {
-      background: rgba(236, 72, 153, 0.03);
-    }
-
-    /* ── FOOTER PANELS ── */
-    .footer-panels {
-      max-width: 1200px;
-      margin: 0 auto;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-top: 20px;
-    }
-
-    .panel {
-      border-radius: 10px;
-      padding: 14px 20px;
-      border: 1px solid var(--border);
-      background: var(--surface);
-    }
-
-    .panel-title {
-      font-size: 9.5px;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      font-family: 'JetBrains Mono', monospace;
-      color: var(--muted);
-      margin-bottom: 10px;
-    }
-
-    .flow-steps {
-      display: flex;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 5px;
-    }
-
-    .flow-step {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 10px;
-      padding: 4px 9px;
-      border-radius: 5px;
-      font-weight: 500;
-      line-height: 1.4;
-      text-align: center;
-    }
-
-    .flow-arrow {
-      color: var(--muted);
-      font-size: 12px;
-      line-height: 1;
-    }
-
-    .formula-text {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 12px;
-      color: #fde68a;
-      line-height: 1.8;
-    }
-
-    @media (max-width: 700px) {
-      .block {
-        min-width: 120px;
-        max-width: 160px;
-      }
-
-      .connector-multi {
-        gap: 30px;
-        padding: 0 20px;
-      }
-
-      .footer-panels {
-        grid-template-columns: 1fr;
-      }
+      --canvas: #0b0e11;
+      --card: #1e2329;
+      --elevated: #2b3139;
+      --hairline: #2b3139;
+      --primary: #FCD535;
+      --primary-active: #f0b90b;
+      --ink: #181a20;
+      --body: #eaecef;
+      --muted: #707a8a;
+      --muted-strong: #929aa5;
+      --on-dark: #ffffff;
+      --soft-light: #fafafa;
+      --hairline-light: #eaecef;
+      --nova: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --plex: 'IBM Plex Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--canvas); color: var(--body); font-family: var(--nova); font-size: 14px; line-height: 1.5; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+    a { color: inherit; text-decoration: none; }
+    :focus-visible { outline: none; box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5); border-radius: 6px; }
+    .wrap { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
+
+    /* ---------- top nav (shared with the site) ---------- */
+    .nav { position: sticky; top: 0; z-index: 50; background: var(--canvas); border-bottom: 1px solid var(--hairline); }
+    .nav .wrap { display: flex; align-items: center; gap: 28px; height: 64px; }
+    .brand { display: flex; align-items: center; gap: 10px; color: var(--primary); font-weight: 700; font-size: 20px; letter-spacing: 0.5px; flex-shrink: 0; }
+    .brand svg { width: 28px; height: 28px; }
+    .tabs { display: flex; gap: 4px; }
+    .tabs a { padding: 8px 12px; border-radius: 6px; font-weight: 500; color: var(--muted-strong); white-space: nowrap; }
+    .tabs a:hover { color: var(--on-dark); background: var(--card); }
+    .tabs a[aria-current="page"] { color: var(--on-dark); background: var(--card); }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 40px; padding: 0 20px; border-radius: 6px; font-weight: 600; font-size: 14px; white-space: nowrap; }
+    .btn svg { width: 16px; height: 16px; }
+    .btn-primary { background: var(--primary); color: var(--ink); margin-left: auto; }
+    .btn-primary:hover, .btn-primary:active { background: var(--primary-active); }
+
+    /* ---------- page head ---------- */
+    .page-head { padding: 56px 0 32px; }
+    .eyebrow { font-size: 14px; font-weight: 600; color: var(--primary); }
+    h1 { margin-top: 8px; font-size: 40px; line-height: 1.15; font-weight: 700; letter-spacing: -0.3px; color: var(--on-dark); }
+    .sub { margin-top: 10px; font-size: 16px; color: var(--muted-strong); max-width: 760px; }
+
+    /* ---------- diagram ---------- */
+    .diagram { padding-bottom: 24px; }
+    .layer { display: grid; grid-template-columns: 168px 1fr; background: var(--card); border-radius: 12px; overflow: hidden; }
+    .layer.key { box-shadow: inset 0 0 0 1px var(--primary); }
+    .layer-label { padding: 20px; border-right: 1px solid var(--hairline); display: flex; flex-direction: column; gap: 4px; }
+    .layer-label .n { font-family: var(--plex); font-weight: 700; font-size: 14px; color: var(--primary); }
+    .layer-label .t { font-weight: 600; font-size: 16px; color: var(--on-dark); }
+    .layer-label .d { font-size: 12px; color: var(--muted); }
+    .blocks { padding: 16px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+
+    .block { background: var(--elevated); border-radius: 8px; padding: 16px; min-width: 0; }
+    .block.future { background: transparent; border: 1px dashed #474d57; }
+    .block-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px; }
+    .block-icon { width: 32px; height: 32px; border-radius: 6px; background: var(--canvas); display: grid; place-items: center; color: var(--on-dark); flex-shrink: 0; }
+    .layer.key .block-icon { color: var(--primary); }
+    .block-icon svg { width: 16px; height: 16px; stroke: currentColor; }
+    .block-tag { font-size: 11px; font-weight: 600; color: var(--muted-strong); background: var(--canvas); padding: 3px 8px; border-radius: 4px; white-space: nowrap; }
+    .future .block-tag { color: var(--muted); }
+    .block-name { font-size: 15px; font-weight: 600; color: var(--on-dark); line-height: 1.3; overflow-wrap: anywhere; }
+    .block-sub { margin-top: 6px; font-family: var(--mono); font-size: 12px; line-height: 1.6; color: var(--muted-strong); overflow-wrap: anywhere; }
+
+    /* connector between layers: a centred line + arrow, labels sit on top of it */
+    .link { position: relative; display: flex; justify-content: center; padding: 14px 0 18px; }
+    .link::before { content: ""; position: absolute; left: 50%; top: 0; bottom: 6px; width: 1px; background: #474d57; }
+    .link::after { content: ""; position: absolute; left: calc(50% - 5px); bottom: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 7px solid #474d57; }
+    .link .labels { position: relative; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; max-width: 920px; padding: 0 16px; }
+    .link span { font-family: var(--mono); font-size: 12px; color: var(--muted-strong); background: var(--canvas); border: 1px solid var(--hairline); padding: 4px 10px; border-radius: 4px; }
+    .link.key span { color: var(--primary); border-color: rgba(252, 213, 53, 0.35); }
+
+    /* ---------- footer panels ---------- */
+    .panels { display: grid; grid-template-columns: 1.4fr 1fr; gap: 16px; margin-top: 24px; padding-bottom: 80px; }
+    .panel { background: var(--card); border-radius: 12px; padding: 24px; min-width: 0; }
+    .panel h2 { font-size: 20px; font-weight: 600; color: var(--on-dark); }
+    .panel .meta { margin-top: 4px; font-size: 13px; color: var(--muted); }
+    .timeline { list-style: none; margin-top: 16px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+    .timeline li { background: var(--elevated); border-radius: 8px; padding: 10px 12px; }
+    .timeline b { display: block; font-family: var(--plex); font-variant-numeric: tabular-nums; font-size: 16px; font-weight: 700; color: var(--primary); }
+    .timeline span { font-size: 12px; color: var(--body); }
+    .formula { margin-top: 16px; background: var(--canvas); border-radius: 8px; padding: 16px; font-family: var(--mono); font-size: 13px; line-height: 1.9; color: var(--body); overflow-x: auto; white-space: nowrap; }
+    .formula .k { color: var(--primary); }
+
+    /* ---------- light footer ---------- */
+    footer { background: var(--soft-light); color: var(--ink); padding: 32px 0; }
+    footer .wrap { display: flex; flex-wrap: wrap; gap: 12px 24px; justify-content: space-between; align-items: center; font-size: 13px; color: var(--muted); }
+    footer nav { display: flex; flex-wrap: wrap; gap: 20px; }
+    footer a:hover { color: var(--ink); }
+
+    /* ---------- responsive ---------- */
+    @media (max-width: 1024px) {
+      .panels { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 767px) {
+      .wrap { padding: 0 16px; }
+      .nav .wrap { height: auto; flex-wrap: wrap; gap: 0 12px; padding-top: 12px; }
+      .brand { height: 40px; }
+      .tabs { order: 3; width: calc(100% + 32px); margin: 8px -16px 0; padding: 0 16px 10px; overflow-x: auto; scrollbar-width: none; }
+      .tabs::-webkit-scrollbar { display: none; }
+      .btn-primary { height: 36px; padding: 0 14px; }
+      .page-head { padding: 32px 0 24px; }
+      h1 { font-size: 28px; }
+      .sub { font-size: 15px; }
+      .layer { grid-template-columns: 1fr; }
+      .layer-label { border-right: 0; border-bottom: 1px solid var(--hairline); flex-direction: row; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; padding: 14px 16px; }
+      .layer-label .d { width: 100%; }
+      .blocks { padding: 12px; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+      .block { padding: 14px; }
+      .block-name { font-size: 14px; }
+      .block-sub { font-size: 11.5px; }
+      .timeline { grid-template-columns: repeat(2, 1fr); }
+      .panel { padding: 20px 16px; }
+      .panels { padding-bottom: 56px; }
+    }
+    @media (max-width: 380px) {
+      .blocks { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 
 <body>
-  <a href="../index.html" style="position:fixed;top:16px;left:16px;z-index:100;display:inline-flex;align-items:center;gap:8px;height:36px;padding:0 14px;border-radius:6px;background:#1e2329;color:#eaecef;font:600 13px Inter,system-ui,sans-serif;text-decoration:none"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>IPDS home</a>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="i-logo" viewBox="0 0 32 32"><rect width="32" height="32" rx="6" fill="currentColor" opacity=".12"/><ellipse cx="16" cy="17" rx="10" ry="5.5" fill="none" stroke="currentColor" stroke-width="2.6"/><ellipse cx="16" cy="17" rx="4" ry="2.2" fill="currentColor"/></symbol>
+      <symbol id="i-back" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M19 12H5M11 6l-6 6 6 6"/></symbol>
+    </defs>
+  </svg>
 
-  <!-- HEADER -->
-  <div class="header">
-    <div class="badge">System Architecture</div>
-    <h1>Intelligent Pothole Detection System (IPDS)</h1>
-    <p>End-to-end block diagram — physical sensing through persistent data storage</p>
-  </div>
+  <header class="nav">
+    <div class="wrap">
+      <a class="brand" href="../index.html"><svg><use href="#i-logo"/></svg>IPDS</a>
+      <nav class="tabs" aria-label="Diagrams">
+        <a href="ipds_block_diagram.html" aria-current="page">Block diagram</a>
+        <a href="ipds_flowchart.html">Flowchart</a>
+        <a href="ipds_schematic.html">Schematic</a>
+      </nav>
+      <a class="btn btn-primary" href="../index.html#diagrams"><svg><use href="#i-back"/></svg>Back to site</a>
+    </div>
+  </header>
 
-  <!-- LEGEND -->
-  <div class="legend">
-    <div class="legend-item">
-      <div class="legend-dot" style="background:#3b82f6"></div>Hardware / Sensor
+  <main class="wrap">
+    <div class="page-head">
+      <div class="eyebrow">System architecture</div>
+      <h1>IPDS block diagram</h1>
+      <p class="sub">End to end, from physical sensing through to stored data. Seven layers, top to bottom.</p>
     </div>
-    <div class="legend-item">
-      <div class="legend-dot" style="background:#8b5cf6"></div>Firmware (ESP32)
-    </div>
-    <div class="legend-item">
-      <div class="legend-dot" style="background:#06b6d4"></div>Transport / WiFi
-    </div>
-    <div class="legend-item">
-      <div class="legend-dot" style="background:#10b981"></div>Computer Vision (Python)
-    </div>
-    <div class="legend-item">
-      <div class="legend-dot" style="background:#f59e0b"></div>Sensor Fusion / Decision
-    </div>
-    <div class="legend-item">
-      <div class="legend-dot" style="background:#ef4444"></div>Storage Output
-    </div>
-    <div class="legend-item">
-      <div class="legend-dot" style="background:#ec4899"></div>Downstream / Future
-    </div>
-  </div>
 
-  <div class="diagram">
+    <div class="diagram">
 
-    <!-- ── LAYER 1: Sensors ── -->
-    <div class="layer-row">
-      <div class="layer-label lbl-hw">Sensor Layer</div>
-      <div class="layer-content bg-hw">
-
-        <div class="block hw">
-          <div class="block-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="3" />
-              <path d="M3 9a9 9 0 0 1 9-6 9 9 0 0 1 9 6" />
-              <path d="M3 15a9 9 0 0 0 9 6 9 9 0 0 0 9-6" />
-              <rect x="2" y="9" width="20" height="6" rx="2" />
-            </svg>
+      <!-- LAYER 1: Sensors -->
+      <section class="layer">
+        <div class="layer-label"><span class="n">01</span><span class="t">Sensors</span><span class="d">Physical inputs</span></div>
+        <div class="blocks">
+          <div class="block">
+            <div class="block-top">
+              <div class="block-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
+              <span class="block-tag">Vision</span>
+            </div>
+            <div class="block-name">OV2640 Camera</div>
+            <div class="block-sub">320&times;240 RGB CMOS<br />MJPEG &middot; ~15 FPS</div>
           </div>
-          <div class="block-name">OV2640 Camera</div>
-          <div class="block-sub">320×240 RGB CMOS<br />MJPEG · ~15 FPS</div>
-          <span class="block-tag">Vision Sensor</span>
+          <div class="block">
+            <div class="block-top">
+              <div class="block-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 15h3M1 9h3M1 15h3"/></svg></div>
+              <span class="block-tag">Inertial</span>
+            </div>
+            <div class="block-name">MPU6050 IMU</div>
+            <div class="block-sub">3-axis MEMS accel<br />&plusmn;2 g &middot; 16-bit &middot; I&sup2;C</div>
+          </div>
+          <div class="block">
+            <div class="block-top">
+              <div class="block-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg></div>
+              <span class="block-tag">Location</span>
+            </div>
+            <div class="block-name">NEO-6M GPS</div>
+            <div class="block-sub">NMEA 0183 &middot; UART<br />$GPGGA / $GPRMC</div>
+          </div>
+          <div class="block">
+            <div class="block-top">
+              <div class="block-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 6v6l4 2"/></svg></div>
+              <span class="block-tag">Time</span>
+            </div>
+            <div class="block-name">DS3231 RTC</div>
+            <div class="block-sub">TCXO &middot; I&sup2;C &middot; CR2032<br />ISO-8601 timestamp</div>
+          </div>
         </div>
+      </section>
 
-        <div class="block hw">
-          <div class="block-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="4" y="4" width="16" height="16" rx="2" />
-              <rect x="9" y="9" width="6" height="6" />
-              <line x1="9" y1="1" x2="9" y2="4" />
-              <line x1="15" y1="1" x2="15" y2="4" />
-              <line x1="9" y1="20" x2="9" y2="23" />
-              <line x1="15" y1="20" x2="15" y2="23" />
-              <line x1="20" y1="9" x2="23" y2="9" />
-              <line x1="20" y1="15" x2="23" y2="15" />
-              <line x1="1" y1="9" x2="4" y2="9" />
-              <line x1="1" y1="15" x2="4" y2="15" />
-            </svg>
+      <div class="link"><div class="labels"><span>Parallel / DMA</span><span>I&sup2;C &middot; 0x69</span><span>UART2 &middot; 9600 baud</span><span>I&sup2;C &middot; shared bus</span></div></div>
+
+      <!-- LAYER 2: Firmware -->
+      <section class="layer">
+        <div class="layer-label"><span class="n">02</span><span class="t">Firmware</span><span class="d">Two ESP32 boards</span></div>
+        <div class="blocks">
+          <div class="block">
+            <div class="block-top">
+              <div class="block-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><circle cx="12" cy="10" r="3"/><path d="M8 21h8M12 17v4"/></svg></div>
+              <span class="block-tag">Vision node</span>
+            </div>
+            <div class="block-name">ESP32-CAM</div>
+            <div class="block-sub">AI-Thinker &middot; 240 MHz &middot; 4 MB PSRAM<br />esp_32_cam_final.ino<br />MJPEG HTTP server :81</div>
           </div>
-          <div class="block-name">MPU6050 IMU</div>
-          <div class="block-sub">3-Axis MEMS Accel<br />±2g · 16-bit ADC · I²C</div>
-          <span class="block-tag">Inertial Sensor</span>
-        </div>
-
-        <div class="block hw">
-          <div class="block-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 2L12 6" />
-              <circle cx="12" cy="12" r="4" />
-              <path d="M6 6 L4 4" />
-              <path d="M18 6 L20 4" />
-              <path d="M4 12 H2" />
-              <path d="M22 12 H20" />
-              <path d="M6 18 L4 20" />
-              <path d="M18 18 L20 20" />
-              <path d="M12 18 L12 22" />
-            </svg>
+          <div class="block">
+            <div class="block-top">
+              <div class="block-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 15h3M1 9h3M1 15h3"/></svg></div>
+              <span class="block-tag">Sensor node</span>
+            </div>
+            <div class="block-name">ESP32 dev board</div>
+            <div class="block-sub">DevKit V1 &middot; 240 MHz &middot; I&sup2;C master<br />esp_32_final.ino<br />REST API :80 &middot; GPS &middot; RTC</div>
           </div>
-          <div class="block-name">NEO-6M GPS</div>
-          <div class="block-sub">NMEA 0183 · UART<br />$GPGGA / $GPRMC</div>
-          <span class="block-tag">Location</span>
         </div>
+      </section>
 
-        <div class="block hw">
-          <div class="block-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="9" />
-              <polyline points="12 6 12 12 16 14" />
-            </svg>
+      <div class="link"><div class="labels"><span>MJPEG stream &middot; 2.4 GHz WiFi</span><span>HTTP GET /query &middot; WiFi</span></div></div>
+
+      <!-- LAYER 3: Transport -->
+      <section class="layer">
+        <div class="layer-label"><span class="n">03</span><span class="t">Transport</span><span class="d">Local WiFi network</span></div>
+        <div class="blocks">
+          <div class="block">
+            <div class="block-top">
+              <div class="block-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.55a11 11 0 0 1 14.08 0M1.42 9a16 16 0 0 1 21.16 0M8.53 16.11a6 6 0 0 1 6.95 0"/><circle cx="12" cy="20" r="1"/></svg></div>
+              <span class="block-tag">Video</span>
+            </div>
+            <div class="block-name">MJPEG over HTTP</div>
+            <div class="block-sub">multipart/x-mixed-replace<br />continuous stream, port 81</div>
           </div>
-          <div class="block-name">DS3231 RTC</div>
-          <div class="block-sub">TCXO · I²C · CR2032<br />ISO-8601 Timestamp</div>
-          <span class="block-tag">Chronology</span>
+          <div class="block">
+            <div class="block-top">
+              <div class="block-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 18l6-6-6-6M8 6l-6 6 6 6"/></svg></div>
+              <span class="block-tag">Sensor data</span>
+            </div>
+            <div class="block-name">JSON over HTTP</div>
+            <div class="block-sub">GET /query?pothole_id=N<br />on demand, port 80</div>
+          </div>
         </div>
+      </section>
 
-      </div>
+      <div class="link"><div class="labels"><span>cv2.VideoCapture()</span><span>urllib.request.urlopen()</span></div></div>
+
+      <!-- LAYER 4: Computer vision -->
+      <section class="layer">
+        <div class="layer-label"><span class="n">04</span><span class="t">Computer vision</span><span class="d">Python processing hub</span></div>
+        <div class="blocks">
+          <div class="block">
+            <div class="block-top">
+              <div class="block-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg></div>
+              <span class="block-tag">Inference</span>
+            </div>
+            <div class="block-name">detector.py</div>
+            <div class="block-sub">Ultralytics YOLOv8m<br />conf threshold 0.25</div>
+          </div>
+          <div class="block">
+            <div class="block-top">
+              <div class="block-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>
+              <span class="block-tag">Kalman</span>
+            </div>
+            <div class="block-name">sort.py</div>
+            <div class="block-sub">7D Kalman filter<br />Hungarian matching &middot; IoU</div>
+          </div>
+          <div class="block">
+            <div class="block-top">
+              <div class="block-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div>
+              <span class="block-tag">Tracking</span>
+            </div>
+            <div class="block-name">tracker.py</div>
+            <div class="block-sub">Persistent IDs<br />unique-ID counting</div>
+          </div>
+          <div class="block">
+            <div class="block-top">
+              <div class="block-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/></svg></div>
+              <span class="block-tag">Filters</span>
+            </div>
+            <div class="block-name">filters.py</div>
+            <div class="block-sub">area ratio &le; 0.25<br />aspect ratio &le; 3.0<br />stationary &le; 10 frames</div>
+          </div>
+        </div>
+      </section>
+
+      <div class="link key"><div class="labels"><span>centre crosses 0.75 &times; frame height &rarr; trigger</span></div></div>
+
+      <!-- LAYER 5: Fusion -->
+      <section class="layer key">
+        <div class="layer-label"><span class="n">05</span><span class="t">Sensor fusion</span><span class="d">Seen and felt</span></div>
+        <div class="blocks">
+          <div class="block">
+            <div class="block-top">
+              <div class="block-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M2 12h4M18 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg></div>
+              <span class="block-tag">Orchestrator</span>
+            </div>
+            <div class="block-name">main.py</div>
+            <div class="block-sub">frame loop &middot; ~15 FPS<br />one query per track</div>
+          </div>
+          <div class="block">
+            <div class="block-top">
+              <div class="block-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h3l2-6 4 13 3-10 2 5h6"/></svg></div>
+              <span class="block-tag">IMU poll</span>
+            </div>
+            <div class="block-name">Sensor burst</div>
+            <div class="block-sub">get_sensor_burst(): 5 reads<br />peak jerk (m/s&sup3;)<br />gate: jerk &ge; 1.5</div>
+          </div>
+          <div class="block">
+            <div class="block-top">
+              <div class="block-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="6"/><circle cx="15" cy="12" r="6"/></svg></div>
+              <span class="block-tag">Fusion</span>
+            </div>
+            <div class="block-name">calculate_severity()</div>
+            <div class="block-sub">jerk_norm = min(J / 20, 1)<br />S = 0.7&middot;conf + 0.3&middot;jerk_norm</div>
+          </div>
+        </div>
+      </section>
+
+      <div class="link"><div class="labels"><span>confirmed event</span><span>severity</span><span>GPS</span><span>RTC timestamp</span></div></div>
+
+      <!-- LAYER 6: Storage -->
+      <section class="layer">
+        <div class="layer-label"><span class="n">06</span><span class="t">Storage</span><span class="d">Outputs on disk</span></div>
+        <div class="blocks">
+          <div class="block">
+            <div class="block-top">
+              <div class="block-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h8"/></svg></div>
+              <span class="block-tag">Log</span>
+            </div>
+            <div class="block-name">pothole_log.csv</div>
+            <div class="block-sub">outputs/logs/<br />time &middot; ID &middot; conf &middot; jerk &middot; severity &middot; GPS</div>
+          </div>
+          <div class="block">
+            <div class="block-top">
+              <div class="block-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2.18"/><path d="M7 2v20M17 2v20M2 12h20M2 7h5M2 17h5M17 17h5M17 7h5"/></svg></div>
+              <span class="block-tag">Video</span>
+            </div>
+            <div class="block-name">Annotated MP4</div>
+            <div class="block-sub">outputs/videos/<br />boxes, IDs, severity overlay</div>
+          </div>
+        </div>
+      </section>
+
+      <div class="link"><div class="labels"><span>structured data for analysis and maps</span></div></div>
+
+      <!-- LAYER 7: Downstream -->
+      <section class="layer">
+        <div class="layer-label"><span class="n">07</span><span class="t">Downstream</span><span class="d">Planned, not built yet</span></div>
+        <div class="blocks">
+          <div class="block future">
+            <div class="block-top">
+              <div class="block-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l19-9-9 19-2-8-8-2z"/></svg></div>
+              <span class="block-tag">Future</span>
+            </div>
+            <div class="block-name">GIS / spatial database</div>
+            <div class="block-sub">PostGIS &middot; GPS heatmap<br />severity clustering</div>
+          </div>
+          <div class="block future">
+            <div class="block-top">
+              <div class="block-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+              <span class="block-tag">Future</span>
+            </div>
+            <div class="block-name">Navigation alerts</div>
+            <div class="block-sub">OpenStreetMap &middot; V2X<br />driver warnings</div>
+          </div>
+          <div class="block future">
+            <div class="block-top">
+              <div class="block-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></div>
+              <span class="block-tag">Future</span>
+            </div>
+            <div class="block-name">Municipal dashboard</div>
+            <div class="block-sub">repair prioritisation<br />work orders</div>
+          </div>
+        </div>
+      </section>
     </div>
 
-    <div class="connector-multi">
-      <div class="arrow-down">
-        <div class="arrow-line"></div>
-        <div class="arrow-head"></div>
-        <div class="arrow-label">Parallel I2S / DMA</div>
-      </div>
-      <div class="arrow-down">
-        <div class="arrow-line"></div>
-        <div class="arrow-head"></div>
-        <div class="arrow-label">I²C · 0x69</div>
-      </div>
-      <div class="arrow-down">
-        <div class="arrow-line"></div>
-        <div class="arrow-head"></div>
-        <div class="arrow-label">UART2 · 9600 baud</div>
-      </div>
-      <div class="arrow-down">
-        <div class="arrow-line"></div>
-        <div class="arrow-head"></div>
-        <div class="arrow-label">I²C · shared bus</div>
-      </div>
+    <div class="panels">
+      <section class="panel">
+        <h2>Timeline of one pothole event</h2>
+        <p class="meta">Approximate timings from capture to the CSV row</p>
+        <ol class="timeline">
+          <li><b>0 ms</b><span>OV2640 capture</span></li>
+          <li><b>10 ms</b><span>JPEG via DMA</span></li>
+          <li><b>25 ms</b><span>WiFi transmit</span></li>
+          <li><b>60 ms</b><span>YOLOv8 inference</span></li>
+          <li><b>65 ms</b><span>SORT assigns ID</span></li>
+          <li><b>150 ms</b><span>HTTP GET /query</span></li>
+          <li><b>170 ms</b><span>JSON reply</span></li>
+          <li><b>185 ms</b><span>CSV row written</span></li>
+        </ol>
+      </section>
+      <section class="panel">
+        <h2>Sensor fusion formula</h2>
+        <p class="meta">From fusion.py (paper Eqs. 6 and 7)</p>
+        <div class="formula">jerk_norm = min(peak_jerk / <span class="k">20</span>, <span class="k">1</span>)<br />severity&nbsp; = <span class="k">0.7</span> &times; confidence + <span class="k">0.3</span> &times; jerk_norm<br />logged only if peak_jerk &ge; <span class="k">1.5</span> m/s&sup3;</div>
+      </section>
     </div>
+  </main>
 
-    <!-- ── LAYER 2: Firmware ── -->
-    <div class="layer-row">
-      <div class="layer-label lbl-fw">Firmware Layer</div>
-      <div class="layer-content bg-fw">
-
-        <div class="block fw" style="max-width:230px">
-          <div class="block-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="2" y="3" width="20" height="14" rx="2" />
-              <circle cx="12" cy="10" r="3" />
-              <path d="M2 17 l20 0" />
-            </svg>
-          </div>
-          <div class="block-name">ESP32-CAM — Vision Node</div>
-          <div class="block-sub">AI Thinker · 240 MHz<br />4 MB PSRAM · DMA<br />esp_32_cam_final.ino<br />MJPEG HTTP
-            Server :81</div>
-          <span class="block-tag">Vision Node</span>
-        </div>
-
-        <div class="block fw" style="max-width:240px">
-          <div class="block-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="4" y="4" width="16" height="16" rx="2" />
-              <rect x="9" y="9" width="6" height="6" />
-              <line x1="9" y1="1" x2="9" y2="4" />
-              <line x1="15" y1="1" x2="15" y2="4" />
-              <line x1="9" y1="20" x2="9" y2="23" />
-              <line x1="15" y1="20" x2="15" y2="23" />
-              <line x1="20" y1="9" x2="23" y2="9" />
-              <line x1="20" y1="15" x2="23" y2="15" />
-              <line x1="1" y1="9" x2="4" y2="9" />
-              <line x1="1" y1="15" x2="4" y2="15" />
-            </svg>
-          </div>
-          <div class="block-name">ESP32 Dev Board — Sensor Node</div>
-          <div class="block-sub">38-pin DevKit V1 · 240 MHz<br />I²C Master · REST API
-            :80<br />esp_32_final.ino<br />GPS buffer · RTC · WDT</div>
-          <span class="block-tag">Sensor Node</span>
-        </div>
-
-      </div>
+  <footer>
+    <div class="wrap">
+      <span>IPDS &middot; MIT License</span>
+      <nav aria-label="Footer">
+        <a href="../index.html">Home</a>
+        <a href="ipds_flowchart.html">Flowchart</a>
+        <a href="ipds_schematic.html">Schematic</a>
+        <a href="https://github.com/SanTiwari07/PotHoleDetection" target="_blank" rel="noopener">GitHub</a>
+      </nav>
     </div>
-
-    <div class="connector-multi" style="gap:200px; padding: 0 150px">
-      <div class="arrow-down">
-        <div class="arrow-line"></div>
-        <div class="arrow-head"></div>
-        <div class="arrow-label">MJPEG stream · 2.4 GHz WiFi</div>
-      </div>
-      <div class="arrow-down">
-        <div class="arrow-line"></div>
-        <div class="arrow-head"></div>
-        <div class="arrow-label">HTTP GET /query · WiFi</div>
-      </div>
-    </div>
-
-    <!-- ── LAYER 3: Transport ── -->
-    <div class="layer-row">
-      <div class="layer-label lbl-tr">Transport Layer</div>
-      <div class="layer-content bg-tr" style="justify-content:center">
-
-        <div class="block tr" style="max-width:340px; text-align:center">
-          <div class="block-icon" style="margin: 0 auto 10px">
-            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M5 12.55a11 11 0 0 1 14.08 0" />
-              <path d="M1.42 9a16 16 0 0 1 21.16 0" />
-              <path d="M8.53 16.11a6 6 0 0 1 6.95 0" />
-              <circle cx="12" cy="20" r="1" fill="currentColor" />
-            </svg>
-          </div>
-          <div class="block-name">IEEE 802.11 b/g/n — Local Area Network</div>
-          <div class="block-sub">
-            multipart/x-mixed-replace MJPEG socket — Video stream<br />
-            HTTP/1.1 JSON REST · GET /query?pothole_id=N — Sensor data
-          </div>
-          <span class="block-tag">Wireless Bridge</span>
-        </div>
-
-      </div>
-    </div>
-
-    <div class="connector-single">
-      <div class="arrow-down" style="align-items:center">
-        <div class="arrow-line"></div>
-        <div class="arrow-head"></div>
-        <div class="arrow-label">cv2.VideoCapture( ) &nbsp;·&nbsp; urllib.request.urlopen( )</div>
-      </div>
-    </div>
-
-    <!-- ── LAYER 4: Computer Vision ── -->
-    <div class="layer-row">
-      <div class="layer-label lbl-cv">CV / AI Layer</div>
-      <div class="layer-content bg-cv">
-
-        <div class="block cv">
-          <div class="block-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="11" cy="11" r="8" />
-              <line x1="21" y1="21" x2="16.65" y2="16.65" />
-            </svg>
-          </div>
-          <div class="block-name">detector.py</div>
-          <div class="block-sub">Ultralytics wrapper<br />YOLOv8m<br />conf threshold: 0.25</div>
-          <span class="block-tag">Inference</span>
-        </div>
-
-        <div class="block cv">
-          <div class="block-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
-            </svg>
-          </div>
-          <div class="block-name">sort.py</div>
-          <div class="block-sub">7D Kalman Filter<br />Hungarian Algorithm<br />IoU association</div>
-          <span class="block-tag">Kalman Filter</span>
-        </div>
-
-        <div class="block cv">
-          <div class="block-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <path
-                d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
-            </svg>
-          </div>
-          <div class="block-name">tracker.py</div>
-          <div class="block-sub">Persistent ID mgmt<br />unique_ids set<br />logged_ids dedup</div>
-          <span class="block-tag">Object Tracking</span>
-        </div>
-
-        <div class="block cv">
-          <div class="block-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="3" y="3" width="18" height="18" rx="2" />
-              <line x1="3" y1="9" x2="21" y2="9" />
-              <line x1="3" y1="15" x2="21" y2="15" />
-              <line x1="9" y1="3" x2="9" y2="21" />
-              <line x1="15" y1="3" x2="15" y2="21" />
-            </svg>
-          </div>
-          <div class="block-name">Geometry Filters</div>
-          <div class="block-sub">Area ratio &lt; 0.25<br />Aspect ratio &lt; 3.0<br />Persistence check</div>
-          <span class="block-tag">Heuristics</span>
-        </div>
-
-      </div>
-    </div>
-
-    <div class="connector-single">
-      <div class="arrow-down" style="align-items:center">
-        <div class="arrow-line"></div>
-        <div class="arrow-head"></div>
-        <div class="arrow-label">centroid cy &ge; ref_y (0.75 &times; frame height) &rarr; TRIGGER</div>
-      </div>
-    </div>
-
-    <!-- ── LAYER 5: Fusion ── -->
-    <div class="layer-row">
-      <div class="layer-label lbl-fu">Fusion Layer</div>
-      <div class="layer-content bg-fu">
-
-        <div class="block fu" style="max-width:220px">
-          <div class="block-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="3" />
-              <path
-                d="M12 2v4M12 18v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M2 12h4M18 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83" />
-            </svg>
-          </div>
-          <div class="block-name">main.py — Orchestrator</div>
-          <div class="block-sub">while True loop · ~15 FPS<br />State: track_history<br />logged_ids dedup set</div>
-          <span class="block-tag">Python Hub</span>
-        </div>
-
-        <div class="block fu" style="max-width:210px">
-          <div class="block-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
-            </svg>
-          </div>
-          <div class="block-name">Sensor Burst Query</div>
-          <div class="block-sub">get_sensor_burst( )<br />ax, ay, az &rarr; m/s&sup2;<br />Peak Jerk (m/s&sup3;)</div>
-          <span class="block-tag">IMU Poll</span>
-        </div>
-
-        <div class="block fu" style="max-width:230px">
-          <div class="block-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="4" y1="20" x2="20" y2="4" />
-              <line x1="4" y1="4" x2="20" y2="20" />
-              <circle cx="12" cy="12" r="2" />
-            </svg>
-          </div>
-          <div class="block-name">calculate_severity( )</div>
-          <div class="block-sub">jerk_norm = MinMax<br />s = 0.7&times;conf + 0.3&times;jerk&sup2;</div>
-          <span class="block-tag">Fusion Math</span>
-        </div>
-
-      </div>
-    </div>
-
-    <div class="connector-single">
-      <div class="arrow-down" style="align-items:center">
-        <div class="arrow-line"></div>
-        <div class="arrow-head"></div>
-        <div class="arrow-label">confirmed event · severity score · GPS coordinates · RTC timestamp</div>
-      </div>
-    </div>
-
-    <!-- ── LAYER 6: Storage ── -->
-    <div class="layer-row">
-      <div class="layer-label lbl-st">Storage Layer</div>
-      <div class="layer-content bg-st">
-
-        <div class="block st">
-          <div class="block-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-              <polyline points="14 2 14 8 20 8" />
-              <line x1="8" y1="13" x2="16" y2="13" />
-              <line x1="8" y1="17" x2="16" y2="17" />
-              <polyline points="10 9 9 9 8 9" />
-            </svg>
-          </div>
-          <div class="block-name">pothole_log.csv</div>
-          <div class="block-sub">outputs/logs/<br />date · time · frame_id<br />confidence · severity · GPS</div>
-          <span class="block-tag">Append-only Log</span>
-        </div>
-
-        <div class="block st">
-          <div class="block-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="2" y="2" width="20" height="20" rx="2.18" />
-              <line x1="7" y1="2" x2="7" y2="22" />
-              <line x1="17" y1="2" x2="17" y2="22" />
-              <line x1="2" y1="12" x2="22" y2="12" />
-              <line x1="2" y1="7" x2="7" y2="7" />
-              <line x1="2" y1="17" x2="7" y2="17" />
-              <line x1="17" y1="17" x2="22" y2="17" />
-              <line x1="17" y1="7" x2="22" y2="7" />
-            </svg>
-          </div>
-          <div class="block-name">output_pothole.mp4</div>
-          <div class="block-sub">outputs/videos/<br />OpenCV bbox overlay<br />MPEG-4 container</div>
-          <span class="block-tag">Annotated Video</span>
-        </div>
-
-      </div>
-    </div>
-
-    <div class="connector-single">
-      <div class="arrow-down" style="align-items:center">
-        <div class="arrow-line"></div>
-        <div class="arrow-head"></div>
-        <div class="arrow-label">structured data available for downstream analysis and visualization</div>
-      </div>
-    </div>
-
-    <!-- ── LAYER 7: Downstream ── -->
-    <div class="layer-row">
-      <div class="layer-label lbl-out">Downstream</div>
-      <div class="layer-content bg-out">
-
-        <div class="block out">
-          <div class="block-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <polygon points="3 11 22 2 13 21 11 13 3 11" />
-            </svg>
-          </div>
-          <div class="block-name">GIS / Spatial Database</div>
-          <div class="block-sub">PostGIS · GPS heatmap<br />Severity clustering<br />Municipality portal</div>
-          <span class="block-tag">Future</span>
-        </div>
-
-        <div class="block out">
-          <div class="block-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-            </svg>
-          </div>
-          <div class="block-name">Navigation Alerts</div>
-          <div class="block-sub">OpenStreetMap · V2X<br />C-V2X hazard broadcast<br />Driver audio warnings</div>
-          <span class="block-tag">Future</span>
-        </div>
-
-        <div class="block out">
-          <div class="block-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="3" y="3" width="18" height="18" rx="2" />
-              <path d="M3 9h18M9 21V9" />
-            </svg>
-          </div>
-          <div class="block-name">Municipal Dashboard</div>
-          <div class="block-sub">Repair prioritization<br />Predictive maintenance<br />Work order generation</div>
-          <span class="block-tag">Future</span>
-        </div>
-
-      </div>
-    </div>
-
-  </div><!-- /diagram -->
-
-  <!-- ── FOOTER PANELS ── -->
-  <div class="footer-panels">
-
-    <div class="panel">
-      <div class="panel-title">Data Flow Timeline &mdash; Single Pothole Event</div>
-      <div class="flow-steps">
-        <span class="flow-step" style="background:rgba(59,130,246,0.12);color:#93c5fd;">t=0ms<br />OV2640 capture</span>
-        <span class="flow-arrow">&rarr;</span>
-        <span class="flow-step" style="background:rgba(139,92,246,0.12);color:#c4b5fd;">t=10ms<br />DMA JPEG</span>
-        <span class="flow-arrow">&rarr;</span>
-        <span class="flow-step" style="background:rgba(6,182,212,0.12);color:#67e8f9;">t=25ms<br />WiFi TX</span>
-        <span class="flow-arrow">&rarr;</span>
-        <span class="flow-step" style="background:rgba(16,185,129,0.12);color:#6ee7b7;">t=60ms<br />YOLOv8</span>
-        <span class="flow-arrow">&rarr;</span>
-        <span class="flow-step" style="background:rgba(16,185,129,0.12);color:#6ee7b7;">t=65ms<br />SORT ID#42</span>
-        <span class="flow-arrow">&rarr;</span>
-        <span class="flow-step" style="background:rgba(245,158,11,0.12);color:#fcd34d;">t=150ms<br />HTTP GET</span>
-        <span class="flow-arrow">&rarr;</span>
-        <span class="flow-step" style="background:rgba(245,158,11,0.12);color:#fcd34d;">t=170ms<br />JSON
-          {az:19.8}</span>
-        <span class="flow-arrow">&rarr;</span>
-        <span class="flow-step" style="background:rgba(239,68,68,0.12);color:#fca5a5;">t=185ms<br />CSV write</span>
-      </div>
-    </div>
-
-    <div class="panel" style="background:rgba(245,158,11,0.04); border-color:rgba(245,158,11,0.18);">
-      <div class="panel-title" style="color:#fcd34d;">Sensor Fusion Formula</div>
-      <div class="formula-text">
-        severity = <span style="color:#93c5fd;">0.7 &times; confidence</span> + <span style="color:#fca5a5;">0.3 &times;
-          jerk_norm&sup2;</span><br />
-        jerk_norm = clamp( (jerk &minus; J_MIN) / (J_MAX &minus; J_MIN), 0, 1 )<br />
-        J_MIN = 0.0 m/s&sup3; &nbsp;|&nbsp; J_MAX = 20.0 m/s&sup3;
-      </div>
-    </div>
-
-  </div>
-
+  </footer>
 </body>
 
 </html>

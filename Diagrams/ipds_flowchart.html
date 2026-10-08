@@ -2,625 +2,267 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>IPDS Detection Pipeline — Flowchart</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IPDS Detection Flowchart</title>
+  <meta name="theme-color" content="#0b0e11" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230b0e11'/%3E%3Cellipse cx='16' cy='17' rx='10' ry='5.5' fill='none' stroke='%23FCD535' stroke-width='2.6'/%3E%3Cellipse cx='16' cy='17' rx='4' ry='2.2' fill='%23FCD535'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --canvas: #0b0e11;
+      --card: #1e2329;
+      --elevated: #2b3139;
+      --hairline: #2b3139;
+      --line: #474d57;
+      --primary: #FCD535;
+      --primary-active: #f0b90b;
+      --ink: #181a20;
+      --body: #eaecef;
+      --muted: #707a8a;
+      --muted-strong: #929aa5;
+      --on-dark: #ffffff;
+      --soft-light: #fafafa;
+      --nova: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --plex: 'IBM Plex Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      --main: 420px;
+    }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--canvas); color: var(--body); font-family: var(--nova); font-size: 14px; line-height: 1.5; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+    a { color: inherit; text-decoration: none; }
+    :focus-visible { outline: none; box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5); border-radius: 6px; }
+    .wrap { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
 
-        body {
-            background: #07090f;
-            font-family: 'Inter', sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 36px 20px 56px;
-            background-image:
-                radial-gradient(ellipse 60% 40% at 20% 5%, rgba(59, 130, 246, 0.055) 0%, transparent 60%),
-                radial-gradient(ellipse 50% 40% at 80% 95%, rgba(16, 185, 129, 0.05) 0%, transparent 60%);
-        }
+    /* ---------- top nav (shared with the site) ---------- */
+    .nav { position: sticky; top: 0; z-index: 50; background: var(--canvas); border-bottom: 1px solid var(--hairline); }
+    .nav .wrap { display: flex; align-items: center; gap: 28px; height: 64px; }
+    .brand { display: flex; align-items: center; gap: 10px; color: var(--primary); font-weight: 700; font-size: 20px; letter-spacing: 0.5px; flex-shrink: 0; }
+    .brand svg { width: 28px; height: 28px; }
+    .tabs { display: flex; gap: 4px; }
+    .tabs a { padding: 8px 12px; border-radius: 6px; font-weight: 500; color: var(--muted-strong); white-space: nowrap; }
+    .tabs a:hover { color: var(--on-dark); background: var(--card); }
+    .tabs a[aria-current="page"] { color: var(--on-dark); background: var(--card); }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 40px; padding: 0 20px; border-radius: 6px; font-weight: 600; font-size: 14px; white-space: nowrap; }
+    .btn svg { width: 16px; height: 16px; }
+    .btn-primary { background: var(--primary); color: var(--ink); margin-left: auto; }
+    .btn-primary:hover, .btn-primary:active { background: var(--primary-active); }
 
-        .header {
-            text-align: center;
-            margin-bottom: 32px;
-        }
+    /* ---------- page head ---------- */
+    .page-head { padding: 56px 0 24px; }
+    .eyebrow { font-size: 14px; font-weight: 600; color: var(--primary); }
+    h1 { margin-top: 8px; font-size: 40px; line-height: 1.15; font-weight: 700; letter-spacing: -0.3px; color: var(--on-dark); }
+    .sub { margin-top: 10px; font-size: 16px; color: var(--muted-strong); max-width: 760px; }
 
-        .badge {
-            display: inline-block;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 10px;
-            letter-spacing: 2.5px;
-            text-transform: uppercase;
-            color: #10b981;
-            border: 1px solid rgba(16, 185, 129, 0.28);
-            background: rgba(16, 185, 129, 0.05);
-            padding: 4px 14px;
-            border-radius: 20px;
-            margin-bottom: 12px;
-        }
+    .legend { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+    .legend span { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted-strong); background: var(--card); padding: 6px 12px; border-radius: 8px; }
+    .legend i { display: block; width: 14px; height: 10px; border-radius: 2px; background: var(--elevated); }
+    .legend i.term { border-radius: 6px; background: var(--elevated); }
+    .legend i.dec { width: 10px; height: 10px; transform: rotate(45deg); background: transparent; border: 1.5px solid var(--primary); }
+    .legend i.key { background: var(--primary); }
+    .legend i.rej { background: transparent; border: 1px dashed var(--line); }
 
-        h1 {
-            font-size: clamp(18px, 3vw, 28px);
-            font-weight: 800;
-            letter-spacing: -0.4px;
-            background: linear-gradient(135deg, #e2e8f0 30%, #7a8faf);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
+    /* ---------- flow ---------- */
+    .flow { max-width: 900px; padding: 16px 0 80px; }
+    .row { display: grid; grid-template-columns: var(--main) minmax(0, 1fr); align-items: center; }
+    .row > .node { grid-column: 1; }
 
-        p.sub {
-            color: #5a6680;
-            font-size: 13px;
-            margin-top: 6px;
-        }
+    .phase { display: flex; align-items: baseline; gap: 10px; padding: 28px 0 12px; }
+    .phase:first-child { padding-top: 8px; }
+    .phase .n { font-family: var(--plex); font-weight: 700; color: var(--primary); }
+    .phase .t { font-size: 13px; font-weight: 600; color: var(--muted-strong); text-transform: uppercase; letter-spacing: 0.8px; }
 
-        /* LEGEND */
-        .legend {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 8px;
-            margin-bottom: 28px;
-        }
+    .node { position: relative; background: var(--card); border-radius: 8px; padding: 14px 16px 14px 52px; min-width: 0; }
+    .node .num { position: absolute; left: 16px; top: 15px; font-family: var(--plex); font-variant-numeric: tabular-nums; font-size: 13px; font-weight: 600; color: var(--muted); }
+    .node .title { font-size: 15px; font-weight: 600; color: var(--on-dark); line-height: 1.35; }
+    .node .detail { margin-top: 4px; font-family: var(--mono); font-size: 12px; color: var(--muted-strong); overflow-wrap: anywhere; }
 
-        .leg {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 11px;
-            color: #8a9ab8;
-        }
+    .node.term { border-radius: 9999px; background: var(--elevated); padding: 12px 20px; text-align: center; }
+    .node.term .title { font-size: 14px; letter-spacing: 1px; text-transform: uppercase; }
 
-        .leg-rect {
-            width: 14px;
-            height: 10px;
-            border-radius: 2px;
-        }
+    .node.dec { background: var(--card); box-shadow: inset 0 0 0 1px rgba(252, 213, 53, 0.55); }
+    .node.dec .num { color: var(--primary); }
+    .node.dec .title::before { content: ""; display: inline-block; width: 8px; height: 8px; margin: 0 10px 2px 0; border: 1.5px solid var(--primary); transform: rotate(45deg); vertical-align: middle; }
 
-        .leg-diamond {
-            width: 12px;
-            height: 12px;
-            transform: rotate(45deg);
-            border-radius: 1px;
-        }
+    .node.key { background: var(--primary); }
+    .node.key .num, .node.key .title, .node.key .detail { color: var(--ink); }
 
-        .leg-term {
-            width: 14px;
-            height: 10px;
-            border-radius: 8px;
-        }
+    /* arrow between nodes, drawn inside the main column */
+    .arrow { position: relative; width: var(--main); height: 34px; }
+    .arrow::before { content: ""; position: absolute; left: 50%; top: 0; bottom: 6px; width: 1px; background: var(--line); }
+    .arrow::after { content: ""; position: absolute; left: calc(50% - 5px); bottom: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 7px solid var(--line); }
+    .arrow .lbl { position: absolute; left: calc(50% + 10px); top: 7px; font-family: var(--mono); font-size: 11px; font-weight: 500; color: var(--body); }
 
-        svg {
-            display: block;
-            max-width: 100%;
-        }
+    /* side branch from a decision */
+    .branch { position: relative; display: flex; align-items: center; gap: 10px; padding-left: 64px; min-width: 0; }
+    .branch::before { content: ""; position: absolute; left: 0; top: 50%; width: 56px; height: 1px; background: var(--line); }
+    .branch::after { content: ""; position: absolute; left: 50px; top: calc(50% - 5px); border-top: 5px solid transparent; border-bottom: 5px solid transparent; border-left: 7px solid var(--line); }
+    .branch .lbl { position: absolute; left: 14px; top: calc(50% - 22px); font-family: var(--mono); font-size: 11px; font-weight: 500; color: var(--body); }
+    .out { border: 1px dashed var(--line); border-radius: 8px; padding: 10px 14px; min-width: 0; }
+    .out .title { font-size: 14px; font-weight: 600; color: var(--muted-strong); }
+    .out .detail { margin-top: 2px; font-size: 12px; color: var(--muted); }
+    .out.loop { border-style: solid; border-color: var(--hairline); background: var(--card); }
+    .out.loop .title { color: var(--body); }
 
-        /* Tooltip */
-        .tip {
-            position: fixed;
-            background: #1e2535;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: #dde4f0;
-            font-size: 11px;
-            font-family: 'JetBrains Mono', monospace;
-            padding: 6px 10px;
-            border-radius: 6px;
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.15s;
-            z-index: 999;
-            white-space: pre;
-            line-height: 1.5;
-        }
-    </style>
+    .note { margin-top: 28px; background: var(--card); border-radius: 12px; padding: 20px 24px; color: var(--muted-strong); max-width: 900px; }
+    .note b { color: var(--on-dark); }
+
+    /* ---------- light footer ---------- */
+    footer { background: var(--soft-light); color: var(--ink); padding: 32px 0; }
+    footer .wrap { display: flex; flex-wrap: wrap; gap: 12px 24px; justify-content: space-between; align-items: center; font-size: 13px; color: var(--muted); }
+    footer nav { display: flex; flex-wrap: wrap; gap: 20px; }
+    footer a:hover { color: var(--ink); }
+
+    /* ---------- responsive ---------- */
+    @media (max-width: 767px) {
+      .wrap { padding: 0 16px; }
+      .nav .wrap { height: auto; flex-wrap: wrap; gap: 0 12px; padding-top: 12px; }
+      .brand { height: 40px; }
+      .tabs { order: 3; width: calc(100% + 32px); margin: 8px -16px 0; padding: 0 16px 10px; overflow-x: auto; scrollbar-width: none; }
+      .tabs::-webkit-scrollbar { display: none; }
+      .btn-primary { height: 36px; padding: 0 14px; }
+      .page-head { padding: 32px 0 16px; }
+      h1 { font-size: 28px; }
+      .sub { font-size: 15px; }
+
+      /* single column: branches drop below their decision */
+      .row { grid-template-columns: 1fr; }
+      .arrow { width: 100%; }
+      .branch { margin-left: 26px; padding: 10px 0 0 16px; border-left: 1px solid var(--line); gap: 12px; }
+      .branch::before { left: 0; top: calc(50% + 5px); width: 10px; }
+      .branch::after { display: none; }
+      .branch .lbl { position: static; flex-shrink: 0; width: 26px; padding-left: 4px; }
+      .branch .out { flex: 1; }
+      .flow { padding-bottom: 56px; }
+      .note { padding: 16px; }
+    }
+  </style>
 </head>
 
 <body>
-  <a href="../index.html" style="position:fixed;top:16px;left:16px;z-index:100;display:inline-flex;align-items:center;gap:8px;height:36px;padding:0 14px;border-radius:6px;background:#1e2329;color:#eaecef;font:600 13px Inter,system-ui,sans-serif;text-decoration:none"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>IPDS home</a>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="i-logo" viewBox="0 0 32 32"><rect width="32" height="32" rx="6" fill="currentColor" opacity=".12"/><ellipse cx="16" cy="17" rx="10" ry="5.5" fill="none" stroke="currentColor" stroke-width="2.6"/><ellipse cx="16" cy="17" rx="4" ry="2.2" fill="currentColor"/></symbol>
+      <symbol id="i-back" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M19 12H5M11 6l-6 6 6 6"/></symbol>
+    </defs>
+  </svg>
 
-    <div class="header">
-        <div class="badge">Detection Pipeline</div>
-        <h1>IPDS — Pothole Detection Flowchart</h1>
-        <p class="sub">Complete algorithmic decision flow from frame capture to data storage</p>
+  <header class="nav">
+    <div class="wrap">
+      <a class="brand" href="../index.html"><svg><use href="#i-logo"/></svg>IPDS</a>
+      <nav class="tabs" aria-label="Diagrams">
+        <a href="ipds_block_diagram.html">Block diagram</a>
+        <a href="ipds_flowchart.html" aria-current="page">Flowchart</a>
+        <a href="ipds_schematic.html">Schematic</a>
+      </nav>
+      <a class="btn btn-primary" href="../index.html#diagrams"><svg><use href="#i-back"/></svg>Back to site</a>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="page-head">
+      <div class="eyebrow">Detection pipeline</div>
+      <h1>Pothole detection flowchart</h1>
+      <p class="sub">Every decision a frame passes through in live mode, from capture to the CSV log.</p>
+      <div class="legend">
+        <span><i class="term"></i>Start / stop</span>
+        <span><i></i>Process</span>
+        <span><i class="dec"></i>Decision</span>
+        <span><i class="key"></i>Fusion</span>
+        <span><i class="rej"></i>Rejected</span>
+      </div>
     </div>
 
-    <div class="legend">
-        <div class="leg">
-            <div class="leg-term" style="background:#1e3a5f;border:1.5px solid #3b82f6"></div>Terminal (Start/End)
-        </div>
-        <div class="leg">
-            <div class="leg-rect" style="background:rgba(59,130,246,0.15);border:1.5px solid #3b82f6"></div>Hardware
-            Process
-        </div>
-        <div class="leg">
-            <div class="leg-rect" style="background:rgba(139,92,246,0.15);border:1.5px solid #8b5cf6"></div>Software /
-            AI Process
-        </div>
-        <div class="leg">
-            <div class="leg-diamond" style="background:rgba(245,158,11,0.15);border:1.5px solid #f59e0b"></div>Decision
-        </div>
-        <div class="leg">
-            <div class="leg-rect" style="background:rgba(239,68,68,0.15);border:1.5px solid #ef4444"></div>Rejection /
-            Discard
-        </div>
-        <div class="leg">
-            <div class="leg-rect" style="background:rgba(16,185,129,0.15);border:1.5px solid #10b981"></div>Storage /
-            Output
-        </div>
+    <div class="flow">
+
+      <div class="phase"><span class="n">01</span><span class="t">Capture</span></div>
+      <div class="row"><div class="node term"><div class="title">System start</div></div></div>
+      <div class="arrow"></div>
+      <div class="row"><div class="node"><span class="num">1</span><div class="title">ESP32-CAM captures a frame</div><div class="detail">OV2640 &rarr; JPEG via DMA</div></div></div>
+      <div class="arrow"></div>
+      <div class="row"><div class="node"><span class="num">2</span><div class="title">WiFi transport</div><div class="detail">MJPEG over 802.11, port 81</div></div></div>
+      <div class="arrow"></div>
+      <div class="row"><div class="node"><span class="num">3</span><div class="title">Python / OpenCV decode</div><div class="detail">cv2.VideoCapture &rarr; frame</div></div></div>
+
+      <div class="phase"><span class="n">02</span><span class="t">Detect and track</span></div>
+      <div class="row"><div class="node"><span class="num">4</span><div class="title">YOLOv8m inference</div><div class="detail">detector.py &middot; forward pass</div></div></div>
+      <div class="arrow"></div>
+      <div class="row">
+        <div class="node dec"><span class="num">5</span><div class="title">Any detection with conf &ge; 0.25?</div></div>
+        <div class="branch"><span class="lbl">No</span><div class="out loop"><div class="title">Next frame</div><div class="detail">nothing to track</div></div></div>
+      </div>
+      <div class="arrow"><span class="lbl">Yes</span></div>
+      <div class="row"><div class="node"><span class="num">6</span><div class="title">SORT tracking</div><div class="detail">sort.py &middot; Kalman + Hungarian &middot; track ID</div></div></div>
+
+      <div class="phase"><span class="n">03</span><span class="t">Filter false positives</span></div>
+      <div class="row">
+        <div class="node dec"><span class="num">7</span><div class="title">Box area &gt; 25% of frame?</div></div>
+        <div class="branch"><span class="lbl">Yes</span><div class="out"><div class="title">Reject: large object</div><div class="detail">truck, bridge shadow</div></div></div>
+      </div>
+      <div class="arrow"><span class="lbl">No</span></div>
+      <div class="row">
+        <div class="node dec"><span class="num">8</span><div class="title">Aspect ratio &gt; 3.0?</div></div>
+        <div class="branch"><span class="lbl">Yes</span><div class="out"><div class="title">Reject: crack or bump</div><div class="detail">speed bump, tar snake</div></div></div>
+      </div>
+      <div class="arrow"><span class="lbl">No</span></div>
+      <div class="row">
+        <div class="node dec"><span class="num">9</span><div class="title">Stationary for &gt; 10 frames?</div></div>
+        <div class="branch"><span class="lbl">Yes</span><div class="out"><div class="title">Reject: static object</div><div class="detail">shadow of a stopped car</div></div></div>
+      </div>
+      <div class="arrow"><span class="lbl">No</span></div>
+      <div class="row">
+        <div class="node dec"><span class="num">10</span><div class="title">Track already queried?</div></div>
+        <div class="branch"><span class="lbl">Yes</span><div class="out"><div class="title">Skip: duplicate ID</div><div class="detail">one query per pothole</div></div></div>
+      </div>
+
+      <div class="phase"><span class="n">04</span><span class="t">Trigger</span></div>
+      <div class="row">
+        <div class="node dec"><span class="num">11</span><div class="title">Centre crossed the reference line?</div><div class="detail">cy &ge; 0.75 &times; frame height</div></div>
+        <div class="branch"><span class="lbl">No</span><div class="out loop"><div class="title">Keep tracking</div><div class="detail">check again next frame</div></div></div>
+      </div>
+      <div class="arrow"><span class="lbl">Yes</span></div>
+      <div class="row"><div class="node"><span class="num">12</span><div class="title">HTTP GET /query?pothole_id=N</div><div class="detail">5 reads &middot; 0.5 s timeout each</div></div></div>
+      <div class="arrow"></div>
+      <div class="row"><div class="node"><span class="num">13</span><div class="title">Sensor node replies with JSON</div><div class="detail">ax, ay, az &middot; RTC time &middot; GPS</div></div></div>
+
+      <div class="phase"><span class="n">05</span><span class="t">Confirm and score</span></div>
+      <div class="row">
+        <div class="node dec"><span class="num">14</span><div class="title">Peak jerk &ge; 1.5 m/s&sup3;?</div></div>
+        <div class="branch"><span class="lbl">No</span><div class="out"><div class="title">Reject: no impact</div><div class="detail">shadow, puddle, manhole</div></div></div>
+      </div>
+      <div class="arrow"><span class="lbl">Yes</span></div>
+      <div class="row"><div class="node key"><span class="num">15</span><div class="title">Sensor fusion</div><div class="detail">S = 0.7&middot;conf + 0.3&middot;min(J / 20, 1)</div></div></div>
+
+      <div class="phase"><span class="n">06</span><span class="t">Log</span></div>
+      <div class="row"><div class="node"><span class="num">16</span><div class="title">Write a row to pothole_log.csv</div><div class="detail">time &middot; ID &middot; conf &middot; jerk &middot; severity &middot; GPS</div></div></div>
+      <div class="arrow"></div>
+      <div class="row"><div class="node"><span class="num">17</span><div class="title">Annotate the frame</div><div class="detail">OpenCV overlay &rarr; MP4</div></div></div>
+      <div class="arrow"></div>
+      <div class="row">
+        <div class="node dec"><span class="num">18</span><div class="title">System still running?</div></div>
+        <div class="branch"><span class="lbl">Yes</span><div class="out loop"><div class="title">Back to step 1</div><div class="detail">next frame</div></div></div>
+      </div>
+      <div class="arrow"><span class="lbl">No</span></div>
+      <div class="row"><div class="node term"><div class="title">System stop</div></div></div>
+
+      <p class="note"><b>Offline mode</b> (a video file, no sensor node) follows the same path up to step 11, then skips steps 12 to 14: severity is vision-only and the jerk and GPS columns stay empty.</p>
     </div>
-
-    <svg id="flowchart" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 2340" width="760">
-        <defs>
-            <!-- Arrow markers -->
-            <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5"
-                orient="auto-start-reverse">
-                <path d="M0,1 L9,5 L0,9 Z" fill="rgba(255,255,255,0.28)" />
-            </marker>
-            <marker id="arr-y" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5"
-                orient="auto-start-reverse">
-                <path d="M0,1 L9,5 L0,9 Z" fill="rgba(245,158,11,0.7)" />
-            </marker>
-            <marker id="arr-r" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5"
-                orient="auto-start-reverse">
-                <path d="M0,1 L9,5 L0,9 Z" fill="rgba(239,68,68,0.7)" />
-            </marker>
-            <marker id="arr-g" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5"
-                orient="auto-start-reverse">
-                <path d="M0,1 L9,5 L0,9 Z" fill="rgba(16,185,129,0.7)" />
-            </marker>
-            <!-- Glow filters -->
-            <filter id="glow-b">
-                <feGaussianBlur stdDeviation="3" result="blur" />
-                <feMerge>
-                    <feMergeNode in="blur" />
-                    <feMergeNode in="SourceGraphic" />
-                </feMerge>
-            </filter>
-            <filter id="glow-g">
-                <feGaussianBlur stdDeviation="3" result="blur" />
-                <feMerge>
-                    <feMergeNode in="blur" />
-                    <feMergeNode in="SourceGraphic" />
-                </feMerge>
-            </filter>
-        </defs>
-
-        <!-- ═══════════════════════════════════════════
-       HELPER: cx=380 is the center column
-       Node width: process=220, decision=200 (diamond), terminal=180
-  ══════════════════════════════════════════════ -->
-
-        <!-- ── COLUMN GUIDE LINES (invisible) cx=380 ── -->
-
-        <!-- ─── NODE 1: START ─── y=30 -->
-        <!-- Terminal pill -->
-        <rect x="280" y="30" width="200" height="44" rx="22" fill="#0f1929" stroke="#3b82f6" stroke-width="1.5"
-            filter="url(#glow-b)" />
-        <text x="380" y="56" text-anchor="middle" dominant-baseline="middle" font-family="Inter" font-size="13"
-            font-weight="700" fill="#93c5fd">
-            SYSTEM START
-        </text>
-
-        <!-- arrow -->
-        <line x1="380" y1="74" x2="380" y2="104" stroke="rgba(255,255,255,0.25)" stroke-width="1.5"
-            marker-end="url(#arr)" />
-
-        <!-- ─── NODE 2: ESP32-CAM captures frame ─── y=104 -->
-        <rect x="260" y="104" width="240" height="52" rx="6" fill="rgba(59,130,246,0.12)" stroke="#3b82f6"
-            stroke-width="1.5" />
-        <text x="380" y="124" text-anchor="middle" font-family="Inter" font-size="12" font-weight="600"
-            fill="#bfdbfe">ESP32-CAM</text>
-        <text x="380" y="142" text-anchor="middle" font-family="JetBrains Mono" font-size="10"
-            fill="rgba(191,219,254,0.6)">OV2640 capture → JPEG (DMA)</text>
-
-        <!-- arrow -->
-        <line x1="380" y1="156" x2="380" y2="186" stroke="rgba(255,255,255,0.25)" stroke-width="1.5"
-            marker-end="url(#arr)" />
-
-        <!-- ─── NODE 3: WiFi MJPEG stream ─── y=186 -->
-        <rect x="260" y="186" width="240" height="52" rx="6" fill="rgba(6,182,212,0.1)" stroke="#06b6d4"
-            stroke-width="1.5" />
-        <text x="380" y="206" text-anchor="middle" font-family="Inter" font-size="12" font-weight="600"
-            fill="#a5f3fc">WiFi Transport</text>
-        <text x="380" y="224" text-anchor="middle" font-family="JetBrains Mono" font-size="10"
-            fill="rgba(165,243,252,0.6)">MJPEG over 802.11 · LAN</text>
-
-        <!-- arrow -->
-        <line x1="380" y1="238" x2="380" y2="268" stroke="rgba(255,255,255,0.25)" stroke-width="1.5"
-            marker-end="url(#arr)" />
-
-        <!-- ─── NODE 4: Python OpenCV decode ─── y=268 -->
-        <rect x="260" y="268" width="240" height="52" rx="6" fill="rgba(139,92,246,0.1)" stroke="#8b5cf6"
-            stroke-width="1.5" />
-        <text x="380" y="288" text-anchor="middle" font-family="Inter" font-size="12" font-weight="600"
-            fill="#c4b5fd">Python / OpenCV</text>
-        <text x="380" y="306" text-anchor="middle" font-family="JetBrains Mono" font-size="10"
-            fill="rgba(196,181,253,0.6)">cv2.VideoCapture → np.ndarray</text>
-
-        <!-- arrow -->
-        <line x1="380" y1="320" x2="380" y2="350" stroke="rgba(255,255,255,0.25)" stroke-width="1.5"
-            marker-end="url(#arr)" />
-
-        <!-- ─── NODE 5: YOLOv8 Inference ─── y=350 -->
-        <rect x="260" y="350" width="240" height="52" rx="6" fill="rgba(139,92,246,0.1)" stroke="#8b5cf6"
-            stroke-width="1.5" />
-        <text x="380" y="370" text-anchor="middle" font-family="Inter" font-size="12" font-weight="600"
-            fill="#c4b5fd">YOLOv8m Inference</text>
-        <text x="380" y="388" text-anchor="middle" font-family="JetBrains Mono" font-size="10"
-            fill="rgba(196,181,253,0.6)">detector.py · Forward Pass CNN</text>
-
-        <!-- arrow -->
-        <line x1="380" y1="402" x2="380" y2="442" stroke="rgba(255,255,255,0.25)" stroke-width="1.5"
-            marker-end="url(#arr)" />
-
-        <!-- ─── DECISION 1: Any detections? ─── y=442 (diamond) -->
-        <!-- Diamond: rotated square, center=(380,472), half=36 -->
-        <polygon points="380,442 420,472 380,502 340,472" fill="rgba(245,158,11,0.1)" stroke="#f59e0b"
-            stroke-width="1.5" />
-        <text x="380" y="469" text-anchor="middle" font-family="Inter" font-size="11" font-weight="600"
-            fill="#fde68a">Any</text>
-        <text x="380" y="483" text-anchor="middle" font-family="Inter" font-size="11" font-weight="600"
-            fill="#fde68a">detections?</text>
-
-        <!-- NO → left reject -->
-        <line x1="340" y1="472" x2="200" y2="472" stroke="rgba(239,68,68,0.6)" stroke-width="1.5"
-            marker-end="url(#arr-r)" />
-        <text x="330" y="465" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#f87171">No</text>
-        <rect x="100" y="454" width="100" height="36" rx="5" fill="rgba(239,68,68,0.1)" stroke="#ef4444"
-            stroke-width="1.2" />
-        <text x="150" y="476" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#fca5a5">Discard
-            frame</text>
-
-        <!-- Reject → loop back up arrow -->
-        <path d="M100,472 Q60,472 60,200 Q60,74 270,74" fill="none" stroke="rgba(239,68,68,0.3)" stroke-width="1"
-            stroke-dasharray="4 3" marker-end="url(#arr-r)" />
-        <text x="48" y="270" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="rgba(239,68,68,0.5)"
-            transform="rotate(-90,48,270)">Next Frame</text>
-
-        <!-- YES → down -->
-        <line x1="380" y1="502" x2="380" y2="532" stroke="rgba(255,255,255,0.25)" stroke-width="1.5"
-            marker-end="url(#arr)" />
-        <text x="393" y="520" font-family="JetBrains Mono" font-size="9" fill="#86efac">Yes</text>
-
-        <!-- ─── DECISION 2: conf ≥ 0.25? ─── y=532 -->
-        <polygon points="380,532 420,562 380,592 340,562" fill="rgba(245,158,11,0.1)" stroke="#f59e0b"
-            stroke-width="1.5" />
-        <text x="380" y="558" text-anchor="middle" font-family="Inter" font-size="11" font-weight="600"
-            fill="#fde68a">conf ≥ 0.25?</text>
-        <text x="380" y="571" text-anchor="middle" font-family="JetBrains Mono" font-size="9"
-            fill="rgba(253,230,138,0.6)">threshold</text>
-
-        <!-- NO reject right -->
-        <line x1="420" y1="562" x2="560" y2="562" stroke="rgba(239,68,68,0.6)" stroke-width="1.5"
-            marker-end="url(#arr-r)" />
-        <text x="488" y="555" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#f87171">No</text>
-        <rect x="560" y="544" width="110" height="36" rx="5" fill="rgba(239,68,68,0.1)" stroke="#ef4444"
-            stroke-width="1.2" />
-        <text x="615" y="566" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#fca5a5">Low conf /
-            skip</text>
-
-        <!-- YES → down -->
-        <line x1="380" y1="592" x2="380" y2="622" stroke="rgba(255,255,255,0.25)" stroke-width="1.5"
-            marker-end="url(#arr)" />
-        <text x="393" y="610" font-family="JetBrains Mono" font-size="9" fill="#86efac">Yes</text>
-
-        <!-- ─── NODE 6: SORT Kalman tracking ─── y=622 -->
-        <rect x="260" y="622" width="240" height="52" rx="6" fill="rgba(139,92,246,0.1)" stroke="#8b5cf6"
-            stroke-width="1.5" />
-        <text x="380" y="642" text-anchor="middle" font-family="Inter" font-size="12" font-weight="600"
-            fill="#c4b5fd">SORT Kalman Filter</text>
-        <text x="380" y="660" text-anchor="middle" font-family="JetBrains Mono" font-size="10"
-            fill="rgba(196,181,253,0.6)">sort.py · Hungarian match · ID assign</text>
-
-        <!-- arrow -->
-        <line x1="380" y1="674" x2="380" y2="714" stroke="rgba(255,255,255,0.25)" stroke-width="1.5"
-            marker-end="url(#arr)" />
-
-        <!-- ─── DECISION 3: Area ratio > 0.25? ─── y=714 -->
-        <polygon points="380,714 420,744 380,774 340,744" fill="rgba(245,158,11,0.1)" stroke="#f59e0b"
-            stroke-width="1.5" />
-        <text x="380" y="740" text-anchor="middle" font-family="Inter" font-size="11" font-weight="600"
-            fill="#fde68a">area_ratio</text>
-        <text x="380" y="754" text-anchor="middle" font-family="Inter" font-size="11" font-weight="600"
-            fill="#fde68a">&gt; 0.25?</text>
-
-        <!-- YES → reject (large object) right -->
-        <line x1="420" y1="744" x2="560" y2="744" stroke="rgba(239,68,68,0.6)" stroke-width="1.5"
-            marker-end="url(#arr-r)" />
-        <text x="488" y="737" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#f87171">Yes</text>
-        <rect x="560" y="726" width="120" height="36" rx="5" fill="rgba(239,68,68,0.1)" stroke="#ef4444"
-            stroke-width="1.2" />
-        <text x="620" y="744" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#fca5a5">Reject:
-            large obj</text>
-        <text x="620" y="756" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#fca5a5">(truck /
-            bridge shadow)</text>
-
-        <!-- NO → down -->
-        <line x1="380" y1="774" x2="380" y2="804" stroke="rgba(255,255,255,0.25)" stroke-width="1.5"
-            marker-end="url(#arr)" />
-        <text x="393" y="792" font-family="JetBrains Mono" font-size="9" fill="#86efac">No</text>
-
-        <!-- ─── DECISION 4: aspect_ratio > 3.0? ─── y=804 -->
-        <polygon points="380,804 420,834 380,864 340,834" fill="rgba(245,158,11,0.1)" stroke="#f59e0b"
-            stroke-width="1.5" />
-        <text x="380" y="830" text-anchor="middle" font-family="Inter" font-size="11" font-weight="600"
-            fill="#fde68a">aspect_ratio</text>
-        <text x="380" y="844" text-anchor="middle" font-family="Inter" font-size="11" font-weight="600"
-            fill="#fde68a">&gt; 3.0?</text>
-
-        <!-- YES reject right -->
-        <line x1="420" y1="834" x2="560" y2="834" stroke="rgba(239,68,46,0.6)" stroke-width="1.5"
-            marker-end="url(#arr-r)" />
-        <text x="488" y="827" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#f87171">Yes</text>
-        <rect x="560" y="816" width="120" height="36" rx="5" fill="rgba(239,68,68,0.1)" stroke="#ef4444"
-            stroke-width="1.2" />
-        <text x="620" y="834" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#fca5a5">Reject:
-            crack / bump</text>
-        <text x="620" y="846" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#fca5a5">(speed bump
-            / tar snake)</text>
-
-        <!-- NO → down -->
-        <line x1="380" y1="864" x2="380" y2="894" stroke="rgba(255,255,255,0.25)" stroke-width="1.5"
-            marker-end="url(#arr)" />
-        <text x="393" y="882" font-family="JetBrains Mono" font-size="9" fill="#86efac">No</text>
-
-        <!-- ─── DECISION 5: Stationary > 10 frames? ─── y=894 -->
-        <polygon points="380,894 420,924 380,954 340,924" fill="rgba(245,158,11,0.1)" stroke="#f59e0b"
-            stroke-width="1.5" />
-        <text x="380" y="920" text-anchor="middle" font-family="Inter" font-size="11" font-weight="600"
-            fill="#fde68a">Static &gt; 10</text>
-        <text x="380" y="934" text-anchor="middle" font-family="Inter" font-size="11" font-weight="600"
-            fill="#fde68a">frames?</text>
-
-        <!-- YES reject right -->
-        <line x1="420" y1="924" x2="560" y2="924" stroke="rgba(239,68,46,0.6)" stroke-width="1.5"
-            marker-end="url(#arr-r)" />
-        <text x="488" y="917" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#f87171">Yes</text>
-        <rect x="560" y="906" width="120" height="36" rx="5" fill="rgba(239,68,68,0.1)" stroke="#ef4444"
-            stroke-width="1.2" />
-        <text x="620" y="924" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#fca5a5">Reject:
-            static shadow</text>
-        <text x="620" y="936" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#fca5a5">(car
-            stopped at light)</text>
-
-        <!-- NO → down -->
-        <line x1="380" y1="954" x2="380" y2="984" stroke="rgba(255,255,255,0.25)" stroke-width="1.5"
-            marker-end="url(#arr)" />
-        <text x="393" y="972" font-family="JetBrains Mono" font-size="9" fill="#86efac">No</text>
-
-        <!-- ─── DECISION 6: Already logged? ─── y=984 -->
-        <polygon points="380,984 420,1014 380,1044 340,1014" fill="rgba(245,158,11,0.1)" stroke="#f59e0b"
-            stroke-width="1.5" />
-        <text x="380" y="1010" text-anchor="middle" font-family="Inter" font-size="11" font-weight="600"
-            fill="#fde68a">track_id in</text>
-        <text x="380" y="1024" text-anchor="middle" font-family="Inter" font-size="11" font-weight="600"
-            fill="#fde68a">logged_ids?</text>
-
-        <!-- YES reject right (duplicate) -->
-        <line x1="420" y1="1014" x2="560" y2="1014" stroke="rgba(239,68,46,0.6)" stroke-width="1.5"
-            marker-end="url(#arr-r)" />
-        <text x="488" y="1007" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#f87171">Yes</text>
-        <rect x="560" y="996" width="120" height="36" rx="5" fill="rgba(239,68,68,0.1)" stroke="#ef4444"
-            stroke-width="1.2" />
-        <text x="620" y="1014" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#fca5a5">Skip:
-            duplicate ID</text>
-        <text x="620" y="1026" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#fca5a5">(already
-            logged)</text>
-
-        <!-- NO → down -->
-        <line x1="380" y1="1044" x2="380" y2="1074" stroke="rgba(255,255,255,0.25)" stroke-width="1.5"
-            marker-end="url(#arr)" />
-        <text x="393" y="1062" font-family="JetBrains Mono" font-size="9" fill="#86efac">No</text>
-
-        <!-- ─── NODE 7: Track centroid ─── y=1074 -->
-        <rect x="260" y="1074" width="240" height="52" rx="6" fill="rgba(139,92,246,0.1)" stroke="#8b5cf6"
-            stroke-width="1.5" />
-        <text x="380" y="1094" text-anchor="middle" font-family="Inter" font-size="12" font-weight="600"
-            fill="#c4b5fd">Track Centroid (cy)</text>
-        <text x="380" y="1112" text-anchor="middle" font-family="JetBrains Mono" font-size="10"
-            fill="rgba(196,181,253,0.6)">tracker.py · Kalman predict loop</text>
-
-        <!-- arrow -->
-        <line x1="380" y1="1126" x2="380" y2="1166" stroke="rgba(255,255,255,0.25)" stroke-width="1.5"
-            marker-end="url(#arr)" />
-
-        <!-- ─── DECISION 7: cy ≥ ref_y? ─── y=1166 -->
-        <polygon points="380,1166 430,1204 380,1242 330,1204" fill="rgba(245,158,11,0.1)" stroke="#f59e0b"
-            stroke-width="1.5" />
-        <text x="380" y="1196" text-anchor="middle" font-family="Inter" font-size="12" font-weight="700"
-            fill="#fde68a">cy ≥ ref_y</text>
-        <text x="380" y="1212" text-anchor="middle" font-family="JetBrains Mono" font-size="9"
-            fill="rgba(253,230,138,0.65)">(0.75 × frame_h)?</text>
-
-        <!-- NO → left loop wait -->
-        <line x1="330" y1="1204" x2="200" y2="1204" stroke="rgba(245,158,11,0.5)" stroke-width="1.5"
-            marker-end="url(#arr-y)" />
-        <text x="268" y="1197" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#fcd34d">No</text>
-        <path d="M200,1204 Q160,1204 160,1100 Q160,1060 260,1060" fill="none" stroke="rgba(245,158,11,0.25)"
-            stroke-width="1" stroke-dasharray="4 3" marker-end="url(#arr-y)" />
-        <text x="148" y="1140" text-anchor="middle" font-family="JetBrains Mono" font-size="9"
-            fill="rgba(245,158,11,0.5)" transform="rotate(-90,148,1140)">Next frame</text>
-
-        <!-- YES → down / TRIGGER -->
-        <line x1="380" y1="1242" x2="380" y2="1272" stroke="rgba(255,255,255,0.25)" stroke-width="1.5"
-            marker-end="url(#arr)" />
-        <text x="393" y="1260" font-family="JetBrains Mono" font-size="9" fill="#86efac">Yes — TRIGGER</text>
-
-        <!-- ─── NODE 8: HTTP GET → Sensor Node ─── y=1272 -->
-        <rect x="260" y="1272" width="240" height="52" rx="6" fill="rgba(59,130,246,0.1)" stroke="#3b82f6"
-            stroke-width="1.5" />
-        <text x="380" y="1292" text-anchor="middle" font-family="Inter" font-size="12" font-weight="600"
-            fill="#bfdbfe">HTTP GET /query</text>
-        <text x="380" y="1310" text-anchor="middle" font-family="JetBrains Mono" font-size="10"
-            fill="rgba(191,219,254,0.6)">urllib → ESP32 Sensor Node :80</text>
-
-        <!-- arrow -->
-        <line x1="380" y1="1324" x2="380" y2="1354" stroke="rgba(255,255,255,0.25)" stroke-width="1.5"
-            marker-end="url(#arr)" />
-
-        <!-- ─── NODE 9: ESP32 reads MPU6050 burst ─── y=1354 -->
-        <rect x="260" y="1354" width="240" height="52" rx="6" fill="rgba(59,130,246,0.12)" stroke="#3b82f6"
-            stroke-width="1.5" />
-        <text x="380" y="1374" text-anchor="middle" font-family="Inter" font-size="12" font-weight="600"
-            fill="#bfdbfe">ESP32 Sensor Node</text>
-        <text x="380" y="1392" text-anchor="middle" font-family="JetBrains Mono" font-size="10"
-            fill="rgba(191,219,254,0.6)">I²C burst: ax,ay,az · GPS · RTC</text>
-
-        <!-- arrow -->
-        <line x1="380" y1="1406" x2="380" y2="1436" stroke="rgba(255,255,255,0.25)" stroke-width="1.5"
-            marker-end="url(#arr)" />
-
-        <!-- ─── NODE 10: JSON response ─── y=1436 -->
-        <rect x="260" y="1436" width="240" height="52" rx="6" fill="rgba(6,182,212,0.09)" stroke="#06b6d4"
-            stroke-width="1.5" />
-        <text x="380" y="1456" text-anchor="middle" font-family="Inter" font-size="12" font-weight="600"
-            fill="#a5f3fc">JSON Response Received</text>
-        <text x="380" y="1474" text-anchor="middle" font-family="JetBrains Mono" font-size="10"
-            fill="rgba(165,243,252,0.6)">{ax,ay,az,lat,lon,timestamp}</text>
-
-        <!-- arrow -->
-        <line x1="380" y1="1488" x2="380" y2="1528" stroke="rgba(255,255,255,0.25)" stroke-width="1.5"
-            marker-end="url(#arr)" />
-
-        <!-- ─── DECISION 8: Peak jerk ≥ threshold? ─── y=1528 -->
-        <polygon points="380,1528 430,1566 380,1604 330,1566" fill="rgba(245,158,11,0.1)" stroke="#f59e0b"
-            stroke-width="1.5" />
-        <text x="380" y="1558" text-anchor="middle" font-family="Inter" font-size="11" font-weight="600"
-            fill="#fde68a">Peak Jerk</text>
-        <text x="380" y="1572" text-anchor="middle" font-family="Inter" font-size="11" font-weight="600"
-            fill="#fde68a">≥ J_threshold?</text>
-
-        <!-- NO reject left (flat surface / puddle) -->
-        <line x1="330" y1="1566" x2="200" y2="1566" stroke="rgba(239,68,46,0.6)" stroke-width="1.5"
-            marker-end="url(#arr-r)" />
-        <text x="268" y="1559" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#f87171">No</text>
-        <rect x="70" y="1548" width="130" height="36" rx="5" fill="rgba(239,68,68,0.1)" stroke="#ef4444"
-            stroke-width="1.2" />
-        <text x="135" y="1563" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#fca5a5">Reject: no
-            impact</text>
-        <text x="135" y="1575" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#fca5a5">(shadow /
-            puddle)</text>
-
-        <!-- YES → down -->
-        <line x1="380" y1="1604" x2="380" y2="1634" stroke="rgba(255,255,255,0.25)" stroke-width="1.5"
-            marker-end="url(#arr)" />
-        <text x="393" y="1622" font-family="JetBrains Mono" font-size="9" fill="#86efac">Yes</text>
-
-        <!-- ─── NODE 11: Sensor Fusion / Severity ─── y=1634 -->
-        <rect x="255" y="1634" width="250" height="62" rx="6" fill="rgba(245,158,11,0.1)" stroke="#f59e0b"
-            stroke-width="1.5" />
-        <text x="380" y="1654" text-anchor="middle" font-family="Inter" font-size="12" font-weight="700"
-            fill="#fde68a">Sensor Fusion</text>
-        <text x="380" y="1672" text-anchor="middle" font-family="JetBrains Mono" font-size="9.5"
-            fill="rgba(253,230,138,0.75)">calculate_severity(conf, jerk)</text>
-        <text x="380" y="1688" text-anchor="middle" font-family="JetBrains Mono" font-size="9.5"
-            fill="rgba(253,230,138,0.6)">s = 0.7·conf + 0.3·jerk_norm²</text>
-
-        <!-- arrow -->
-        <line x1="380" y1="1696" x2="380" y2="1726" stroke="rgba(255,255,255,0.25)" stroke-width="1.5"
-            marker-end="url(#arr)" />
-
-        <!-- ─── NODE 12: Add to logged_ids ─── y=1726 -->
-        <rect x="260" y="1726" width="240" height="45" rx="6" fill="rgba(139,92,246,0.1)" stroke="#8b5cf6"
-            stroke-width="1.5" />
-        <text x="380" y="1752" text-anchor="middle" font-family="Inter" font-size="12" font-weight="600"
-            fill="#c4b5fd">logged_ids.add(track_id)</text>
-
-        <!-- arrow -->
-        <line x1="380" y1="1771" x2="380" y2="1801" stroke="rgba(255,255,255,0.25)" stroke-width="1.5"
-            marker-end="url(#arr)" />
-
-        <!-- ─── NODE 13: Write CSV row ─── y=1801 -->
-        <rect x="260" y="1801" width="240" height="52" rx="6" fill="rgba(16,185,129,0.1)" stroke="#10b981"
-            stroke-width="1.5" filter="url(#glow-g)" />
-        <text x="380" y="1821" text-anchor="middle" font-family="Inter" font-size="12" font-weight="600"
-            fill="#6ee7b7">Write to pothole_log.csv</text>
-        <text x="380" y="1839" text-anchor="middle" font-family="JetBrains Mono" font-size="10"
-            fill="rgba(110,231,183,0.6)">date·time·ID·conf·severity·GPS</text>
-
-        <!-- arrow -->
-        <line x1="380" y1="1853" x2="380" y2="1883" stroke="rgba(255,255,255,0.25)" stroke-width="1.5"
-            marker-end="url(#arr)" />
-
-        <!-- ─── NODE 14: Annotate & write video ─── y=1883 -->
-        <rect x="260" y="1883" width="240" height="52" rx="6" fill="rgba(16,185,129,0.1)" stroke="#10b981"
-            stroke-width="1.5" filter="url(#glow-g)" />
-        <text x="380" y="1903" text-anchor="middle" font-family="Inter" font-size="12" font-weight="600"
-            fill="#6ee7b7">Annotate Frame (OpenCV)</text>
-        <text x="380" y="1921" text-anchor="middle" font-family="JetBrains Mono" font-size="10"
-            fill="rgba(110,231,183,0.6)">out.write(frame) → .mp4</text>
-
-        <!-- arrow -->
-        <line x1="380" y1="1935" x2="380" y2="1975" stroke="rgba(255,255,255,0.25)" stroke-width="1.5"
-            marker-end="url(#arr)" />
-
-        <!-- ─── DECISION 9: System running? ─── y=1975 -->
-        <polygon points="380,1975 420,2005 380,2035 340,2005" fill="rgba(245,158,11,0.1)" stroke="#f59e0b"
-            stroke-width="1.5" />
-        <text x="380" y="2001" text-anchor="middle" font-family="Inter" font-size="11" font-weight="600"
-            fill="#fde68a">System</text>
-        <text x="380" y="2015" text-anchor="middle" font-family="Inter" font-size="11" font-weight="600"
-            fill="#fde68a">running?</text>
-
-        <!-- YES → loop back to top (right side) -->
-        <line x1="420" y1="2005" x2="700" y2="2005" stroke="rgba(59,130,246,0.4)" stroke-width="1.5"
-            marker-end="url(#arr)" />
-        <text x="558" y="1998" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#93c5fd">Yes</text>
-        <path d="M700,2005 Q730,2005 730,57 Q730,30 490,30" fill="none" stroke="rgba(59,130,246,0.2)" stroke-width="1"
-            stroke-dasharray="5 3" marker-end="url(#arr)" />
-        <text x="740" y="1050" text-anchor="middle" font-family="JetBrains Mono" font-size="9.5"
-            fill="rgba(59,130,246,0.5)" transform="rotate(90,740,1050)">Next Frame Loop</text>
-
-        <!-- NO → stop terminal -->
-        <line x1="380" y1="2035" x2="380" y2="2065" stroke="rgba(255,255,255,0.25)" stroke-width="1.5"
-            marker-end="url(#arr)" />
-        <text x="393" y="2053" font-family="JetBrains Mono" font-size="9" fill="#f87171">No</text>
-
-        <!-- ─── NODE 15: END ─── y=2065 -->
-        <rect x="280" y="2065" width="200" height="44" rx="22" fill="#0f1929" stroke="#ef4444" stroke-width="1.5" />
-        <text x="380" y="2091" text-anchor="middle" dominant-baseline="middle" font-family="Inter" font-size="13"
-            font-weight="700" fill="#fca5a5">
-            SYSTEM STOP
-        </text>
-
-        <!-- ─── STEP LABELS (left margin) ─── -->
-        <text x="18" y="57" font-family="JetBrains Mono" font-size="8.5" fill="#3b5280">①</text>
-        <text x="18" y="133" font-family="JetBrains Mono" font-size="8.5" fill="#3b5280">②</text>
-        <text x="18" y="215" font-family="JetBrains Mono" font-size="8.5" fill="#3b5280">③</text>
-        <text x="18" y="297" font-family="JetBrains Mono" font-size="8.5" fill="#3b5280">④</text>
-        <text x="18" y="379" font-family="JetBrains Mono" font-size="8.5" fill="#3b5280">⑤</text>
-        <text x="18" y="472" font-family="JetBrains Mono" font-size="8.5" fill="#3b5280">⑥</text>
-        <text x="18" y="562" font-family="JetBrains Mono" font-size="8.5" fill="#3b5280">⑦</text>
-        <text x="18" y="651" font-family="JetBrains Mono" font-size="8.5" fill="#3b5280">⑧</text>
-        <text x="18" y="744" font-family="JetBrains Mono" font-size="8.5" fill="#3b5280">⑨</text>
-        <text x="18" y="834" font-family="JetBrains Mono" font-size="8.5" fill="#3b5280">⑩</text>
-        <text x="18" y="924" font-family="JetBrains Mono" font-size="8.5" fill="#3b5280">⑪</text>
-        <text x="18" y="1014" font-family="JetBrains Mono" font-size="8.5" fill="#3b5280">⑫</text>
-        <text x="18" y="1103" font-family="JetBrains Mono" font-size="8.5" fill="#3b5280">⑬</text>
-        <text x="18" y="1204" font-family="JetBrains Mono" font-size="8.5" fill="#3b5280">⑭</text>
-        <text x="18" y="1301" font-family="JetBrains Mono" font-size="8.5" fill="#3b5280">⑮</text>
-        <text x="18" y="1383" font-family="JetBrains Mono" font-size="8.5" fill="#3b5280">⑯</text>
-        <text x="18" y="1465" font-family="JetBrains Mono" font-size="8.5" fill="#3b5280">⑰</text>
-        <text x="18" y="1566" font-family="JetBrains Mono" font-size="8.5" fill="#3b5280">⑱</text>
-        <text x="18" y="1666" font-family="JetBrains Mono" font-size="8.5" fill="#3b5280">⑲</text>
-        <text x="18" y="1752" font-family="JetBrains Mono" font-size="8.5" fill="#3b5280">⑳</text>
-        <text x="14" y="1830" font-family="JetBrains Mono" font-size="8.5" fill="#3b5280">㉑</text>
-        <text x="14" y="1912" font-family="JetBrains Mono" font-size="8.5" fill="#3b5280">㉒</text>
-        <text x="14" y="2005" font-family="JetBrains Mono" font-size="8.5" fill="#3b5280">㉓</text>
-        <text x="14" y="2091" font-family="JetBrains Mono" font-size="8.5" fill="#3b5280">㉔</text>
-
-    </svg>
-
-    <!-- Tooltip div -->
-    <div class="tip" id="tip"></div>
-
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <span>IPDS &middot; MIT License</span>
+      <nav aria-label="Footer">
+        <a href="../index.html">Home</a>
+        <a href="ipds_block_diagram.html">Block diagram</a>
+        <a href="ipds_schematic.html">Schematic</a>
+        <a href="https://github.com/SanTiwari07/PotHoleDetection" target="_blank" rel="noopener">GitHub</a>
+      </nav>
+    </div>
+  </footer>
 </body>
 
 </html>
