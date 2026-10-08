@@ -23,6 +23,7 @@ static const char* _STREAM_PART =
 
 /* ================= GLOBAL OBJECTS ================= */
 httpd_handle_t stream_httpd = NULL;
+httpd_handle_t control_httpd = NULL;
 
 /* ================= MJPEG STREAM HANDLER ================= */
 static esp_err_t stream_handler(httpd_req_t *req) {
@@ -73,17 +74,31 @@ static esp_err_t health_handler(httpd_req_t *req) {
 }
 
 /* ================= START HTTP SERVER ================= */
+// /stream runs forever inside its handler, so /health gets its own server
+// (port 80) and still answers while a client is streaming from port 81.
 void startStreamServer() {
   httpd_config_t config = HTTPD_DEFAULT_CONFIG();
+  config.server_port = 80;
+
+  httpd_uri_t health_uri = {};
+  health_uri.uri = "/health";
+  health_uri.method = HTTP_GET;
+  health_uri.handler = health_handler;
+
+  httpd_uri_t stream_uri = {};
+  stream_uri.uri = "/stream";
+  stream_uri.method = HTTP_GET;
+  stream_uri.handler = stream_handler;
+
+  if (httpd_start(&control_httpd, &config) == ESP_OK) {
+    httpd_register_uri_handler(control_httpd, &health_uri);
+  }
+
   config.server_port = 81;
-
-  httpd_uri_t stream_uri = { "/stream", HTTP_GET, stream_handler, NULL };
-  httpd_uri_t health_uri = { "/health", HTTP_GET, health_handler, NULL };
-
+  config.ctrl_port += 1;
   if (httpd_start(&stream_httpd, &config) == ESP_OK) {
     httpd_register_uri_handler(stream_httpd, &stream_uri);
-    httpd_register_uri_handler(stream_httpd, &health_uri);
-    Serial.println("HTTP server started");
+    Serial.println("HTTP server started: stream on :81/stream, health on :80/health");
   }
 }
 
@@ -97,7 +112,7 @@ void setup() {
   // and overriding it causes the IDLE1 Task to starve and panic.
 
   // ===== CAMERA CONFIG =====
-  camera_config_t config;
+  camera_config_t config = {};  // zero-init: core 3.x adds fields (fb_location, grab_mode, ...)
   config.ledc_channel = LEDC_CHANNEL_0;
   config.ledc_timer = LEDC_TIMER_0;
   config.pin_d0 = Y2_GPIO_NUM;
@@ -112,8 +127,8 @@ void setup() {
   config.pin_pclk = PCLK_GPIO_NUM;
   config.pin_vsync = VSYNC_GPIO_NUM;
   config.pin_href = HREF_GPIO_NUM;
-  config.pin_sscb_sda = SIOD_GPIO_NUM;
-  config.pin_sscb_scl = SIOC_GPIO_NUM;
+  config.pin_sccb_sda = SIOD_GPIO_NUM;
+  config.pin_sccb_scl = SIOC_GPIO_NUM;
   config.pin_pwdn = PWDN_GPIO_NUM;
   config.pin_reset = RESET_GPIO_NUM;
   config.xclk_freq_hz = 20000000;
@@ -121,13 +136,19 @@ void setup() {
   config.frame_size = FRAMESIZE_QVGA;
   config.jpeg_quality = 12;
   config.fb_count = 2;
+  config.grab_mode = CAMERA_GRAB_LATEST;  // always send the newest frame (lowest latency)
+  config.fb_location = psramFound() ? CAMERA_FB_IN_PSRAM : CAMERA_FB_IN_DRAM;
 
-  if (esp_camera_init(&config) != ESP_OK) {
-    Serial.println("Camera init failed!");
-    while (true);
+  esp_err_t err = esp_camera_init(&config);
+  if (err != ESP_OK) {
+    Serial.printf("Camera init failed (0x%x)! Check the camera ribbon cable. Restarting...\n", err);
+    delay(3000);
+    ESP.restart();
   }
 
   // ===== WIFI =====
+  WiFi.mode(WIFI_STA);
+  WiFi.setSleep(false);  // modem sleep adds large latency to the MJPEG stream
   WiFi.begin(ssid, password);
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
