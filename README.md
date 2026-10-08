@@ -255,6 +255,20 @@ The best checkpoint is copied to `assets/models/pothole_yolov8.pt` and validatio
 
 ## Build the hardware
 
+### The prototype
+
+Two hand-wired perfboard decks: the ESP32-CAM vision node on top, and the ESP32 sensor node with the MPU6050, DS3231 and NEO-6M below. The [custom PCB](#custom-pcb) replaces the lower deck.
+
+<table>
+<tr>
+<td width="33%" align="center"><img src="assets/hardware/assembled-rig.jpg" alt="Assembled two-deck IPDS prototype" width="260"><br><sub><b>Assembled rig</b>: camera deck above, sensor deck below</sub></td>
+<td width="33%" align="center"><img src="assets/hardware/vision-node-top.jpg" alt="ESP32-CAM vision node on perfboard" width="260"><br><sub><b>Vision node</b>: ESP32-CAM with the OV2640 camera</sub></td>
+<td width="33%" align="center"><img src="assets/hardware/hand-wired-underside.jpg" alt="Hand-soldered wiring on the underside of the sensor deck" width="260"><br><sub><b>Hand-wired underside</b>: point-to-point wiring of the sensor deck</sub></td>
+</tr>
+</table>
+
+### Components
+
 | Component | Role |
 |---|---|
 | **ESP32-CAM** (AI-Thinker, OV2640) | Vision node: continuous MJPEG stream |

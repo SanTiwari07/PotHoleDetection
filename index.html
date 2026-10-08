@@ -224,6 +224,11 @@
     .pcb .foot { padding: 20px 24px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
     .pcb .foot .drc { margin-right: auto; color: var(--muted-strong); }
     .pcb .foot .drc b { color: var(--on-dark); }
+    .build { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 16px; }
+    .build figure { margin: 0; background: var(--card); border-radius: var(--r-xl); overflow: hidden; min-width: 0; }
+    .build img { display: block; width: 100%; height: auto; aspect-ratio: 3 / 4; object-fit: cover; }
+    .build figcaption { padding: 14px 20px 16px; font-size: 14px; color: var(--muted-strong); }
+    .build figcaption b { display: block; color: var(--on-dark); font-weight: 600; margin-bottom: 2px; }
     .rows { list-style: none; margin-top: 12px; }
     .rows li { display: flex; justify-content: space-between; gap: 16px; padding: 12px 0; border-top: 1px solid var(--hairline); }
     .rows li:first-child { border-top: 0; }
@@ -346,6 +351,9 @@
       .tbl td.m { width: 28%; }
       .code { font-size: 12.5px; padding: 56px 16px 16px; }
       .demo-head .live { display: none; }
+      .build { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: 78%; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
+      .build::-webkit-scrollbar { display: none; }
+      .build figure { scroll-snap-align: start; }
     }
   </style>
 </head>
@@ -569,8 +577,13 @@ severity  = <span class="k">0.7</span> &times; confidence + <span class="k">0.3<
       <div class="wrap">
         <div class="head">
           <div class="eyebrow">Hardware</div>
-          <h2>Common parts, and a custom PCB</h2>
-          <p class="sub">A 2-layer carrier board for the ESP32-DevKitC and its three modules. Gerbers, BOM and schematic are ready to order.</p>
+          <h2>Built by hand, then made into a PCB</h2>
+          <p class="sub">The prototype is two perfboard decks: the ESP32-CAM on top, and the ESP32 sensor node with the MPU6050, DS3231 and NEO-6M below. Its design is now a 2-layer carrier board, with Gerbers, BOM and schematic ready to order.</p>
+        </div>
+        <div class="build">
+          <figure><img src="assets/hardware/assembled-rig.jpg" alt="Assembled two-deck IPDS prototype: ESP32-CAM on the top deck, ESP32, MPU6050, DS3231 RTC and NEO-6M GPS on the lower deck" width="720" height="960" loading="lazy" /><figcaption><b>Assembled rig</b>Camera deck above, sensor deck below</figcaption></figure>
+          <figure><img src="assets/hardware/vision-node-top.jpg" alt="Top view of the ESP32-CAM vision node mounted on perfboard" width="720" height="960" loading="lazy" /><figcaption><b>Vision node</b>ESP32-CAM with the OV2640 camera</figcaption></figure>
+          <figure><img src="assets/hardware/hand-wired-underside.jpg" alt="Hand-soldered point-to-point wiring on the underside of the sensor deck" width="720" height="960" loading="lazy" /><figcaption><b>Hand-wired underside</b>Point-to-point wiring of the sensor deck</figcaption></figure>
         </div>
         <div class="hw">
           <div class="card pcb">
