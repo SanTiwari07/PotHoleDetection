@@ -332,6 +332,16 @@ A 2-layer carrier board for the ESP32-DevKitC and the three modules is in [`KiCa
 
 </details>
 
+### See your potholes on a map
+
+Convert any log to GeoJSON and open it in [geojson.io](https://geojson.io), QGIS, uMap or Google My Maps:
+
+```bash
+python python/export_geojson.py outputs/sample_logs/output.csv -o potholes.geojson
+```
+
+Rows without a GPS position (offline runs, or no GPS fix) are skipped and counted.
+
 ---
 
 ## Repository structure
@@ -340,12 +350,14 @@ A 2-layer carrier board for the ESP32-DevKitC and the three modules is in [`KiCa
 PotHoleDetection/
 ├── python/
 │   ├── main.py                    # Entry point: detection → tracking → fusion → logging
+│   ├── export_geojson.py          # CSV log → GeoJSON for QGIS / geojson.io
 │   └── pothole_detection/
 │       ├── detector.py            # YOLOv8 wrapper
 │       ├── tracker.py             # SORT wrapper with unique-ID counting
 │       ├── sort.py                # SORT (Bewley et al., GPL-3.0)
 │       ├── filters.py             # Area / aspect-ratio / persistence filters
-│       └── fusion.py              # Jerk, fusion gate, severity score
+│       ├── fusion.py              # Jerk, fusion gate, severity score
+│       └── geojson_export.py      # Log rows → GeoJSON features
 ├── ESP_32_Code/
 │   ├── esp_32_cam_final/          # Vision node firmware (MJPEG server)
 │   ├── esp_32_final/              # Sensor node firmware (HTTP /query API)
@@ -388,6 +400,8 @@ pytest tests
 
 Then fork, branch from `main`, keep each PR focused, and make sure `pytest tests` passes. **Never commit credentials** (`.env` and `credentials.h` are git-ignored). The full guide is in [**CONTRIBUTING.md**](CONTRIBUTING.md).
 
+**Built one, or tried it on your roads?** Tell us, whatever the result. Post photos, logs or false-positive clips in [Discussions](https://github.com/SanTiwari07/PotHoleDetection/discussions) or in the [field data issue](https://github.com/SanTiwari07/PotHoleDetection/issues/10). Real-world data from other cities is the most useful contribution you can make.
+
 ### Contributors
 
 <a href="https://github.com/SanTiwari07/PotHoleDetection/graphs/contributors">
@@ -399,7 +413,7 @@ Then fork, branch from `main`, keep each PR focused, and make sure `pytest tests
 ## Roadmap
 
 - [ ] Smartphone / dashcam mode (no ESP32 needed)
-- [ ] Export detections to GeoJSON / OpenStreetMap
+- [x] Export detections to GeoJSON ([`export_geojson.py`](python/export_geojson.py))
 - [ ] Edge deployment on Coral TPU / Hailo-8 / Jetson
 - [ ] Docker image for the processing hub
 - [ ] Web dashboard with a live pothole heatmap
