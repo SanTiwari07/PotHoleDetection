@@ -8,6 +8,7 @@ on:
       - "Diagrams/**"
       - "assets/demo/**"
       - "assets/hardware/**"
+      - "assets/social-preview.png"
       - "docs/IPDS_Pothole_Detection.pdf"
       - "KiCad/IPDS_SensorNode/fabrication/**"
       - ".github/workflows/pages.yml"
@@ -35,7 +36,7 @@ jobs:
       - name: Assemble site
         run: |
           mkdir -p _site
-          for f in index.html Diagrams assets/demo/demo.gif assets/hardware docs/IPDS_Pothole_Detection.pdf \
+          for f in index.html Diagrams assets/demo/demo.gif assets/hardware assets/social-preview.png docs/IPDS_Pothole_Detection.pdf \
                    KiCad/IPDS_SensorNode/fabrication/pcb_render_top.png \
                    KiCad/IPDS_SensorNode/fabrication/IPDS_SensorNode_schematic.pdf \
                    KiCad/IPDS_SensorNode/fabrication/IPDS_SensorNode_gerbers.zip; do

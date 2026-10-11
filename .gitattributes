@@ -1,0 +1,6 @@
+# Keep GitHub's language stats on the actual code (Python, ESP32 firmware).
+# The project website and interactive diagrams are HTML-heavy and would
+# otherwise make the repo show up as an "HTML" project.
+index.html linguist-documentation
+Diagrams/** linguist-documentation
+notebooks/** linguist-documentation
