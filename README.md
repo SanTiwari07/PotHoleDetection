@@ -380,8 +380,7 @@ PotHoleDetection/
 ---
 
 ## Contributing
-
-IPDS is open source and built to be extended. Contributions of every size are welcome, from a typo fix to a whole new hardware port. Field data from roads in your city is especially valuable.
+PotHoleDetection is an open-source project that welcomes contributions from everyone. Whether you're fixing a bug, improving documentation, enhancing pothole detection accuracy, or adding new features, every contribution makes a difference. Real-world road images and pothole data from your city are especially valuable for improving the system.
 
 **Good places to start**
 
