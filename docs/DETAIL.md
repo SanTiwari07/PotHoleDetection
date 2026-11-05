@@ -185,7 +185,7 @@ Each of these stages is implemented in the code: confidence threshold, SORT `min
 
 ## 8. Sample field log
 
-[`outputs/sample_logs/output.csv`](../outputs/sample_logs/output.csv) contains 50 rows dated 20 March 2026, 1:56–2:08 pm. Its `severity` column uses text bands rather than the numeric score `main.py` writes:
+[`outputs/sample_logs/output.csv`](../outputs/sample_logs/output.csv) contains 50 rows dated 20 March 2026, 1:56–2:08 pm. It uses the same columns as the log `main.py` writes (numeric 0–1 `severity`, numeric `pothole_id`, `HH:MM:SS` time). The original file, with text severity bands, is kept as [`output_legacy.csv`](../outputs/sample_logs/output_legacy.csv) and was converted with `python/convert_legacy_log.py`. The bands in the legacy file were assigned by peak jerk:
 
 | Band | Rows | Peak-jerk range in the file |
 |---|:---:|---|
@@ -193,7 +193,7 @@ Each of these stages is implemented in the code: confidence threshold, SORT `min
 | Medium | 22 | 3.0 – 5.9 |
 | High | 20 | 6.0 – 9.4 |
 
-The current `main.py` writes a numeric severity score instead, so this file comes from an earlier version of the pipeline or was post-processed into bands.
+In the converted file each band is replaced by the score `main.py` computes from the row's `confidence` and `peak_jerk` (Eqs. 6-7), so scores follow the formula rather than the band edges.
 
 ---
 

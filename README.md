@@ -213,7 +213,13 @@ The paper also reports false-positive trials (shadows, manhole covers, speed bum
 
 ### Sample field log (20 March 2026)
 
-[`outputs/sample_logs/output.csv`](outputs/sample_logs/output.csv) has 50 logged potholes from a drive between 1:56 and 2:08 pm. This file records severity as text bands by peak jerk, while the current `main.py` writes the numeric 0–1 score instead:
+[`outputs/sample_logs/output.csv`](outputs/sample_logs/output.csv) has 50 logged potholes from a drive between 1:56 and 2:08 pm. It uses the same columns as the log `main.py` writes. The original, older-format file (text severity bands, `pothole_001` IDs, `01:56 pm` times) is kept as [`output_legacy.csv`](outputs/sample_logs/output_legacy.csv), and [`python/convert_legacy_log.py`](python/convert_legacy_log.py) converts any log in that format:
+
+```bash
+python python/convert_legacy_log.py outputs/sample_logs/output_legacy.csv -o outputs/sample_logs/output.csv
+```
+
+The script turns `01:56 pm` into `13:56:00` (the old log has no seconds, so they are `00`), `pothole_001` into `1`, and each Low / Medium / High band into the 0–1 score computed from that row's own `confidence` and `peak_jerk`. Rows already in the current format are left unchanged. The bands in the legacy file were assigned by peak jerk:
 
 | Band | Peak jerk in the file | Rows | Share |
 |---|---|:---:|:---:|
@@ -233,7 +239,7 @@ The paper also reports false-positive trials (shadows, manhole covers, speed bum
 | `bounding_box_area` | Box area in px² |
 | `aspect_ratio` | Box width / height |
 | `peak_jerk` | Peak jerk from the MPU6050 burst (m/s³; empty in offline mode) |
-| `severity` | Severity score 0–1 (the sample file uses Low / Medium / High bands instead) |
+| `severity` | Severity score 0–1 |
 | `latitude`, `longitude` | WGS-84 position from the NEO-6M (`0` without a GPS fix; empty in offline mode) |
 
 </details>

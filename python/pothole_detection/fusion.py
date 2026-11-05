@@ -7,7 +7,7 @@ J_MAX = 20.0
 
 # Minimum peak jerk that counts as a physical impact for the fusion gate (Section 6.1).
 # The paper does not give a value; 1.5 m/s^3 sits just below the smallest peak jerk (1.6)
-# in outputs/sample_logs/output.csv. Calibrate per vehicle (see docs/DETAIL.md).
+# in outputs/sample_logs/output_legacy.csv. Calibrate per vehicle (see docs/DETAIL.md).
 JERK_GATE = 1.5
 
 # Fusion weights w1 (vision) and w2 (inertial), Eq. 6

@@ -32,6 +32,7 @@ outputs/videos/
 # CSV outputs — keep only the curated sample log
 *.csv
 !outputs/sample_logs/output.csv
+!outputs/sample_logs/output_legacy.csv
 !KiCad/**/fabrication/*.csv
 
 # Model weights (large binary; distributed via GitHub Releases, auto-downloaded on first run)
